@@ -242,8 +242,8 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/80">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/80 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Header */}
         <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
@@ -567,7 +567,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
           </div>
 
           {/* Footer Controls */}
-          <div className="pt-3 flex items-center justify-between border-t border-pink-100">
+          <div className="pt-3 pb-safe flex items-center justify-between border-t border-pink-100">
             <button
               type="button"
               onClick={handleClearDraft}

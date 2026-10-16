@@ -420,8 +420,8 @@ export function App() {
       />
 
       {/* iOS Frosted Glass App Header */}
-      <header className="sticky top-0 z-40 ios-glass border-b border-pink-200/80 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-40 ios-glass border-b border-pink-200/80 shadow-xs pt-safe">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Brand & Home Navigation */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
@@ -705,57 +705,63 @@ export function App() {
 
       {/* iOS Mobile Bottom Navigation Bar (Phone Only) */}
       {!activeStudyDeck && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/92 backdrop-blur-xl border-t border-pink-200/80 px-2 py-1 shadow-lg flex items-center justify-around select-none">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-pink-200/90 px-3 pt-1.5 pb-safe shadow-[0_-8px_30px_rgba(255,105,180,0.12)] flex items-center justify-around select-none">
           {/* Decks Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all cursor-pointer ${
-              currentTab === 'decks' ? 'text-[#ff3366] font-black' : 'text-slate-500 font-semibold'
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+              currentTab === 'decks' 
+                ? 'text-[#ff3366] font-black scale-105' 
+                : 'text-slate-500 font-semibold hover:text-slate-800'
             }`}
           >
-            <Layers size={20} className={currentTab === 'decks' ? 'scale-110' : ''} />
-            <span className="text-[10px] mt-0.5 font-bold">Decks</span>
+            <Layers size={22} className={currentTab === 'decks' ? 'text-[#ff3366]' : 'text-slate-400'} />
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Decks</span>
           </button>
 
           {/* Card Browser Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all cursor-pointer ${
-              currentTab === 'browser' ? 'text-[#ff3366] font-black' : 'text-slate-500 font-semibold'
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+              currentTab === 'browser' 
+                ? 'text-[#ff3366] font-black scale-105' 
+                : 'text-slate-500 font-semibold hover:text-slate-800'
             }`}
           >
-            <Search size={20} className={currentTab === 'browser' ? 'scale-110' : ''} />
-            <span className="text-[10px] mt-0.5 font-bold">Cards</span>
+            <Search size={22} className={currentTab === 'browser' ? 'text-[#ff3366]' : 'text-slate-400'} />
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Cards</span>
           </button>
 
           {/* Quick Floating Add Card Button */}
           <button
             onClick={() => handleOpenNewCard()}
-            className="w-12 h-12 -mt-5 rounded-full bg-gradient-to-tr from-[#ff3366] to-[#ff6699] text-white flex items-center justify-center shadow-lg shadow-pink-300/80 border-2 border-white transition-transform active:scale-95 cursor-pointer"
+            className="w-13 h-13 -mt-6 rounded-full bg-gradient-to-tr from-[#ff3366] to-[#ff5c8a] text-white flex items-center justify-center shadow-lg shadow-pink-400/50 border-3 border-white transition-transform active:scale-90 cursor-pointer"
             title="Create New Card"
           >
-            <Plus size={22} />
+            <Plus size={26} strokeWidth={2.5} />
           </button>
 
           {/* Stats Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-            className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all cursor-pointer ${
-              currentTab === 'stats' ? 'text-[#ff3366] font-black' : 'text-slate-500 font-semibold'
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+              currentTab === 'stats' 
+                ? 'text-[#ff3366] font-black scale-105' 
+                : 'text-slate-500 font-semibold hover:text-slate-800'
             }`}
           >
-            <BarChart2 size={20} className={currentTab === 'stats' ? 'scale-110' : ''} />
-            <span className="text-[10px] mt-0.5 font-bold">Heatmap</span>
+            <BarChart2 size={22} className={currentTab === 'stats' ? 'text-[#ff3366]' : 'text-slate-400'} />
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Heatmap</span>
           </button>
 
           {/* AI Deck Architect Modal Trigger */}
           <button
             onClick={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
-            className="flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl transition-all text-purple-600 font-semibold cursor-pointer"
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all text-purple-600 font-semibold cursor-pointer active:scale-95"
             title="AI Deck Architect"
           >
-            <Sparkles size={20} className="text-purple-500 animate-pulse" />
-            <span className="text-[10px] mt-0.5 font-bold">AI Deck</span>
+            <Sparkles size={22} className="text-purple-500 animate-pulse" />
+            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-purple-600">AI Deck</span>
           </button>
         </nav>
       )}

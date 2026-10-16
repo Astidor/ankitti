@@ -107,8 +107,8 @@ export const DeckModal: React.FC<DeckModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-lg shadow-2xl overflow-hidden border border-pink-200/80">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-lg shadow-2xl overflow-hidden border border-pink-200/80 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Header */}
         <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
@@ -253,7 +253,7 @@ export const DeckModal: React.FC<DeckModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-pink-100">
+          <div className="flex items-center justify-end space-x-2.5 pt-3 pb-safe border-t border-pink-100">
             <button
               type="button"
               onClick={onClose}

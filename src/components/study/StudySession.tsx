@@ -507,55 +507,55 @@ export const StudySession: React.FC<StudySessionProps> = ({
       </div>
 
       {/* iOS Rating Controls Toolbar (Separate, well-spaced, guaranteed unhidden!) */}
-      <div className="mt-6 pb-12">
+      <div className="mt-5 pb-safe">
         {!isFlipped ? (
           <button
             onClick={handleFlip}
-            className="w-full py-4 rounded-2xl bg-[#ff3366] hover:bg-[#e11d48] text-white font-black shadow-md hover:shadow-lg transition-all text-sm flex items-center justify-center space-x-2 ios-btn"
+            className="w-full h-14 rounded-2xl bg-[#ff3366] active:bg-[#e11d48] text-white font-black shadow-md active:shadow-sm transition-all text-sm flex items-center justify-center space-x-2 ios-btn cursor-pointer"
           >
-            <RotateCw size={17} />
-            <span>Show Answer (Space)</span>
+            <RotateCw size={18} />
+            <span>Show Answer (Tap to Flip)</span>
           </button>
         ) : (
           <div className="space-y-2">
-            <div className="text-[11px] font-bold text-slate-500 text-center tracking-wider uppercase">
+            <div className="text-[10px] sm:text-[11px] font-bold text-slate-500 text-center tracking-wider uppercase">
               How well did you remember this?
             </div>
-            <div className="grid grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="grid grid-cols-4 gap-1.5 sm:gap-3">
               {/* Again (1) */}
               <button
                 onClick={() => handleRating(1)}
-                className="py-3 px-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95"
+                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="text-[11px] text-rose-600 uppercase tracking-wider font-extrabold">Again (1)</div>
-                <div className="text-xs font-mono font-black mt-0.5">{previews.again}</div>
+                <div className="text-[10px] sm:text-[11px] text-rose-600 uppercase tracking-wider font-extrabold">Again</div>
+                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.again}</div>
               </button>
 
               {/* Hard (2) */}
               <button
                 onClick={() => handleRating(2)}
-                className="py-3 px-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95"
+                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="text-[11px] text-amber-700 uppercase tracking-wider font-extrabold">Hard (2)</div>
-                <div className="text-xs font-mono font-black mt-0.5">{previews.hard}</div>
+                <div className="text-[10px] sm:text-[11px] text-amber-700 uppercase tracking-wider font-extrabold">Hard</div>
+                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.hard}</div>
               </button>
 
               {/* Good (3) */}
               <button
                 onClick={() => handleRating(3)}
-                className="py-3 px-2 rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-800 border-2 border-pink-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95"
+                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-800 border-2 border-pink-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="text-[11px] text-pink-600 uppercase tracking-wider font-extrabold">Good (3)</div>
-                <div className="text-xs font-mono font-black mt-0.5">{previews.good}</div>
+                <div className="text-[10px] sm:text-[11px] text-pink-600 uppercase tracking-wider font-extrabold">Good</div>
+                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.good}</div>
               </button>
 
               {/* Easy (4) */}
               <button
                 onClick={() => handleRating(4)}
-                className="py-3 px-2 rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95"
+                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
               >
-                <div className="text-[11px] text-emerald-700 uppercase tracking-wider font-extrabold">Easy (4)</div>
-                <div className="text-xs font-mono font-black mt-0.5">{previews.easy}</div>
+                <div className="text-[10px] sm:text-[11px] text-emerald-700 uppercase tracking-wider font-extrabold">Easy</div>
+                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.easy}</div>
               </button>
             </div>
           </div>

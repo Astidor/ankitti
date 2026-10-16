@@ -4,9 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
 @layer base {
   * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
@@ -14,6 +22,7 @@
     overflow-x: hidden;
     overflow-y: auto;
     min-height: 100%;
+    touch-action: manipulation;
   }
 
   body {
@@ -192,4 +201,32 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(255, 51, 102, 0.35);
   display: inline-block;
+}
+
+/* iOS Safe Areas & Native App Polish */
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.85rem);
+}
+
+.mb-safe {
+  margin-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem);
+}
+
+@keyframes iosSlideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0.95;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.ios-bottom-sheet {
+  animation: iosSlideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }

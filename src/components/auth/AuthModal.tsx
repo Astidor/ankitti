@@ -74,8 +74,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/35 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden border border-pink-200/80 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden border border-pink-200/80 flex flex-col ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber */}
         <div className="pt-2.5 pb-1 flex justify-center bg-white/70">
@@ -257,7 +257,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </div>
         </form>
 
-        <div className="p-3.5 bg-white/70 border-t border-pink-100 text-center text-[11px] text-kitty-subtle font-medium">
+        <div className="p-3.5 pb-safe bg-white/70 border-t border-pink-100 text-center text-[11px] text-kitty-subtle font-medium">
           Secured with SHA-512 PBKDF2 Encryption • Privacy First 🎀
         </div>
       </div>

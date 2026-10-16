@@ -124,9 +124,39 @@ export const DeckList: React.FC<DeckListProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Hero Banner with Hello Kitty Theme & Floating Mascot */}
-      <div className="relative overflow-hidden rounded-[32px] bg-white border-2 border-pink-200/90 p-6 md:p-8 shadow-sm">
-        
+      {/* Mobile Compact Hero Greeting (Phone View) */}
+      <div className="sm:hidden bg-white/95 rounded-3xl border border-pink-200/90 p-4 shadow-sm space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <KittyBow size={20} />
+            <span className="text-xs font-black text-pink-600 tracking-tight">Ankitti Studio 🎀</span>
+          </div>
+          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-pink-100 text-pink-700">
+            {totalCardsAllDecks} Cards • {decks.length} Decks
+          </span>
+        </div>
+
+        {firstDeckWithDue ? (
+          <button
+            onClick={() => {
+              sounds.playClick();
+              onStudyDeck(firstDeckWithDue, 'due');
+            }}
+            className="w-full py-3 px-4 rounded-2xl bg-[#ff3366] active:bg-[#e11d48] text-white font-black text-xs flex items-center justify-center space-x-2 shadow-sm transition-all ios-btn cursor-pointer"
+          >
+            <Zap size={15} />
+            <span>Review Due Cards ({totalDueAllDecks})</span>
+          </button>
+        ) : (
+          <div className="py-2.5 px-3 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 font-bold text-xs flex items-center justify-center space-x-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>All caught up! Zero cards due 🎉</span>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop/Tablet Bento Hero Banner */}
+      <div className="hidden sm:block relative overflow-hidden rounded-[32px] bg-white border-2 border-pink-200/90 p-6 md:p-8 shadow-sm">
         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-3.5 max-w-xl text-left">
             <div className="flex items-center space-x-2">
@@ -396,27 +426,27 @@ export const DeckList: React.FC<DeckListProps> = ({
                 </div>
 
                 {/* Bottom Action Area: Study + Relearn Anytime */}
-                <div className="pt-5 mt-4 border-t border-pink-200/50 flex items-center justify-between gap-2">
+                <div className="pt-4 mt-3 border-t border-pink-200/50 flex items-center justify-between gap-1.5 sm:gap-2">
                   <button
                     onClick={() => { sounds.playClick(); onAddCardToDeck(deck); }}
-                    className="p-2 text-slate-500 hover:text-pink-600 hover:bg-white rounded-full transition-colors ios-btn"
+                    className="p-2 text-slate-500 hover:text-pink-600 hover:bg-white rounded-full transition-colors ios-btn shrink-0"
                     title="Add flashcard to this deck"
                   >
                     <Plus size={18} />
                   </button>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2">
                     {/* Relearn Anytime Button */}
                     <button
                       onClick={() => {
                         sounds.playClick();
                         onStudyDeck(deck, 'all');
                       }}
-                      className="px-3.5 py-2 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs ios-btn"
+                      className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center space-x-1 shadow-xs ios-btn shrink-0"
                       title="Study and repeat all cards in this deck right now (relearn mode)"
                     >
-                      <RotateCcw size={13} className="text-amber-500" />
-                      <span>Relearn Anytime</span>
+                      <RotateCcw size={12} className="text-amber-500 shrink-0" />
+                      <span>Relearn</span>
                     </button>
 
                     {/* Primary Study Due Button */}
@@ -425,13 +455,13 @@ export const DeckList: React.FC<DeckListProps> = ({
                         sounds.playClick();
                         onStudyDeck(deck, totalDue > 0 ? 'due' : 'all');
                       }}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm ios-btn ${
+                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm ios-btn shrink-0 ${
                         totalDue > 0
                           ? 'bg-[#ff3366] hover:bg-[#e11d48] text-white'
                           : 'bg-white hover:bg-pink-50 text-slate-700 border border-pink-200'
                       }`}
                     >
-                      <Play size={13} className={totalDue > 0 ? 'fill-white' : 'fill-slate-600'} />
+                      <Play size={12} className={totalDue > 0 ? 'fill-white' : 'fill-slate-600'} />
                       <span>{totalDue > 0 ? `Study (${totalDue})` : 'Practice All'}</span>
                     </button>
                   </div>

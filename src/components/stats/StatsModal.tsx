@@ -73,8 +73,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/80">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Header */}
         <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
@@ -254,10 +254,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-white/80 border-t border-pink-100 flex justify-end">
+        <div className="p-4 pb-safe bg-white/80 border-t border-pink-100 flex justify-end">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all ios-btn cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all ios-btn cursor-pointer"
           >
             Close Statistics
           </button>

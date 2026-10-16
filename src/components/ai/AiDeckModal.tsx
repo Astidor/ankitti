@@ -169,8 +169,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/35 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[32px] w-full max-w-2xl max-h-[92vh] shadow-2xl overflow-hidden border border-pink-200/80 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[32px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 flex flex-col ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber */}
         <div className="pt-2.5 pb-1 flex justify-center bg-white/70">
@@ -362,7 +362,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Submit Button */}
-              <div className="pt-2">
+              <div className="pt-2 pb-safe">
                 <button
                   type="submit"
                   disabled={isLoading || !topic.trim()}
@@ -460,7 +460,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-2 pt-2 border-t border-pink-100">
+              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-pink-100">
                 <button
                   type="button"
                   onClick={() => setGeneratedResult(null)}

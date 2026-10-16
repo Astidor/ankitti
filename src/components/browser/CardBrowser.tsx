@@ -61,12 +61,12 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
         </div>
 
         {/* Filters */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {/* Deck Filter */}
           <select
             value={selectedDeckId}
             onChange={(e) => setSelectedDeckId(e.target.value)}
-            className="px-3.5 py-2 rounded-2xl border border-pink-200/80 bg-white text-xs font-semibold text-kitty-dark focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-xs"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-2xl border border-pink-200/80 bg-white text-xs font-semibold text-kitty-dark focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-xs"
           >
             <option value="all">All Decks ({cards.length})</option>
             {decks.map(d => (
@@ -78,7 +78,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
           <select
             value={filterState}
             onChange={(e) => setFilterState(e.target.value)}
-            className="px-3.5 py-2 rounded-2xl border border-pink-200/80 bg-white text-xs font-semibold text-kitty-dark focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-xs"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-2xl border border-pink-200/80 bg-white text-xs font-semibold text-kitty-dark focus:outline-none focus:ring-2 focus:ring-pink-400 shadow-xs"
           >
             <option value="all">All States</option>
             <option value="new">New</option>
@@ -88,7 +88,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
 
           <button
             onClick={onNewCard}
-            className="px-4 py-2 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all flex items-center space-x-1.5 ios-btn cursor-pointer whitespace-nowrap"
+            className="hidden sm:flex px-4 py-2 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all items-center space-x-1.5 ios-btn cursor-pointer whitespace-nowrap"
           >
             <Plus size={14} />
             <span>Add Card 🎀</span>
