@@ -8,7 +8,6 @@ import {
   Check, 
   AlertCircle, 
   ArrowRight, 
-  Key, 
   Plus, 
   CheckCircle2,
   Trash2,
@@ -44,8 +43,6 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   const [notes, setNotes] = useState('');
   const [cardCount, setCardCount] = useState<number>(6);
   const [style, setStyle] = useState<'mixed' | 'basic' | 'cloze'>('mixed');
-  const [customKey, setCustomKey] = useState('');
-  const [showKeyInput, setShowKeyInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [generatedResult, setGeneratedResult] = useState<AiDeckResponse | null>(null);
@@ -67,7 +64,6 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
         cardCount,
         notes: notes.trim(),
         style,
-        apiKey: customKey.trim() || undefined,
       });
 
       setGeneratedResult(result);
@@ -81,9 +77,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
     } catch (err: unknown) {
       sounds.playRating(1);
       const msg = err instanceof Error ? err.message : 'AI Generation failed';
-      if (msg === 'KEY_MISSING') {
-        setShowKeyInput(true);
-        setErrorMessage('DeepSeek API Key is needed. You can set DEEPSEEK_API_KEY in .env, or enter it below!');
+      if (msg === 'KEY_MISSING' || msg === 'AI_API_KEY_MISSING') {
+        setErrorMessage('AI Deck architect service is not configured or temporarily unavailable.');
       } else {
         setErrorMessage(msg);
       }
@@ -328,37 +323,6 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Optional Custom API Key accordion */}
-              <div className="pt-1">
-                <button
-                  type="button"
-                  onClick={() => setShowKeyInput(!showKeyInput)}
-                  className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Key size={13} />
-                  <span>{showKeyInput ? 'Hide API Key' : 'Configure API Key (or use .env)'}</span>
-                </button>
-
-                {showKeyInput && (
-                  <div className="mt-2 p-3 bg-pink-50/70 rounded-2xl border border-pink-200/80 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-kitty-dark">AI Service API Key:</span>
-                      <span className="text-[10px] text-kitty-subtle">Stored in your local session</span>
-                    </div>
-                    <input
-                      type="password"
-                      value={customKey}
-                      onChange={(e) => setCustomKey(e.target.value)}
-                      placeholder="sk-..."
-                      className="w-full px-3.5 py-2 rounded-xl bg-white border border-pink-200 text-xs font-mono focus:ring-2 focus:ring-pink-400 focus:outline-none"
-                    />
-                    <div className="text-[10px] text-kitty-subtle leading-relaxed">
-                      💡 Tip: You can also place <code>DEEPSEEK_API_KEY=your_key</code> inside <code>.env</code> in the project directory.
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Submit Button */}
