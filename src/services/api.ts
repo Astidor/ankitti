@@ -144,11 +144,18 @@ class ApiService {
         headers: this.getHeaders(),
       });
       if (!res.ok) return storage.getDecks();
-      const decks: Deck[] = await res.json();
-      if (decks.length > 0) {
-        storage.saveDecks(decks);
+      const remoteDecks: Deck[] = await res.json();
+      const localDecks = storage.getDecks();
+      const remoteMap = new Map(remoteDecks.map(d => [d.id, d]));
+      const unSynced = localDecks.filter(ld => !remoteMap.has(ld.id));
+      const merged = [...remoteDecks, ...unSynced];
+      storage.saveDecks(merged);
+      if (unSynced.length > 0) {
+        for (const ud of unSynced) {
+          this.createDeck(ud).catch(() => {});
+        }
       }
-      return decks;
+      return merged;
     } catch {
       return storage.getDecks();
     }
@@ -214,12 +221,17 @@ class ApiService {
       const res = await fetch(url, {
         headers: this.getHeaders(),
       });
-      if (!res.ok) return storage.getCards();
-      const cards: Card[] = await res.json();
-      if (cards.length > 0) {
-        storage.saveCards(cards);
+      if (!res.ok) return storage.getCards(deckId);
+      const remoteCards: Card[] = await res.json();
+      const localCards = storage.getCards();
+      const remoteMap = new Map(remoteCards.map(c => [c.id, c]));
+      const unSynced = localCards.filter(lc => !remoteMap.has(lc.id));
+      const merged = [...remoteCards, ...unSynced];
+      storage.saveCards(merged);
+      if (unSynced.length > 0) {
+        this.bulkCreateCards(unSynced).catch(() => {});
       }
-      return cards;
+      return deckId ? merged.filter(c => c.deckId === deckId) : merged;
     } catch {
       return storage.getCards();
     }

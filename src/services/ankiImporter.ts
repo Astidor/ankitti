@@ -179,46 +179,7 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
     }
   }
 
-  if (targetDeckId) {
-    importedDecks.push({
-      id: targetDeckId,
-      name: defaultDeckName,
-      description: `Imported from ${file.name}`,
-      icon: '🎀',
-      color: '#ff4d88',
-      settings: { ...DEFAULT_DECK_SETTINGS },
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-  } else if (Object.keys(deckMap).length === 0) {
-    deckMap[primaryDeckId] = defaultDeckName;
-    importedDecks.push({
-      id: primaryDeckId,
-      name: defaultDeckName,
-      description: `Imported from ${file.name}`,
-      icon: '🎀',
-      color: '#ff4d88',
-      settings: { ...DEFAULT_DECK_SETTINGS },
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-  } else {
-    for (const [id, name] of Object.entries(deckMap)) {
-      const cleanName = name.replace(/\x1f/g, '::');
-      importedDecks.push({
-        id: `deck_${id}_${Date.now()}`,
-        name: cleanName,
-        description: `Imported deck from ${file.name}`,
-        icon: '🎀',
-        color: '#ff4d88',
-        settings: { ...DEFAULT_DECK_SETTINGS },
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-    }
-  }
-
-  // 2. Query notes and cards
+  // 2. Query notes and cards first to determine which decks actually have cards
   const notesQuery = db.exec('SELECT id, flds, tags FROM notes');
   const cardsQuery = db.exec('SELECT id, nid, did, ivl, factor, reps, lapses, type, due FROM cards');
 
@@ -234,12 +195,66 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
     }
   }
 
+  // Find distinct deck IDs that actually contain cards
+  const didWithCards = new Set<string>();
+  if (cardsQuery.length > 0) {
+    for (const row of cardsQuery[0].values) {
+      didWithCards.add(String(row[2]));
+    }
+  }
+
+  if (targetDeckId) {
+    importedDecks.push({
+      id: targetDeckId,
+      name: defaultDeckName,
+      description: `Imported from ${file.name}`,
+      icon: '🎀',
+      color: '#ff4d88',
+      settings: { ...DEFAULT_DECK_SETTINGS },
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  } else if (didWithCards.size <= 1) {
+    // Single deck or single subdeck with cards: create 1 clean deck named after the file
+    const cleanFileName = defaultDeckName.charAt(0).toUpperCase() + defaultDeckName.slice(1);
+    const singleDid = Array.from(didWithCards)[0];
+    const ankiName = (singleDid && deckMap[singleDid]) ? deckMap[singleDid].replace(/\x1f/g, '::') : '';
+    const chosenName = cleanFileName || (ankiName ? ankiName.split('::').pop() : 'Imported Deck') || 'Imported Deck';
+
+    importedDecks.push({
+      id: primaryDeckId,
+      name: chosenName,
+      description: `Imported from ${file.name}`,
+      icon: '🎀',
+      color: '#ff4d88',
+      settings: { ...DEFAULT_DECK_SETTINGS },
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  } else {
+    // Multiple decks with cards: create ONLY the decks that actually have cards (exclude empty parent shells)
+    for (const did of didWithCards) {
+      const rawName = deckMap[did] || `Deck ${did}`;
+      const cleanName = rawName.replace(/\x1f/g, '::');
+      importedDecks.push({
+        id: `deck_${did}_${Date.now()}`,
+        name: cleanName,
+        description: `Imported deck from ${file.name}`,
+        icon: '🎀',
+        color: '#ff4d88',
+        settings: { ...DEFAULT_DECK_SETTINGS },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+  }
+
   const cards: Card[] = [];
   if (cardsQuery.length > 0) {
     for (const row of cardsQuery[0].values) {
       const cid = row[0] as number;
       const nid = row[1] as number;
-      const did = row[2] as number;
+      const did = String(row[2]);
       const ivl = (row[3] as number) || 0;
       const factor = (row[4] as number) || 2500;
       const reps = (row[5] as number) || 0;
@@ -255,8 +270,15 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
       const detectedType = detectCardType(front);
       const ease = factor > 0 ? factor / 1000 : 2.5;
 
-      const matchedDeck = importedDecks.find(d => d.id.includes(`_${did}_`)) || importedDecks[0];
-      const cardDeckId = targetDeckId || (matchedDeck ? matchedDeck.id : primaryDeckId);
+      let cardDeckId = primaryDeckId;
+      if (targetDeckId) {
+        cardDeckId = targetDeckId;
+      } else if (importedDecks.length === 1) {
+        cardDeckId = importedDecks[0].id;
+      } else {
+        const matchedDeck = importedDecks.find(d => d.id.includes(`_${did}_`)) || importedDecks[0];
+        cardDeckId = matchedDeck ? matchedDeck.id : primaryDeckId;
+      }
 
       cards.push({
         id: `c_${cid}_${Date.now()}`,

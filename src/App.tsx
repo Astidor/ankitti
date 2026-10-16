@@ -337,7 +337,12 @@ export function App() {
 
   // Anki Import callback
   const handleImportComplete = async (result: ImportResult, targetDeckId?: string) => {
-    // 1. Instantly update React decks state & local storage
+    // 1. Ensure cardDeckId is mapped to targetDeckId if specified
+    const cardsToImport = targetDeckId
+      ? result.cards.map(c => ({ ...c, deckId: targetDeckId }))
+      : result.cards;
+
+    // 2. Instantly update React decks state & local storage
     if (!targetDeckId) {
       result.decks.forEach(d => storage.saveDeck(d));
       setDecks(prev => {
@@ -347,32 +352,67 @@ export function App() {
       });
     }
 
-    // 2. Instantly update React cards state & local storage
-    storage.bulkAddCards(result.cards);
+    // 3. Instantly update React cards state & local storage
+    storage.bulkAddCards(cardsToImport);
     setCards(prev => {
       const existingIds = new Set(prev.map(c => c.id));
-      const freshCards = result.cards.filter(c => !existingIds.has(c.id));
+      const freshCards = cardsToImport.filter(c => !existingIds.has(c.id));
       return [...freshCards, ...prev];
     });
 
     sounds.playRating(4);
 
-    // 3. Persist to Cloudflare D1 in background
+    // 4. Persist to Cloudflare D1 in background
     try {
       if (!targetDeckId) {
         for (const d of result.decks) {
           await api.createDeck(d);
         }
       }
-      await api.bulkCreateCards(result.cards);
+      await api.bulkCreateCards(cardsToImport);
     } catch (e) {
       console.warn('D1 sync on import error:', e);
     }
   };
 
-  const getDeckStats = (deckId: string): DeckStats => {
-    return storage.getDeckStats(deckId);
-  };
+  const getDeckStats = useCallback((deckId: string): DeckStats => {
+    const deckCards = cards.filter(c => c.deckId === deckId);
+    const now = Date.now();
+
+    let newCount = 0;
+    let learnCount = 0;
+    let dueCount = 0;
+    let matureCount = 0;
+    let youngCount = 0;
+
+    for (const card of deckCards) {
+      if (card.suspended) continue;
+      if (card.state === 'new') {
+        newCount++;
+      } else if (card.state === 'learning' || card.state === 'relearning') {
+        learnCount++;
+      } else if (card.due <= now) {
+        dueCount++;
+      }
+
+      if (card.state === 'review') {
+        if (card.interval >= 21) {
+          matureCount++;
+        } else {
+          youngCount++;
+        }
+      }
+    }
+
+    return {
+      total: deckCards.length,
+      newCount,
+      learnCount,
+      dueCount,
+      matureCount,
+      youngCount,
+    };
+  }, [cards]);
 
   const hasDraftForDeck = (deckId: string): boolean => {
     return !!storage.getDraft(deckId);
