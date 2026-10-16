@@ -61,6 +61,58 @@ export async function parseAnkiFile(file: File, targetDeckId?: string): Promise<
   }
 }
 
+// Cache the initialized SQL instance to prevent re-instantiation errors and redundant downloads
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let sqlJsInstance: any = null;
+
+async function getSqlInstance() {
+  if (sqlJsInstance) {
+    return sqlJsInstance;
+  }
+
+  // Strategy 1: Fetch local WASM binary directly from /sql-wasm.wasm.
+  // Passing wasmBinary directly prevents Emscripten from using internal fetch with credentials: "same-origin"
+  // which causes "both async and sync fetching of the wasm failed" when cross-origin or CDN blocked.
+  try {
+    const res = await fetch('/sql-wasm.wasm');
+    if (res.ok) {
+      const wasmBinary = await res.arrayBuffer();
+      sqlJsInstance = await initSqlJs({ wasmBinary });
+      return sqlJsInstance;
+    }
+  } catch (err) {
+    console.warn('[Ankitti] Direct /sql-wasm.wasm fetch failed, trying local locateFile:', err);
+  }
+
+  // Strategy 2: Local locateFile
+  try {
+    sqlJsInstance = await initSqlJs({
+      locateFile: () => '/sql-wasm.wasm',
+    });
+    return sqlJsInstance;
+  } catch (err) {
+    console.warn('[Ankitti] Local locateFile failed, trying CDN binary fallback:', err);
+  }
+
+  // Strategy 3: CDN wasm binary from cdnjs matching exact version 1.15.0
+  try {
+    const cdnRes = await fetch('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.15.0/sql-wasm.wasm');
+    if (cdnRes.ok) {
+      const wasmBinary = await cdnRes.arrayBuffer();
+      sqlJsInstance = await initSqlJs({ wasmBinary });
+      return sqlJsInstance;
+    }
+  } catch (err) {
+    console.warn('[Ankitti] CDN binary fetch failed:', err);
+  }
+
+  // Strategy 4: Fallback locateFile
+  sqlJsInstance = await initSqlJs({
+    locateFile: (file) => `https://sql.js.org/dist/${file}`,
+  });
+  return sqlJsInstance;
+}
+
 // 1. APKG Parser using JSZip and sql.js
 async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportResult> {
   const zip = new JSZip();
@@ -78,10 +130,8 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
 
   const dbBuffer = await dbFile.async('uint8array');
 
-  // Initialize SQLite
-  const SQL = await initSqlJs({
-    locateFile: (file) => `https://sql.js.org/dist/${file}`,
-  });
+  // Initialize SQLite with local/cached WASM
+  const SQL = await getSqlInstance();
 
   const db = new SQL.Database(dbBuffer);
 

@@ -79,8 +79,8 @@ export const AnkiImportModal: React.FC<AnkiImportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/30 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] w-full max-w-xl shadow-2xl overflow-hidden border border-pink-200/80">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Header */}
         <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
@@ -110,7 +110,7 @@ export const AnkiImportModal: React.FC<AnkiImportModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-5 text-xs">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
           <div>
             <h3 className="font-black text-kitty-dark text-sm mb-1 flex items-center space-x-1.5">
               <span>Transfer Your Anki Decks to Ankitti</span>
@@ -229,7 +229,7 @@ export const AnkiImportModal: React.FC<AnkiImportModalProps> = ({
           )}
 
           {/* Footer buttons */}
-          <div className="pt-3 flex items-center justify-between border-t border-pink-100">
+          <div className="pt-3 pb-safe flex items-center justify-between border-t border-pink-100">
             <button
               type="button"
               onClick={onClose}
