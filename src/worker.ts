@@ -2,6 +2,7 @@ interface Env {
   DEEPSEEK_API_KEY?: string;
   ENVIRONMENT?: string;
   DB?: any;
+  ASSETS?: any;
 }
 
 // ==========================================
@@ -252,6 +253,11 @@ async function authenticateUser(request: Request, db: any): Promise<any | null> 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    // Forward non-API requests directly to Cloudflare Static Assets
+    if (!url.pathname.startsWith('/api') && env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+      return env.ASSETS.fetch(request);
+    }
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
@@ -940,6 +946,10 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
       }
 
       return jsonResponse({ error: 'Endpoint not found' }, 404);
+    }
+
+    if (env.ASSETS && typeof env.ASSETS.fetch === 'function') {
+      return env.ASSETS.fetch(request);
     }
 
     return new Response('Not Found', { status: 404 });

@@ -70,45 +70,37 @@ async function getSqlInstance() {
     return sqlJsInstance;
   }
 
-  // Strategy 1: Fetch local WASM binary directly from /sql-wasm.wasm.
-  // Passing wasmBinary directly prevents Emscripten from using internal fetch with credentials: "same-origin"
-  // which causes "both async and sync fetching of the wasm failed" when cross-origin or CDN blocked.
-  try {
-    const res = await fetch('/sql-wasm.wasm');
-    if (res.ok) {
-      const wasmBinary = await res.arrayBuffer();
-      sqlJsInstance = await initSqlJs({ wasmBinary });
-      return sqlJsInstance;
+  // Pre-fetch the WASM binary from local origin or high-speed, CORS-enabled CDNs.
+  // Passing `wasmBinary` directly into initSqlJs ensures Emscripten instantiates the
+  // WebAssembly module directly from memory, completely eliminating the error:
+  // "both async and sync fetching of the wasm failed".
+  const wasmSources = [
+    '/sql-wasm.wasm',
+    'https://cdn.jsdelivr.net/npm/sql.js@1.15.0/dist/sql-wasm.wasm',
+    'https://unpkg.com/sql.js@1.15.0/dist/sql-wasm.wasm',
+  ];
+
+  let wasmBinary: ArrayBuffer | null = null;
+  for (const src of wasmSources) {
+    try {
+      const res = await fetch(src);
+      if (res.ok) {
+        wasmBinary = await res.arrayBuffer();
+        break;
+      }
+    } catch {
+      // Try next source
     }
-  } catch (err) {
-    console.warn('[Ankitti] Direct /sql-wasm.wasm fetch failed, trying local locateFile:', err);
   }
 
-  // Strategy 2: Local locateFile
-  try {
-    sqlJsInstance = await initSqlJs({
-      locateFile: () => '/sql-wasm.wasm',
-    });
+  if (wasmBinary) {
+    sqlJsInstance = await initSqlJs({ wasmBinary });
     return sqlJsInstance;
-  } catch (err) {
-    console.warn('[Ankitti] Local locateFile failed, trying CDN binary fallback:', err);
   }
 
-  // Strategy 3: CDN wasm binary from cdnjs matching exact version 1.15.0
-  try {
-    const cdnRes = await fetch('https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.15.0/sql-wasm.wasm');
-    if (cdnRes.ok) {
-      const wasmBinary = await cdnRes.arrayBuffer();
-      sqlJsInstance = await initSqlJs({ wasmBinary });
-      return sqlJsInstance;
-    }
-  } catch (err) {
-    console.warn('[Ankitti] CDN binary fetch failed:', err);
-  }
-
-  // Strategy 4: Fallback locateFile
+  // Fallback: locateFile on jsdelivr
   sqlJsInstance = await initSqlJs({
-    locateFile: (file) => `https://sql.js.org/dist/${file}`,
+    locateFile: (file) => `https://cdn.jsdelivr.net/npm/sql.js@1.15.0/dist/${file}`,
   });
   return sqlJsInstance;
 }
