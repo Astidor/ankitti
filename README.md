@@ -6,6 +6,8 @@
 
 ### *Spaced Repetition Flashcards • Master Anything with Kawaii Magic*
 
+**[🌐 Visit Ankitti Live: https://ankitti.com](https://ankitti.com)**
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-pink.svg?style=flat-square)](LICENSE)
 [![React](https://img.shields.io/badge/React-19-61dafb.svg?style=flat-square&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)

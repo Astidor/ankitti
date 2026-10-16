@@ -4,4 +4,4 @@ Allow: /
 Disallow: /api/
 
 # Sitemaps
-Sitemap: https://ankitti.pages.dev/sitemap.xml
+Sitemap: https://ankitti.com/sitemap.xml
