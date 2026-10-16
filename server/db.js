@@ -129,42 +129,9 @@ export function verifyPassword(password, hash, salt) {
   return check === hash;
 }
 
-// Seed demo user and starter decks if users table is empty
+// Seed initial database structure (no default credentials in production)
 export function seedDatabase(db) {
-  const checkUser = db.prepare('SELECT COUNT(*) as count FROM users').get();
-  if (checkUser.count === 0) {
-    console.log('🌸 Seeding initial demo account: kitty@sanrio.com (password: kitty123)...');
-    
-    const demoUserId = 'user_kitty_demo';
-    const { hash, salt } = hashPassword('kitty123');
-    const now = Date.now();
-
-    const insertUser = db.prepare(`
-      INSERT INTO users (
-        id, email, password_hash, salt, name, role, avatar, 
-        target_exam, exam_date, sound_enabled, streak_days, daily_goal, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    insertUser.run(
-      demoUserId,
-      'kitty@sanrio.com',
-      hash,
-      salt,
-      'Dr. Hello Kitty, MD',
-      'Chief of Spaced Repetition 🎀',
-      'doctor',
-      'Japanese N5 & Medicine',
-      new Date(now + 90 * 86400000).toISOString().split('T')[0],
-      1,
-      7,
-      30,
-      now
-    );
-
-    // Seed starter decks for demo user
-    seedDecksForUser(db, demoUserId);
-  }
+  // Database schema is initialized via getDatabase()
 }
 
 export function seedDecksForUser(db, userId) {

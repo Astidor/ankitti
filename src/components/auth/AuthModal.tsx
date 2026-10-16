@@ -188,7 +188,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="kitty@sanrio.com"
+                placeholder="you@domain.com"
                 className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border border-pink-200 text-xs focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-xs font-medium"
               />
             </div>
