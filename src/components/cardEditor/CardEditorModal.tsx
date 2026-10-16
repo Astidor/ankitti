@@ -4,15 +4,8 @@ import {
   Save, 
   Trash2, 
   Sparkles, 
-  Check, 
-  Clock, 
-  Tag, 
-  BookOpen, 
-  Lightbulb, 
-  FileText,
   AlertCircle,
   Image as ImageIcon,
-  Paperclip,
   ZoomIn
 } from 'lucide-react';
 import { Card, CardType, Deck, MedicalMeta, CardDraft } from '../../types/anki';

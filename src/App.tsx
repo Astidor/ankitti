@@ -156,8 +156,6 @@ export function App() {
   };
 
   // Auth Handlers & Studio Access Guard
-  const isAuthenticated = !!(account && account.email);
-
   const requireAuth = (action: () => void, mode: 'login' | 'signup' = 'signup') => {
     if (!account?.email) {
       setAuthModalMode(mode);
