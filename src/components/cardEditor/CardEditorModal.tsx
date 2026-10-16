@@ -6,13 +6,16 @@ import {
   Sparkles, 
   AlertCircle,
   Image as ImageIcon,
-  ZoomIn
+  ZoomIn,
+  Eye,
+  Edit3
 } from 'lucide-react';
 import { Card, CardType, Deck, MedicalMeta, CardDraft } from '../../types/anki';
 import { storage } from '../../services/storage';
 import { sounds } from '../../services/audio';
 import { KittyBow } from '../common/KittyIllustrations';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
+import { RichCardContent } from '../common/RichCardContent';
 
 interface CardEditorModalProps {
   isOpen: boolean;
@@ -47,6 +50,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
   const [draftRestoredNotice, setDraftRestoredNotice] = useState<boolean>(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const frontInputRef = useRef<HTMLTextAreaElement>(null);
   const frontFileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
@@ -339,157 +343,220 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
               </button>
             </div>
 
-            {/* Quick Cloze insertion button */}
-            <button
-              type="button"
-              onClick={handleInsertCloze}
-              className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold border border-pink-200 flex items-center justify-center space-x-1.5 ios-btn"
-              title="Wrap selected text in {{c1::...}}"
-            >
-              <span>+ Insert Cloze Deletion</span>
-              <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded-md border border-pink-200 font-mono">⌘⇧C</kbd>
-            </button>
-          </div>
-
-          {/* Front / Question */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="font-bold text-kitty-dark text-xs flex items-center space-x-1">
-                <span>{type === 'cloze' ? 'Card Text with Cloze {{c1::answer}}' : 'Front (Question / Prompt / Concept)'}</span>
-                <span className="text-pink-500 font-extrabold">*</span>
-              </label>
-              <span className="text-[10px] text-kitty-subtle bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100 font-medium">Markdown Supported</span>
-            </div>
-            <textarea
-              ref={frontInputRef}
-              rows={4}
-              required
-              value={front}
-              onChange={(e) => setFront(e.target.value)}
-              onPaste={(e) => handlePasteImage(e, setFrontImage)}
-              placeholder={
-                type === 'cloze'
-                  ? 'e.g. The capital of Japan is {{c1::Tokyo}}.'
-                  : 'e.g. What is the mechanism of action of beta-lactam antibiotics?'
-              }
-              className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
-            />
-
-            {/* Front Screenshot / Attachment Controls */}
-            <div className="flex items-center justify-between pt-1">
-              <input
-                type="file"
-                ref={frontFileInputRef}
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleImageFile(e.target.files[0], setFrontImage);
-                }}
-                className="hidden"
-              />
+            {/* Action buttons: Edit/Preview toggle & Cloze insert */}
+            <div className="flex items-center space-x-2">
               <button
                 type="button"
-                onClick={() => frontFileInputRef.current?.click()}
-                className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
+                onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
+                className={`px-3 py-1.5 rounded-xl font-bold border transition-all text-xs flex items-center space-x-1.5 ios-btn cursor-pointer ${
+                  viewMode === 'preview'
+                    ? 'bg-rose-500 text-white border-rose-600 shadow-sm'
+                    : 'bg-white text-kitty-dark border-pink-200 hover:bg-pink-50'
+                }`}
               >
-                <ImageIcon size={13} />
-                <span>{frontImage ? 'Change Front Screenshot' : '📷 Attach Front Screenshot / Diagram'}</span>
+                {viewMode === 'preview' ? <Edit3 size={13} /> : <Eye size={13} />}
+                <span>{viewMode === 'preview' ? 'Edit Mode' : 'Live Preview'}</span>
               </button>
-              <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
-            </div>
 
-            {frontImage && (
-              <div 
-                className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
-                onClick={() => setPreviewImage({ src: frontImage, title: 'Front Attachment Preview' })}
-                title="Click to expand"
-              >
-                <img src={frontImage} alt="Front Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                  <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
-                    <ZoomIn size={11} />
-                    <span>Expand</span>
-                  </span>
-                </div>
+              {type === 'cloze' && viewMode === 'edit' && (
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setFrontImage(null);
-                  }}
-                  className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
-                  title="Remove Image"
+                  onClick={handleInsertCloze}
+                  className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold border border-pink-200 flex items-center justify-center space-x-1.5 ios-btn"
+                  title="Wrap selected text in {{c1::...}}"
                 >
-                  <X size={12} />
+                  <span>+ Cloze</span>
+                  <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded-md border border-pink-200 font-mono">⌘⇧C</kbd>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Back / Explanation */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="font-bold text-kitty-dark text-xs">
-                {type === 'cloze' ? 'Extra Notes / Context (revealed on flip)' : 'Back (Answer / Explanation / Key Details)'}
-              </label>
-            </div>
-            <textarea
-              rows={4}
-              value={back}
-              onChange={(e) => setBack(e.target.value)}
-              onPaste={(e) => handlePasteImage(e, setBackImage)}
-              placeholder="e.g. Inhibit penicillin-binding proteins (PBPs), halting peptidoglycan cell wall cross-linking..."
-              className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
-            />
-
-            {/* Back Screenshot / Attachment Controls */}
-            <div className="flex items-center justify-between pt-1">
-              <input
-                type="file"
-                ref={backFileInputRef}
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleImageFile(e.target.files[0], setBackImage);
-                }}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => backFileInputRef.current?.click()}
-                className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
-              >
-                <ImageIcon size={13} />
-                <span>{backImage ? 'Change Back Screenshot' : '📷 Attach Back Screenshot / Diagram'}</span>
-              </button>
-              <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
-            </div>
-
-            {backImage && (
-              <div 
-                className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
-                onClick={() => setPreviewImage({ src: backImage, title: 'Back Attachment Preview' })}
-                title="Click to expand"
-              >
-                <img src={backImage} alt="Back Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                  <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
-                    <ZoomIn size={11} />
-                    <span>Expand</span>
+          {viewMode === 'preview' ? (
+            <div className="space-y-4 py-1">
+              {/* Front Face Preview */}
+              <div className="bg-white rounded-3xl border-2 border-pink-200 p-5 shadow-sm space-y-3">
+                <div className="flex items-center justify-between border-b border-pink-100 pb-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-pink-500 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-200/60">
+                    Front / Question Face
                   </span>
+                  <span className="text-[11px] text-slate-400 font-medium">Rendered Formatting Preview</span>
                 </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setBackImage(null);
-                  }}
-                  className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
-                  title="Remove Image"
-                >
-                  <X size={12} />
-                </button>
+                <RichCardContent
+                  content={front || '*(No front question entered yet)*'}
+                  showClozeAnswers={false}
+                  className="text-base text-slate-800 font-semibold"
+                />
+                {frontImage && (
+                  <div className="pt-2 flex justify-center">
+                    <img src={frontImage} alt="Front Attachment" className="max-h-44 rounded-xl border border-pink-100 object-contain shadow-xs" />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+
+              {/* Back Face Preview */}
+              <div className="bg-[#fffdfd] rounded-3xl border-2 border-rose-300 p-5 shadow-sm space-y-3">
+                <div className="flex items-center justify-between border-b border-rose-100 pb-2">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/60">
+                    Back / Answer Face
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-medium">Revealed on Flip</span>
+                </div>
+                <RichCardContent
+                  content={back || (type === 'cloze' ? front : '*(No back answer entered yet)*')}
+                  showClozeAnswers={true}
+                  className="text-base text-slate-800 font-medium"
+                />
+                {backImage && (
+                  <div className="pt-2 flex justify-center">
+                    <img src={backImage} alt="Back Attachment" className="max-h-44 rounded-xl border border-rose-100 object-contain shadow-xs" />
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Front / Question */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-kitty-dark text-xs flex items-center space-x-1">
+                    <span>{type === 'cloze' ? 'Card Text with Cloze {{c1::answer}}' : 'Front (Question / Prompt / Concept)'}</span>
+                    <span className="text-pink-500 font-extrabold">*</span>
+                  </label>
+                  <span className="text-[10px] text-kitty-subtle bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100 font-medium">HTML & Markdown Supported</span>
+                </div>
+                <textarea
+                  ref={frontInputRef}
+                  rows={4}
+                  required
+                  value={front}
+                  onChange={(e) => setFront(e.target.value)}
+                  onPaste={(e) => handlePasteImage(e, setFrontImage)}
+                  placeholder={
+                    type === 'cloze'
+                      ? 'e.g. The capital of Japan is {{c1::Tokyo}}.'
+                      : 'e.g. What is the mechanism of action of beta-lactam antibiotics?'
+                  }
+                  className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
+                />
+
+                {/* Front Screenshot / Attachment Controls */}
+                <div className="flex items-center justify-between pt-1">
+                  <input
+                    type="file"
+                    ref={frontFileInputRef}
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) handleImageFile(e.target.files[0], setFrontImage);
+                    }}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => frontFileInputRef.current?.click()}
+                    className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
+                  >
+                    <ImageIcon size={13} />
+                    <span>{frontImage ? 'Change Front Screenshot' : '📷 Attach Front Screenshot / Diagram'}</span>
+                  </button>
+                  <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
+                </div>
+
+                {frontImage && (
+                  <div 
+                    className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
+                    onClick={() => setPreviewImage({ src: frontImage, title: 'Front Attachment Preview' })}
+                    title="Click to expand"
+                  >
+                    <img src={frontImage} alt="Front Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
+                        <ZoomIn size={11} />
+                        <span>Expand</span>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFrontImage(null);
+                      }}
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
+                      title="Remove Image"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Back / Explanation */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-kitty-dark text-xs">
+                    {type === 'cloze' ? 'Extra Notes / Context (revealed on flip)' : 'Back (Answer / Explanation / Key Details)'}
+                  </label>
+                </div>
+                <textarea
+                  rows={4}
+                  value={back}
+                  onChange={(e) => setBack(e.target.value)}
+                  onPaste={(e) => handlePasteImage(e, setBackImage)}
+                  placeholder="e.g. Inhibit penicillin-binding proteins (PBPs), halting peptidoglycan cell wall cross-linking..."
+                  className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
+                />
+
+                {/* Back Screenshot / Attachment Controls */}
+                <div className="flex items-center justify-between pt-1">
+                  <input
+                    type="file"
+                    ref={backFileInputRef}
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) handleImageFile(e.target.files[0], setBackImage);
+                    }}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => backFileInputRef.current?.click()}
+                    className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
+                  >
+                    <ImageIcon size={13} />
+                    <span>{backImage ? 'Change Back Screenshot' : '📷 Attach Back Screenshot / Diagram'}</span>
+                  </button>
+                  <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
+                </div>
+
+                {backImage && (
+                  <div 
+                    className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
+                    onClick={() => setPreviewImage({ src: backImage, title: 'Back Attachment Preview' })}
+                    title="Click to expand"
+                  >
+                    <img src={backImage} alt="Back Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
+                        <ZoomIn size={11} />
+                        <span>Expand</span>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBackImage(null);
+                      }}
+                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
+                      title="Remove Image"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           {/* Universal Learning Accelerators Section */}
           <div className="bg-pink-50/50 rounded-2xl p-4 border border-pink-200/70 space-y-3">

@@ -20,6 +20,7 @@ import { answerCard, getIntervalPreviews } from '../../services/scheduler';
 import { sounds } from '../../services/audio';
 import { KittyBow, AestheticMascot } from '../common/KittyIllustrations';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
+import { RichCardContent } from '../common/RichCardContent';
 
 export type StudyFilterMode = 'due' | 'all' | 'flagged' | 'highYield';
 
@@ -391,69 +392,79 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
             {/* Front Question Body */}
             <div className="my-auto py-6 text-center space-y-4">
-              <div className="text-xl sm:text-2xl font-black text-slate-800 leading-snug tracking-tight">
-                {renderCloze(currentCard.front, false)}
-              </div>
+              <RichCardContent
+                content={currentCard.front}
+                showClozeAnswers={false}
+                className="text-xl sm:text-2xl font-black text-slate-800 leading-snug tracking-tight text-center"
+              />
+            </div>
 
-              {/* Front Screenshot Attachment */}
-              {currentCard.frontImage && (
-                <div className="flex justify-center pt-2">
-                  <div 
-                    className="relative group cursor-zoom-in inline-block rounded-2xl overflow-hidden border border-pink-200/80 shadow-xs hover:border-pink-400 transition-all max-w-full"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setLightboxImage({ src: currentCard.frontImage!, title: 'Front Diagram / Screenshot' });
-                    }}
-                    title="Click to view full size"
-                  >
-                    <img 
-                      src={currentCard.frontImage} 
-                      alt="Front Diagram / Screenshot" 
-                      className="max-h-60 sm:max-h-72 max-w-full rounded-2xl object-contain bg-pink-50/20" 
-                    />
-                    <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="px-3 py-1 rounded-full bg-white/95 text-slate-800 text-[11px] font-bold shadow-md flex items-center space-x-1">
-                        <ZoomIn size={13} />
-                        <span>Click to Expand</span>
-                      </span>
-                    </div>
+            {/* Front Screenshot Attachment */}
+            {currentCard.frontImage && (
+              <div className="flex justify-center pt-2">
+                <div 
+                  className="relative group cursor-zoom-in inline-block rounded-2xl overflow-hidden border border-pink-200/80 shadow-xs hover:border-pink-400 transition-all max-w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxImage({ src: currentCard.frontImage!, title: 'Front Diagram / Screenshot' });
+                  }}
+                  title="Click to view full size"
+                >
+                  <img 
+                    src={currentCard.frontImage} 
+                    alt="Front Diagram / Screenshot" 
+                    className="max-h-60 sm:max-h-72 max-w-full rounded-2xl object-contain bg-pink-50/20" 
+                  />
+                  <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="px-3 py-1 rounded-full bg-white/95 text-slate-800 text-[11px] font-bold shadow-md flex items-center space-x-1">
+                      <ZoomIn size={13} />
+                      <span>Click to Expand</span>
+                    </span>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Front Footer */}
-            <div className="flex items-center justify-between text-xs text-pink-500 font-bold border-t border-pink-100/80 pt-3.5 mt-4">
-              <span className="text-slate-500 font-medium">Card {currentCardIndex + 1} of {queue.length}</span>
-              <span className="flex items-center space-x-1 bg-pink-50 px-2.5 py-1 rounded-full text-pink-700 border border-pink-200/60">
-                <span>Space to Flip</span>
-                <KittyBow size={13} />
-              </span>
-            </div>
+          <div className="flex items-center justify-between text-xs text-pink-500 font-bold border-t border-pink-100/80 pt-3.5 mt-4">
+            <span className="text-slate-500 font-medium">Card {currentCardIndex + 1} of {queue.length}</span>
+            <span className="flex items-center space-x-1 bg-pink-50 px-2.5 py-1 rounded-full text-pink-700 border border-pink-200/60">
+              <span>Space to Flip</span>
+              <KittyBow size={13} />
+            </span>
           </div>
-        ) : (
-          /* CARD BACK FACE */
-          <div className="w-full min-h-[360px] bg-[#fffdfd] rounded-[32px] border-2 border-rose-300 shadow-md p-6 sm:p-8 flex flex-col justify-between hover:shadow-lg transition-all animate-in fade-in duration-200">
-            {/* Back Header */}
-            <div className="flex items-center justify-between text-xs pb-4 border-b border-rose-100">
-              <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-extrabold flex items-center space-x-1.5">
-                <span>Answer & Insights</span>
-              </span>
-              <KittyBow size={24} />
+        </div>
+      ) : (
+        /* CARD BACK FACE */
+        <div className="w-full min-h-[360px] bg-[#fffdfd] rounded-[32px] border-2 border-rose-300 shadow-md p-6 sm:p-8 flex flex-col justify-between hover:shadow-lg transition-all animate-in fade-in duration-200">
+          {/* Back Header */}
+          <div className="flex items-center justify-between text-xs pb-4 border-b border-rose-100">
+            <span className="px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-extrabold flex items-center space-x-1.5">
+              <span>Answer & Insights</span>
+            </span>
+            <KittyBow size={24} />
+          </div>
+
+          {/* Back Body (Scroll-safe, dynamic height, never clipped!) */}
+          <div className="my-auto py-5 space-y-4">
+            {/* Question summary badge */}
+            <div className="p-3 bg-pink-50/50 rounded-2xl border border-pink-100 text-xs text-slate-600 font-medium leading-relaxed">
+              <span className="font-bold text-pink-700 block text-[10px] uppercase tracking-wider mb-0.5">Prompt</span>
+              <RichCardContent
+                content={currentCard.front}
+                showClozeAnswers={true}
+                className="line-clamp-2 text-xs text-slate-600"
+              />
             </div>
 
-            {/* Back Body (Scroll-safe, dynamic height, never clipped!) */}
-            <div className="my-auto py-5 space-y-4">
-              {/* Question summary badge */}
-              <div className="p-3 bg-pink-50/50 rounded-2xl border border-pink-100 text-xs text-slate-600 font-medium leading-relaxed">
-                <span className="font-bold text-pink-700 block text-[10px] uppercase tracking-wider mb-0.5">Prompt</span>
-                <div className="line-clamp-2">{currentCard.front.replace(/\{\{c\d+::(.*?)(?:::([^\}]+))?\}\}/g, '$1')}</div>
-              </div>
-
-              {/* Answer Content */}
-              <div className="text-lg sm:text-xl text-slate-900 font-bold leading-relaxed whitespace-pre-wrap">
-                {renderCloze(currentCard.back, true)}
-              </div>
+            {/* Answer Content */}
+            <div className="text-base sm:text-lg text-slate-900 leading-relaxed">
+              <RichCardContent
+                content={currentCard.back}
+                showClozeAnswers={true}
+                className="text-base sm:text-lg text-slate-900 leading-relaxed font-medium"
+              />
+            </div>
 
               {/* Back Screenshot Attachment */}
               {currentCard.backImage && (

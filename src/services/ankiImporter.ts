@@ -15,13 +15,21 @@ export interface ImportResult {
   };
 }
 
-// Clean HTML tags from Anki fields while preserving line breaks and basic formatting
+// Clean HTML tags from Anki fields while preserving safe rich formatting (b, i, u, headings, lists, colors)
 export function cleanAnkiHtml(html: string): string {
   if (!html) return '';
+
   let text = html
+    // 1. Remove dangerous script and style blocks
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    // 2. Convert common Anki line break wrappers
     .replace(/<br\s*[\/]?>/gi, '\n')
     .replace(/<div>/gi, '\n')
     .replace(/<\/div>/gi, '')
+    .replace(/<p\s*>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    // 3. Clean entities
     .replace(/&nbsp;/gi, ' ')
     .replace(/&amp;/gi, '&')
     .replace(/&lt;/gi, '<')
@@ -29,14 +37,15 @@ export function cleanAnkiHtml(html: string): string {
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'");
 
-  // Keep bold and italics
-  text = text.replace(/<b>(.*?)<\/b>/gi, '**$1**');
-  text = text.replace(/<strong>(.*?)<\/strong>/gi, '**$1**');
-  text = text.replace(/<i>(.*?)<\/i>/gi, '*$1*');
-  text = text.replace(/<em>(.*?)<\/em>/gi, '*$1*');
+  // 4. Strip unsafe or unnecessary tags while PRESERVING safe rich formatting tags:
+  // b, strong, i, em, u, s, strike, del, h1, h2, h3, h4, ul, ol, li, span, code, pre, sub, sup, mark
+  text = text.replace(/<\/?(?:applet|base|basefont|body|button|embed|form|frame|frameset|head|html|iframe|input|link|meta|noframes|noscript|object|param|script|style|title)\b[^>]*>/gi, '');
 
-  // Strip remaining HTML tags
-  text = text.replace(/<[^>]*>/g, '');
+  // 5. Strip dangerous inline event attributes like onclick, onload
+  text = text.replace(/\son\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '');
+
+  // 6. Clean excessive newlines
+  text = text.replace(/\n{3,}/g, '\n\n');
 
   return text.trim();
 }

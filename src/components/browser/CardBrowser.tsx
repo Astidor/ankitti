@@ -44,6 +44,21 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
     return decks.find(d => d.id === deckId)?.name || 'General';
   };
 
+  const stripPreviewText = (text: string) => {
+    if (!text) return '';
+    return text
+      .replace(/\{\{c\d+::(.*?)(?:::.*?)?\}\}/g, '$1')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&amp;/gi, '&')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;/gi, "'")
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   return (
     <div className="space-y-4">
       {/* Top Filter & Search Controls */}
@@ -177,11 +192,11 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                 </div>
 
                 <div className="font-bold text-slate-800 text-xs leading-snug line-clamp-2">
-                  {card.front}
+                  {stripPreviewText(card.front)}
                 </div>
 
                 <div className="text-slate-600 text-xs line-clamp-2 bg-pink-50/50 p-2.5 rounded-xl border border-pink-100/60 font-medium">
-                  {card.back}
+                  {stripPreviewText(card.back)}
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-0.5">
@@ -248,7 +263,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
 
                     <td className="py-3 px-4 text-kitty-dark font-medium max-w-xs">
                       <div className="flex items-center space-x-1.5">
-                        <span className="truncate font-sans">{card.front}</span>
+                        <span className="truncate font-sans">{stripPreviewText(card.front)}</span>
                         {(card.frontImage || card.backImage) && (
                           <button
                             type="button"
@@ -258,7 +273,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                               if (targetImg) {
                                 setPreviewImage({
                                   url: targetImg,
-                                  title: `${card.front.slice(0, 30)}... (Attachment)`
+                                  title: `${stripPreviewText(card.front).slice(0, 30)}... (Attachment)`
                                 });
                               }
                             }}
@@ -275,7 +290,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                     </td>
 
                     <td className="py-3 px-4 text-kitty-subtle max-w-xs">
-                      <div className="truncate">{card.back}</div>
+                      <div className="truncate">{stripPreviewText(card.back)}</div>
                     </td>
 
                     <td className="py-3 px-3 font-mono font-bold text-kitty-dark">
