@@ -1,0 +1,14 @@
+name = "ankitti"
+compatibility_date = "2026-10-16"
+pages_build_output_dir = "dist"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Cloudflare D1 Database Binding:
+# Bind 'DB' in Cloudflare Pages dashboard (Settings -> Functions -> D1 database bindings)
+# or configure below for Wrangler CLI deployments:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "ankitti-db"
+# database_id = "<your-d1-database-id>"

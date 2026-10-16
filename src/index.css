@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Quicksand:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Outfit", "Quicksand", sans-serif;
+    color: #1e1b4b;
+    background-color: #fff8fa;
+    background-image: 
+      url('/assets/study_background.jpg'),
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255, 214, 230, 0.4), transparent 70%);
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: #fbcfe8;
+    color: #831843;
+  }
+}
+
+/* iOS Frosted Glass & Inset Card Styles */
+.ios-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 182, 193, 0.35);
+}
+
+.ios-card {
+  background: #ffffff;
+  border-radius: 1.6rem;
+  border: 1px solid #ffe4e9;
+  box-shadow: 0 4px 20px -2px rgba(255, 105, 180, 0.06);
+  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.ios-card:hover {
+  transform: translateY(-2px);
+  border-color: #fbcfe8;
+  box-shadow: 0 10px 30px -4px rgba(255, 105, 180, 0.12);
+}
+
+.ios-card:active {
+  transform: scale(0.985);
+}
+
+/* iOS Spring Button Press */
+.ios-btn {
+  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ios-btn:active {
+  transform: scale(0.96);
+}
+
+/* 3D Perspective Flashcard Flip */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Falling Sakura Blossom Drift Animation */
+@keyframes sakuraDrift {
+  0% {
+    transform: translateY(-40px) rotate(0deg) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(50vh) rotate(180deg) translateX(40px);
+  }
+  90% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(105vh) rotate(360deg) translateX(-30px);
+    opacity: 0;
+  }
+}
+
+.petal {
+  position: absolute;
+  pointer-events: none;
+  animation-name: sakuraDrift;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+/* Cute Mascot Floating Animation */
+@keyframes kittyFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1deg);
+  }
+}
+
+.mascot-float {
+  animation: kittyFloat 3.5s ease-in-out infinite;
+}
+
+/* Cute Twinkle Animation */
+@keyframes cuteTwinkle {
+  0%, 100% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15) rotate(15deg);
+    opacity: 1;
+  }
+}
+
+.cute-twinkle {
+  animation: cuteTwinkle 2.5s ease-in-out infinite;
+}
+
+/* iOS Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fff0f3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fbcfe8;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f472b6;
+}
+
+/* Cloze Deletion Badges */
+.cloze-badge {
+  background-color: #ffe4e9;
+  color: #be123c;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1.5px dashed #fb7185;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.cloze-active {
+  background-color: #ff3366;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255, 51, 102, 0.35);
+  display: inline-block;
+}
