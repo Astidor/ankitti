@@ -73,6 +73,7 @@ export function App() {
       try {
         const user = await api.getMe();
         if (user) {
+          storage.setActiveAccount(user.id);
           setAccount(user);
           const [remoteDecks, remoteCards] = await Promise.all([
             api.getDecks(),
@@ -175,6 +176,7 @@ export function App() {
   }, [viewMode, account]);
 
   const handleAuthSuccess = async (user: UserAccount) => {
+    storage.setActiveAccount(user.id);
     setAccount(user);
     setIsAuthModalOpen(false);
     setViewMode('app');
@@ -334,16 +336,38 @@ export function App() {
   };
 
   // Anki Import callback
-  const handleImportComplete = (result: ImportResult, targetDeckId?: string) => {
+  const handleImportComplete = async (result: ImportResult, targetDeckId?: string) => {
+    // 1. Instantly update React decks state & local storage
     if (!targetDeckId) {
-      result.decks.forEach(d => {
-        storage.saveDeck(d);
-        api.createDeck(d).catch(e => console.warn(e));
+      result.decks.forEach(d => storage.saveDeck(d));
+      setDecks(prev => {
+        const existingIds = new Set(prev.map(d => d.id));
+        const newDecks = result.decks.filter(d => !existingIds.has(d.id));
+        return [...newDecks, ...prev];
       });
     }
+
+    // 2. Instantly update React cards state & local storage
     storage.bulkAddCards(result.cards);
-    result.cards.forEach(c => api.createCard(c).catch(e => console.warn(e)));
-    reloadData();
+    setCards(prev => {
+      const existingIds = new Set(prev.map(c => c.id));
+      const freshCards = result.cards.filter(c => !existingIds.has(c.id));
+      return [...freshCards, ...prev];
+    });
+
+    sounds.playRating(4);
+
+    // 3. Persist to Cloudflare D1 in background
+    try {
+      if (!targetDeckId) {
+        for (const d of result.decks) {
+          await api.createDeck(d);
+        }
+      }
+      await api.bulkCreateCards(result.cards);
+    } catch (e) {
+      console.warn('D1 sync on import error:', e);
+    }
   };
 
   const getDeckStats = (deckId: string): DeckStats => {

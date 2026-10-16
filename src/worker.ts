@@ -784,6 +784,58 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
         }
       }
 
+      // --- 7.5 CARDS BATCH INSERT ---
+      if (url.pathname === '/api/cards/batch' && request.method === 'POST') {
+        const body: any = await request.json().catch(() => ({}));
+        const cardsToInsert = Array.isArray(body.cards) ? body.cards : [];
+        if (cardsToInsert.length === 0) {
+          return jsonResponse({ success: true, count: 0 });
+        }
+
+        const now = Date.now();
+        const statements = [];
+
+        for (const card of cardsToInsert) {
+          if (!card.deckId || !card.front) continue;
+          const cardId = card.id || `c_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          statements.push(
+            env.DB.prepare(`
+              INSERT OR REPLACE INTO cards (
+                id, user_id, deck_id, type, front, back, front_image, back_image, tags_json,
+                due, interval, ease_factor, repetitions, lapses, state, step_index,
+                medical_meta_json, flagged, created_at
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).bind(
+              cardId,
+              user.id,
+              card.deckId,
+              card.type || 'basic',
+              card.front,
+              card.back || '',
+              card.frontImage || null,
+              card.backImage || null,
+              JSON.stringify(card.tags || []),
+              card.due !== undefined ? card.due : now,
+              card.interval || 0,
+              card.easeFactor || 2.5,
+              card.repetitions || 0,
+              card.lapses || 0,
+              card.state || 'new',
+              card.stepIndex || 0,
+              JSON.stringify(card.medicalMeta || {}),
+              card.flagged ? 1 : 0,
+              card.createdAt || now
+            )
+          );
+        }
+
+        if (statements.length > 0) {
+          await env.DB.batch(statements);
+        }
+
+        return jsonResponse({ success: true, count: statements.length }, 201);
+      }
+
       // --- 8. CARDS UPDATE & DELETE ---
       const cardMatch = url.pathname.match(/^\/api\/cards\/([^/]+)$/);
       if (cardMatch) {

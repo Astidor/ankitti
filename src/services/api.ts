@@ -241,6 +241,24 @@ class ApiService {
     return card;
   }
 
+  public async bulkCreateCards(cards: Card[]): Promise<void> {
+    storage.bulkAddCards(cards);
+    if (!this.token || cards.length === 0) return;
+    try {
+      const chunkSize = 50;
+      for (let i = 0; i < cards.length; i += chunkSize) {
+        const chunk = cards.slice(i, i + chunkSize);
+        await fetch(`${API_BASE}/cards/batch`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify({ cards: chunk }),
+        });
+      }
+    } catch (err) {
+      console.warn('API bulkCreateCards error, preserved in local storage:', err);
+    }
+  }
+
   public async updateCard(card: Card): Promise<Card> {
     storage.saveCard(card);
     if (!this.token) return card;
