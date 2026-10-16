@@ -9,8 +9,6 @@ not_found_handling = "single-page-application"
 [vars]
 ENVIRONMENT = "production"
 
-# Cloudflare D1 Database Binding (Optional):
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "ankitti-db"
-# database_id = "<your-d1-database-id>"
+[[d1_databases]]
+binding = "DB"
+database_id = "c1b98c68-b699-4319-a996-08dbee8a1e38"
