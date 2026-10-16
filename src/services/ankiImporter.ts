@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import initSqlJs from 'sql.js';
+import * as fzstd from 'fzstd';
 import { Card, Deck, CardType } from '../types/anki';
 import { DEFAULT_DECK_SETTINGS } from './scheduler';
 
@@ -105,50 +106,91 @@ async function getSqlInstance() {
   return sqlJsInstance;
 }
 
-// 1. APKG Parser using JSZip and sql.js
+// 1. APKG Parser using JSZip, fzstd and sql.js
 async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportResult> {
   const zip = new JSZip();
   const zipContent = await zip.loadAsync(file);
 
-  // Look for collection.anki21 or collection.anki2
-  let dbFile = zipContent.file('collection.anki21');
-  if (!dbFile) {
-    dbFile = zipContent.file('collection.anki2');
+  // Modern Anki packages (Anki 2.1.50+ / V3) use `collection.anki21b` compressed with Zstandard (zstd).
+  // Legacy Anki packages use `collection.anki21` or `collection.anki2` (raw SQLite).
+  let dbBuffer: Uint8Array | null = null;
+  const anki21bFile = zipContent.file('collection.anki21b');
+  const anki21File = zipContent.file('collection.anki21');
+  const anki2File = zipContent.file('collection.anki2');
+
+  if (anki21bFile) {
+    const compressed = await anki21bFile.async('uint8array');
+    dbBuffer = fzstd.decompress(compressed);
+  } else if (anki21File) {
+    dbBuffer = await anki21File.async('uint8array');
+  } else if (anki2File) {
+    dbBuffer = await anki2File.async('uint8array');
   }
 
-  if (!dbFile) {
-    throw new Error('Invalid .apkg package: collection.anki2 not found in archive.');
+  if (!dbBuffer) {
+    throw new Error('Invalid .apkg package: collection database not found in archive.');
   }
-
-  const dbBuffer = await dbFile.async('uint8array');
 
   // Initialize SQLite with local/cached WASM
   const SQL = await getSqlInstance();
 
   const db = new SQL.Database(dbBuffer);
 
-  // 1. Get decks from `col` table
-  const colQuery = db.exec('SELECT decks, models FROM col LIMIT 1');
+  // 1. Get decks
   let deckMap: Record<string, string> = {};
   const importedDecks: Deck[] = [];
 
   const defaultDeckName = file.name.replace(/\.apkg$/i, '');
   const primaryDeckId = targetDeckId || `deck_${Date.now()}`;
 
-  if (colQuery.length > 0 && colQuery[0].values.length > 0) {
+  // Modern Anki schema: query dedicated `decks` table
+  try {
+    const decksTable = db.exec('SELECT id, name FROM decks WHERE id != 1');
+    if (decksTable.length > 0 && decksTable[0].values.length > 0) {
+      for (const row of decksTable[0].values) {
+        const id = String(row[0]);
+        const name = String(row[1] || '').trim();
+        if (name) {
+          deckMap[id] = name;
+        }
+      }
+    }
+  } catch {
+    // Modern decks table absent, proceed to legacy query
+  }
+
+  // Legacy Anki schema: query `col.decks` JSON field
+  if (Object.keys(deckMap).length === 0) {
     try {
-      const decksJson = JSON.parse(colQuery[0].values[0][0] as string);
-      for (const [id, d] of Object.entries(decksJson as Record<string, { id: number; name: string }>)) {
-        if (id !== '1' && d.name) {
-          deckMap[id] = d.name;
+      const colQuery = db.exec('SELECT decks FROM col LIMIT 1');
+      if (colQuery.length > 0 && colQuery[0].values.length > 0) {
+        const rawJson = colQuery[0].values[0][0];
+        if (rawJson) {
+          const decksJson = JSON.parse(rawJson as string);
+          for (const [id, d] of Object.entries(decksJson as Record<string, { id: number; name: string }>)) {
+            if (id !== '1' && d && d.name) {
+              deckMap[id] = d.name;
+            }
+          }
         }
       }
     } catch {
-      // Use fallback name
+      // Fallback
     }
   }
 
-  if (Object.keys(deckMap).length === 0) {
+  if (targetDeckId) {
+    importedDecks.push({
+      id: targetDeckId,
+      name: defaultDeckName,
+      description: `Imported from ${file.name}`,
+      icon: '🎀',
+      color: '#ff4d88',
+      settings: { ...DEFAULT_DECK_SETTINGS },
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    });
+  } else if (Object.keys(deckMap).length === 0) {
     deckMap[primaryDeckId] = defaultDeckName;
     importedDecks.push({
       id: primaryDeckId,
@@ -164,7 +206,7 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
     for (const [id, name] of Object.entries(deckMap)) {
       const cleanName = name.replace(/\x1f/g, '::');
       importedDecks.push({
-        id: targetDeckId || `deck_${id}_${Date.now()}`,
+        id: `deck_${id}_${Date.now()}`,
         name: cleanName,
         description: `Imported deck from ${file.name}`,
         icon: '🎀',
@@ -177,8 +219,6 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
   }
 
   // 2. Query notes and cards
-  // notes: id, flds, tags
-  // cards: id, nid, did, ivl, factor, reps, lapses, type, queue, due
   const notesQuery = db.exec('SELECT id, flds, tags FROM notes');
   const cardsQuery = db.exec('SELECT id, nid, did, ivl, factor, reps, lapses, type, due FROM cards');
 
@@ -213,9 +253,10 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
       const back = note.flds.slice(1).join('\n\n') || '';
 
       const detectedType = detectCardType(front);
-      const ease = factor / 1000;
+      const ease = factor > 0 ? factor / 1000 : 2.5;
 
-      const cardDeckId = targetDeckId || (importedDecks.find(d => d.id.includes(String(did)))?.id || importedDecks[0]?.id || primaryDeckId);
+      const matchedDeck = importedDecks.find(d => d.id.includes(`_${did}_`)) || importedDecks[0];
+      const cardDeckId = targetDeckId || (matchedDeck ? matchedDeck.id : primaryDeckId);
 
       cards.push({
         id: `c_${cid}_${Date.now()}`,
@@ -227,7 +268,7 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
         createdAt: Date.now(),
         due: Date.now(),
         interval: Math.max(0, ivl),
-        easeFactor: Math.max(1.3, ease || 2.5),
+        easeFactor: Math.max(1.3, ease),
         repetitions: reps,
         lapses,
         state: cType === 0 ? 'new' : cType === 1 ? 'learning' : 'review',
