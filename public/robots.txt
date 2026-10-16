@@ -1,0 +1,7 @@
+# Ankitti robots.txt
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Sitemaps
+Sitemap: https://ankitti.pages.dev/sitemap.xml
