@@ -28,8 +28,14 @@ function parseMarkdownToHtml(text: string): string {
   // Strikethrough
   html = html.replace(/~~(.*?)~~/g, '<s>$1</s>');
 
+  // Highlight markdown ==text==
+  html = html.replace(/==(.*?)==/g, '<mark class="bg-amber-200/80 px-1 py-0.5 rounded text-slate-900 font-semibold">$1</mark>');
+
   // Inline code
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/`([^`]+)`/g, '<code class="bg-pink-100/70 text-pink-700 px-1.5 py-0.5 rounded-md font-mono text-[0.9em] border border-pink-200/60">$1</code>');
+
+  // Markdown links: [text](url)
+  html = html.replace(/\[(.*?)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-pink-600 underline font-semibold hover:text-pink-700 cursor-pointer">$1</a>');
 
   // Convert bullet points with markdown dashes or asterisks at start of line
   html = html.replace(/(?:^|\n)[-*]\s+(.*?)(?=\n|$)/g, '\n<div class="rich-list-item">• $1</div>');

@@ -9,7 +9,14 @@ import {
   Edit3,
   ChevronDown,
   ChevronUp,
-  Plus
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  Code,
+  Link as LinkIcon,
+  Highlighter,
+  List
 } from 'lucide-react';
 import { Card, CardType, Deck, MedicalMeta, CardDraft } from '../../types/anki';
 import { storage } from '../../services/storage';
@@ -42,9 +49,11 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   const [mnemonic, setMnemonic] = useState<string>('');
   const [showExtras, setShowExtras] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [activeField, setActiveField] = useState<'front' | 'back'>('front');
   const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
 
   const frontInputRef = useRef<HTMLTextAreaElement>(null);
+  const backInputRef = useRef<HTMLTextAreaElement>(null);
   const frontFileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
   const isInitialMount = useRef(true);
@@ -90,14 +99,12 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
       setHint(meta.clinicalPearl || meta.takeaway || '');
       setMnemonic(meta.mnemonic || '');
       
-      // Auto-expand extras if the card already has extra data
       if (meta.clinicalPearl || meta.takeaway || meta.mnemonic || (editingCard.tags && editingCard.tags.length > 0)) {
         setShowExtras(true);
       } else {
         setShowExtras(false);
       }
     } else {
-      // Check for saved draft for this deck
       const existingDraft = storage.getDraft(deck.id);
       if (existingDraft && (existingDraft.front.trim() || existingDraft.back.trim() || existingDraft.frontImage || existingDraft.backImage)) {
         setFront(existingDraft.front);
@@ -110,7 +117,6 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
         setMnemonic(meta.mnemonic || '');
         setShowExtras(Boolean(meta.clinicalPearl || meta.takeaway || meta.mnemonic || existingDraft.tags));
       } else {
-        // Fresh blank card
         setFront('');
         setBack('');
         setFrontImage(null);
@@ -122,9 +128,9 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
       }
     }
     setViewMode('edit');
+    setActiveField('front');
     isInitialMount.current = true;
 
-    // Focus front input after opening
     setTimeout(() => {
       frontInputRef.current?.focus();
     }, 120);
@@ -166,26 +172,89 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
     return () => clearTimeout(timer);
   }, [front, back, frontImage, backImage, tags, hint, mnemonic, deck.id, editingCard?.id, isOpen]);
 
-  // Cloze deletion helper: wraps selected text in {{c1::selection}}
-  const handleInsertCloze = () => {
-    const textarea = frontInputRef.current;
+  // Formatting Bar Engine: Inserts or wraps formatting around active textarea selection
+  const applyFormat = (type: 'bold' | 'italic' | 'underline' | 'strikethrough' | 'cloze' | 'code' | 'highlight' | 'link' | 'bullet') => {
+    sounds.playClick();
+    const isFront = activeField === 'front';
+    const textarea = isFront ? frontInputRef.current : backInputRef.current;
+    const value = isFront ? front : back;
+    const setValue = isFront ? setFront : setBack;
+
     if (!textarea) return;
 
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selected = front.substring(start, end) || 'hidden text';
+    const selected = value.substring(start, end);
 
-    const existingClozes = (front.match(/\{\{c(\d+)::/g) || []).map(m => parseInt(m.replace(/\D/g, '')));
-    const nextNumber = existingClozes.length > 0 ? Math.max(...existingClozes) + 1 : 1;
+    let prefix = '';
+    let suffix = '';
+    let defaultPlaceholder = '';
 
-    const replacement = `{{c${nextNumber}::${selected}}}`;
-    const newFront = front.substring(0, start) + replacement + front.substring(end);
-    setFront(newFront);
+    switch (type) {
+      case 'bold':
+        prefix = '**';
+        suffix = '**';
+        defaultPlaceholder = 'bold text';
+        break;
+      case 'italic':
+        prefix = '*';
+        suffix = '*';
+        defaultPlaceholder = 'italic text';
+        break;
+      case 'underline':
+        prefix = '<u>';
+        suffix = '</u>';
+        defaultPlaceholder = 'underlined text';
+        break;
+      case 'strikethrough':
+        prefix = '~~';
+        suffix = '~~';
+        defaultPlaceholder = 'strikethrough';
+        break;
+      case 'code':
+        prefix = '`';
+        suffix = '`';
+        defaultPlaceholder = 'code';
+        break;
+      case 'highlight':
+        prefix = '==';
+        suffix = '==';
+        defaultPlaceholder = 'highlighted text';
+        break;
+      case 'link':
+        prefix = '[';
+        suffix = '](https://)';
+        defaultPlaceholder = 'link text';
+        break;
+      case 'bullet':
+        prefix = '\n• ';
+        suffix = '';
+        defaultPlaceholder = 'list item';
+        break;
+      case 'cloze': {
+        const fullContent = front;
+        const existingClozes = (fullContent.match(/\{\{c(\d+)::/g) || []).map(m => parseInt(m.replace(/\D/g, '')));
+        const nextNum = existingClozes.length > 0 ? Math.max(...existingClozes) + 1 : 1;
+        prefix = `{{c${nextNum}::`;
+        suffix = '}}';
+        defaultPlaceholder = 'hidden text';
+        break;
+      }
+    }
+
+    const insertText = selected || defaultPlaceholder;
+    const replacement = prefix + insertText + suffix;
+    const newValue = value.substring(0, start) + replacement + value.substring(end);
+    setValue(newValue);
 
     setTimeout(() => {
       textarea.focus();
-      textarea.setSelectionRange(start + 6, start + 6 + selected.length);
-    }, 50);
+      if (selected) {
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + selected.length);
+      } else {
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length + defaultPlaceholder.length);
+      }
+    }, 40);
   };
 
   const handleClear = () => {
@@ -235,11 +304,8 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
 
     onSaveCard(cardToSave);
     sounds.playRating(3);
-
-    // Clear draft once card is saved
     storage.clearDraft(editingCard?.id ? `draft_${editingCard.id}` : `draft_${deck.id}`);
 
-    // If adding a new card, keep modal open and reset so user can rapid-fire add next card!
     if (!editingCard) {
       setFront('');
       setBack('');
@@ -253,21 +319,43 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
     }
   };
 
-  // ⌘+Enter / Ctrl+Enter shortcut
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+  // Standard Anki keyboard shortcuts: Ctrl/Cmd + B, I, U, Shift+C (Cloze), Enter (Save)
+  const handleEditorKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isMeta = e.metaKey || e.ctrlKey;
+
+    if (isMeta && e.key === 'Enter') {
       e.preventDefault();
       handleSubmit();
+      return;
+    }
+
+    if (isMeta && e.shiftKey && e.key.toLowerCase() === 'c') {
+      e.preventDefault();
+      applyFormat('cloze');
+      return;
+    }
+
+    if (isMeta && !e.shiftKey) {
+      if (e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        applyFormat('bold');
+      } else if (e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        applyFormat('italic');
+      } else if (e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        applyFormat('underline');
+      } else if (e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        applyFormat('link');
+      }
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xs animate-fadeIn"
-      onKeyDown={handleKeyDown}
-    >
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
       <div className="bg-white rounded-t-[32px] sm:rounded-[28px] w-full max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/90 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Minimal Header */}
@@ -313,6 +401,144 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
           </div>
         </div>
 
+        {/* Anki-Style Formatting Bar Ribbon (When in Edit Mode) */}
+        {viewMode === 'edit' && (
+          <div className="px-4 py-2 bg-pink-50/70 border-b border-pink-200/70 flex items-center justify-between gap-1 overflow-x-auto select-none no-scrollbar">
+            
+            {/* Formatting Tools (Bold, Italic, Underline, Cloze, Code, Highlight, Link, Bullet) */}
+            <div className="flex items-center space-x-1">
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('bold')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Bold (Ctrl+B)"
+              >
+                <Bold size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('italic')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Italic (Ctrl+I)"
+              >
+                <Italic size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('underline')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Underline (Ctrl+U)"
+              >
+                <Underline size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('strikethrough')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Strikethrough"
+              >
+                <Strikethrough size={15} />
+              </button>
+
+              <div className="h-4 w-[1px] bg-pink-200 mx-1" />
+
+              {/* Cloze Deletion Button: The Star of Anki */}
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('cloze')}
+                className="px-2.5 py-1 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-extrabold text-[11px] flex items-center space-x-1 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                title="Wrap selection in Cloze deletion {{c1::...}} (Ctrl+Shift+C)"
+              >
+                <span>[...]</span>
+                <span className="hidden sm:inline">Cloze</span>
+              </button>
+
+              <div className="h-4 w-[1px] bg-pink-200 mx-1" />
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('code')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Inline Code (`code`)"
+              >
+                <Code size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('highlight')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-amber-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Highlight Text (==text==)"
+              >
+                <Highlighter size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('link')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Add Link [text](url)"
+              >
+                <LinkIcon size={15} />
+              </button>
+
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => applyFormat('bullet')}
+                className="p-1.5 rounded-lg text-slate-700 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors cursor-pointer"
+                title="Bullet List"
+              >
+                <List size={15} />
+              </button>
+            </div>
+
+            {/* Target Field Switcher Pill (Front / Back) */}
+            <div className="flex items-center space-x-1 shrink-0 bg-white p-0.5 rounded-xl border border-pink-200/80 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveField('front');
+                  frontInputRef.current?.focus();
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                  activeField === 'front' 
+                    ? 'bg-pink-500 text-white' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Front
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveField('back');
+                  backInputRef.current?.focus();
+                }}
+                className={`px-2 py-0.5 rounded-lg text-[10px] font-black transition-all cursor-pointer ${
+                  activeField === 'back' 
+                    ? 'bg-rose-500 text-white' 
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Back
+              </button>
+            </div>
+
+          </div>
+        )}
+
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
           
@@ -356,23 +582,28 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
             <div className="space-y-3.5">
               
               {/* Card Face 1: FRONT */}
-              <div className="rounded-2xl border-2 border-pink-200/90 bg-white p-3.5 shadow-2xs focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-200 transition-all">
+              <div 
+                onClick={() => setActiveField('front')}
+                className={`rounded-2xl border-2 bg-white p-3.5 shadow-2xs transition-all ${
+                  activeField === 'front' 
+                    ? 'border-pink-500 ring-2 ring-pink-200/70' 
+                    : 'border-pink-200/90'
+                }`}
+              >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-pink-600">
-                    Front
-                  </span>
-                  
-                  {/* Front card micro-actions (Cloze + Camera) */}
                   <div className="flex items-center space-x-1.5">
-                    <button
-                      type="button"
-                      onClick={handleInsertCloze}
-                      className="px-2 py-0.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 text-[11px] font-bold border border-pink-200 flex items-center space-x-1 cursor-pointer"
-                      title="Hide selected text for cloze recall [ ... ]"
-                    >
-                      <span>[...] Cloze</span>
-                    </button>
-
+                    <span className="text-[11px] font-black uppercase tracking-wider text-pink-600">
+                      Front
+                    </span>
+                    {activeField === 'front' && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-pink-100 text-pink-700">
+                        Active Field
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Front card photo upload */}
+                  <div className="flex items-center space-x-1.5">
                     <input
                       type="file"
                       ref={frontFileInputRef}
@@ -397,9 +628,11 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                   ref={frontInputRef}
                   rows={3}
                   value={front}
+                  onFocus={() => setActiveField('front')}
                   onChange={(e) => setFront(e.target.value)}
+                  onKeyDown={handleEditorKeyDown}
                   onPaste={(e) => handlePasteImage(e, setFrontImage)}
-                  placeholder="Question or prompt..."
+                  placeholder="Question or prompt... (e.g. The powerhouse of the cell is...)"
                   className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
                 />
 
@@ -425,13 +658,27 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
               </div>
 
               {/* Card Face 2: BACK */}
-              <div className="rounded-2xl border-2 border-rose-200/90 bg-white p-3.5 shadow-2xs focus-within:border-rose-400 focus-within:ring-2 focus-within:ring-rose-200 transition-all">
+              <div 
+                onClick={() => setActiveField('back')}
+                className={`rounded-2xl border-2 bg-white p-3.5 shadow-2xs transition-all ${
+                  activeField === 'back' 
+                    ? 'border-rose-400 ring-2 ring-rose-200/70' 
+                    : 'border-rose-200/90'
+                }`}
+              >
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">
-                    Back
-                  </span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">
+                      Back
+                    </span>
+                    {activeField === 'back' && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-md bg-rose-100 text-rose-700">
+                        Active Field
+                      </span>
+                    )}
+                  </div>
 
-                  {/* Back card micro-action (Camera) */}
+                  {/* Back card photo upload */}
                   <div className="flex items-center space-x-1.5">
                     <input
                       type="file"
@@ -454,9 +701,12 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                 </div>
 
                 <textarea
+                  ref={backInputRef}
                   rows={3}
                   value={back}
+                  onFocus={() => setActiveField('back')}
                   onChange={(e) => setBack(e.target.value)}
+                  onKeyDown={handleEditorKeyDown}
                   onPaste={(e) => handlePasteImage(e, setBackImage)}
                   placeholder="Answer or key details..."
                   className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
