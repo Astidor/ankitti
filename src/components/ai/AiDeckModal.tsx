@@ -138,6 +138,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
             highYield: true,
             takeaway: item.takeaway,
             mnemonic: item.mnemonic,
+            clinicalPearl: item.takeaway,
           },
         };
 
