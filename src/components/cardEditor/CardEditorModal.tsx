@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
-  Save, 
   Trash2, 
   Sparkles, 
-  AlertCircle,
-  Image as ImageIcon,
-  ZoomIn,
-  Eye,
-  Edit3
+  Camera,
+  ZoomIn, 
+  Eye, 
+  Edit3,
+  ChevronDown,
+  ChevronUp,
+  Plus
 } from 'lucide-react';
 import { Card, CardType, Deck, MedicalMeta, CardDraft } from '../../types/anki';
 import { storage } from '../../services/storage';
@@ -32,25 +33,17 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   onClose,
   onSaveCard,
 }) => {
-  const [type, setType] = useState<CardType>('basic');
   const [front, setFront] = useState<string>('');
   const [back, setBack] = useState<string>('');
   const [frontImage, setFrontImage] = useState<string | null>(null);
   const [backImage, setBackImage] = useState<string | null>(null);
-  const [tags, setTags] = useState<string>('High-Yield');
-  const [medicalMeta, setMedicalMeta] = useState<MedicalMeta>({
-    highYield: true,
-    system: 'Cardiovascular',
-    difficulty: 'Normal',
-    clinicalPearl: '',
-    mnemonic: '',
-    firstAidRef: '',
-  });
-
-  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
-  const [draftRestoredNotice, setDraftRestoredNotice] = useState<boolean>(false);
-  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+  const [tags, setTags] = useState<string>('');
+  const [hint, setHint] = useState<string>('');
+  const [mnemonic, setMnemonic] = useState<string>('');
+  const [showExtras, setShowExtras] = useState<boolean>(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [previewImage, setPreviewImage] = useState<{ src: string; title: string } | null>(null);
+
   const frontInputRef = useRef<HTMLTextAreaElement>(null);
   const frontFileInputRef = useRef<HTMLInputElement>(null);
   const backFileInputRef = useRef<HTMLInputElement>(null);
@@ -88,47 +81,56 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
     if (!isOpen) return;
 
     if (editingCard) {
-      setType(editingCard.type);
       setFront(editingCard.front);
       setBack(editingCard.back);
       setFrontImage(editingCard.frontImage || null);
       setBackImage(editingCard.backImage || null);
-      setTags(editingCard.tags.join(', '));
-      setMedicalMeta(editingCard.medicalMeta || { highYield: true });
-      setDraftRestoredNotice(false);
+      setTags(editingCard.tags?.join(', ') || '');
+      const meta = editingCard.medicalMeta || {};
+      setHint(meta.clinicalPearl || meta.takeaway || '');
+      setMnemonic(meta.mnemonic || '');
+      
+      // Auto-expand extras if the card already has extra data
+      if (meta.clinicalPearl || meta.takeaway || meta.mnemonic || (editingCard.tags && editingCard.tags.length > 0)) {
+        setShowExtras(true);
+      } else {
+        setShowExtras(false);
+      }
     } else {
       // Check for saved draft for this deck
       const existingDraft = storage.getDraft(deck.id);
       if (existingDraft && (existingDraft.front.trim() || existingDraft.back.trim() || existingDraft.frontImage || existingDraft.backImage)) {
-        setType(existingDraft.type);
         setFront(existingDraft.front);
         setBack(existingDraft.back);
         setFrontImage(existingDraft.frontImage || null);
         setBackImage(existingDraft.backImage || null);
-        setTags(existingDraft.tags);
-        setMedicalMeta(existingDraft.medicalMeta);
-        setLastSavedTime(new Date(existingDraft.lastSavedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
-        setDraftRestoredNotice(true);
+        setTags(existingDraft.tags || '');
+        const meta = existingDraft.medicalMeta || {};
+        setHint(meta.clinicalPearl || meta.takeaway || '');
+        setMnemonic(meta.mnemonic || '');
+        setShowExtras(Boolean(meta.clinicalPearl || meta.takeaway || meta.mnemonic || existingDraft.tags));
       } else {
-        // Fresh card default
-        setType('basic');
+        // Fresh blank card
         setFront('');
         setBack('');
         setFrontImage(null);
         setBackImage(null);
-        setTags('High-Yield');
-        setMedicalMeta({
-          highYield: true,
-          system: deck.name.replace(/^[^\w]+/, '').trim() || 'General',
-          difficulty: 'Normal',
-        });
-        setDraftRestoredNotice(false);
+        setTags('');
+        setHint('');
+        setMnemonic('');
+        setShowExtras(false);
       }
     }
+    setViewMode('edit');
     isInitialMount.current = true;
-  }, [isOpen, deck.id, deck.name, editingCard]);
 
-  // AUTO-SAVE / DRAFT PERSISTENCE (Runs on every keystroke after 350ms debounce)
+    // Focus front input after opening
+    setTimeout(() => {
+      frontInputRef.current?.focus();
+    }, 120);
+  }, [isOpen, deck.id, editingCard]);
+
+  // Silent draft auto-saving
   useEffect(() => {
     if (!isOpen) return;
     if (isInitialMount.current) {
@@ -136,29 +138,33 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
       return;
     }
 
-    // Only save if there is some content
     const timer = setTimeout(() => {
       if (front.trim() || back.trim() || frontImage || backImage) {
+        const isCloze = /\{\{c\d+::/i.test(front);
         const draft: CardDraft = {
           id: editingCard?.id ? `draft_${editingCard.id}` : `draft_${deck.id}`,
           deckId: deck.id,
           cardId: editingCard?.id,
-          type,
+          type: isCloze ? 'cloze' : 'basic',
           front,
           back,
           frontImage,
           backImage,
           tags,
-          medicalMeta,
+          medicalMeta: {
+            highYield: true,
+            clinicalPearl: hint,
+            takeaway: hint,
+            mnemonic,
+          },
           lastSavedAt: Date.now(),
         };
         storage.saveDraft(draft);
-        setLastSavedTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
       }
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [front, back, frontImage, backImage, tags, type, medicalMeta, deck.id, editingCard?.id, isOpen]);
+  }, [front, back, frontImage, backImage, tags, hint, mnemonic, deck.id, editingCard?.id, isOpen]);
 
   // Cloze deletion helper: wraps selected text in {{c1::selection}}
   const handleInsertCloze = () => {
@@ -169,14 +175,12 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
     const end = textarea.selectionEnd;
     const selected = front.substring(start, end) || 'hidden text';
 
-    // Count existing clozes to auto-increment
     const existingClozes = (front.match(/\{\{c(\d+)::/g) || []).map(m => parseInt(m.replace(/\D/g, '')));
     const nextNumber = existingClozes.length > 0 ? Math.max(...existingClozes) + 1 : 1;
 
     const replacement = `{{c${nextNumber}::${selected}}}`;
     const newFront = front.substring(0, start) + replacement + front.substring(end);
     setFront(newFront);
-    setType('cloze');
 
     setTimeout(() => {
       textarea.focus();
@@ -184,33 +188,34 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
     }, 50);
   };
 
-  const handleClearDraft = () => {
-    if (confirm('Discard this draft and start a blank card?')) {
-      storage.clearDraft(editingCard?.id ? `draft_${editingCard.id}` : `draft_${deck.id}`);
-      setFront('');
-      setBack('');
-      setFrontImage(null);
-      setBackImage(null);
-      setLastSavedTime(null);
-      setDraftRestoredNotice(false);
-    }
+  const handleClear = () => {
+    storage.clearDraft(editingCard?.id ? `draft_${editingCard.id}` : `draft_${deck.id}`);
+    setFront('');
+    setBack('');
+    setFrontImage(null);
+    setBackImage(null);
+    setHint('');
+    setMnemonic('');
+    setTags('');
+    frontInputRef.current?.focus();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!front.trim()) return;
 
     const tagList = tags.split(/[, ]+/).map(t => t.trim().replace(/^#/, '')).filter(Boolean);
+    const isCloze = /\{\{c\d+::/i.test(front);
 
     const cardToSave: Card = {
       id: editingCard?.id || `card_${Date.now()}`,
       deckId: deck.id,
-      type,
+      type: isCloze ? 'cloze' : 'basic',
       front: front.trim(),
       back: back.trim(),
       frontImage: frontImage || null,
       backImage: backImage || null,
-      tags: tagList.length > 0 ? tagList : ['High-Yield'],
+      tags: tagList.length > 0 ? tagList : [deck.name.slice(0, 15)],
       createdAt: editingCard?.createdAt || Date.now(),
       due: editingCard?.due || Date.now(),
       interval: editingCard?.interval || 0,
@@ -219,270 +224,199 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
       lapses: editingCard?.lapses || 0,
       state: editingCard?.state || 'new',
       stepIndex: editingCard?.stepIndex || 0,
-      medicalMeta,
+      medicalMeta: {
+        highYield: true,
+        clinicalPearl: hint.trim(),
+        takeaway: hint.trim(),
+        mnemonic: mnemonic.trim(),
+      },
       flagged: editingCard?.flagged,
     };
 
     onSaveCard(cardToSave);
     sounds.playRating(3);
 
-    // Clear saved draft once card is committed
+    // Clear draft once card is saved
     storage.clearDraft(editingCard?.id ? `draft_${editingCard.id}` : `draft_${deck.id}`);
 
-    // If adding new card, reset form so student can add next card rapid-fire!
+    // If adding a new card, keep modal open and reset so user can rapid-fire add next card!
     if (!editingCard) {
       setFront('');
       setBack('');
       setFrontImage(null);
       setBackImage(null);
-      setLastSavedTime(null);
-      setDraftRestoredNotice(false);
+      setHint('');
+      setMnemonic('');
       frontInputRef.current?.focus();
     } else {
       onClose();
     }
   };
 
+  // ⌘+Enter / Ctrl+Enter shortcut
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/80 ios-bottom-sheet sm:animate-none">
+    <div 
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xs animate-fadeIn"
+      onKeyDown={handleKeyDown}
+    >
+      <div className="bg-white rounded-t-[32px] sm:rounded-[28px] w-full max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-pink-200/90 ios-bottom-sheet sm:animate-none">
         
-        {/* iOS Grabber & Header */}
-        <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
+        {/* iOS Grabber & Minimal Header */}
+        <div className="pt-2 pb-1 px-4 flex justify-center bg-white/70">
           <div className="w-10 h-1 bg-pink-200 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3 bg-white/80 border-b border-pink-100 select-none">
+        <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-pink-100 select-none">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
+            <span className="p-1 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
               <KittyBow size={16} />
             </span>
-            <div>
-              <div className="text-xs font-black text-kitty-dark tracking-tight flex items-center space-x-1.5">
-                <span>{editingCard ? 'Edit Flashcard' : 'Add Flashcard'}</span>
-                <span className="text-pink-400">•</span>
-                <span className="text-pink-600 font-extrabold max-w-[180px] sm:max-w-xs truncate">{deck.name}</span>
-              </div>
-              <div className="text-[10px] text-kitty-subtle">SM-2 Spaced Repetition Engine</div>
+            <div className="flex items-center space-x-1.5 text-xs font-black text-slate-800">
+              <span>{editingCard ? 'Edit Card' : 'New Card'}</span>
+              <span className="text-pink-400">•</span>
+              <span className="text-pink-600 font-extrabold max-w-[180px] sm:max-w-xs truncate">{deck.name}</span>
             </div>
           </div>
 
-          {/* Auto-Save Status Badge & Close button */}
           <div className="flex items-center space-x-2">
-            {lastSavedTime && (
-              <span className="hidden sm:inline-flex items-center space-x-1.5 text-[11px] font-semibold text-kitty-600 bg-pink-50 px-2.5 py-1 rounded-full border border-pink-200/70">
-                <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
-                <span>Auto-saved at {lastSavedTime} 🎀</span>
-              </span>
-            )}
+            {/* Minimal Preview Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
+              className={`p-1.5 rounded-full border transition-all cursor-pointer ${
+                viewMode === 'preview'
+                  ? 'bg-pink-500 text-white border-pink-600'
+                  : 'text-slate-500 hover:text-pink-600 hover:bg-pink-50 border-pink-200'
+              }`}
+              title={viewMode === 'preview' ? 'Edit Mode' : 'Preview Card'}
+            >
+              {viewMode === 'preview' ? <Edit3 size={15} /> : <Eye size={15} />}
+            </button>
+
+            {/* Close Button */}
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-pink-100/70 hover:bg-pink-200/70 text-kitty-subtle hover:text-kitty-dark flex items-center justify-center transition-colors ios-btn"
-              title="Close (Esc)"
+              className="p-1.5 rounded-full bg-slate-100 hover:bg-pink-100 text-slate-500 hover:text-pink-700 transition-colors cursor-pointer"
+              title="Close"
             >
               <X size={15} />
             </button>
           </div>
         </div>
 
-        {/* Draft Restored Banner */}
-        {draftRestoredNotice && (
-          <div className="bg-amber-50/90 px-4 py-2 border-b border-amber-200 text-xs text-amber-900 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <AlertCircle size={15} className="text-amber-600 shrink-0" />
-              <span>Restored your unfinished draft from previous session.</span>
-            </div>
-            <button
-              onClick={handleClearDraft}
-              className="text-[11px] font-bold text-amber-700 hover:text-rose-600 underline ml-2 cursor-pointer"
-            >
-              Discard Draft
-            </button>
-          </div>
-        )}
-
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
-          {/* Card Type iOS Segmented Selector */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-            <div className="inline-flex p-1 bg-pink-100/60 rounded-2xl border border-pink-200/60 shadow-inner">
-              <button
-                type="button"
-                onClick={() => setType('basic')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-all text-xs ios-btn ${
-                  type === 'basic' 
-                    ? 'bg-white text-pink-600 shadow-sm' 
-                    : 'text-kitty-subtle hover:text-kitty-dark'
-                }`}
-              >
-                📝 Basic Q&A
-              </button>
-              <button
-                type="button"
-                onClick={() => setType('cloze')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-all text-xs ios-btn ${
-                  type === 'cloze' 
-                    ? 'bg-white text-pink-600 shadow-sm' 
-                    : 'text-kitty-subtle hover:text-kitty-dark'
-                }`}
-              >
-                [ ... ] Cloze
-              </button>
-              <button
-                type="button"
-                onClick={() => setType('concept')}
-                className={`px-3.5 py-1.5 rounded-xl font-bold transition-all text-xs ios-btn ${
-                  type === 'concept' 
-                    ? 'bg-white text-pink-600 shadow-sm' 
-                    : 'text-kitty-subtle hover:text-kitty-dark'
-                }`}
-              >
-                💡 Concept
-              </button>
-            </div>
-
-            {/* Action buttons: Edit/Preview toggle & Cloze insert */}
-            <div className="flex items-center space-x-2">
-              <button
-                type="button"
-                onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
-                className={`px-3 py-1.5 rounded-xl font-bold border transition-all text-xs flex items-center space-x-1.5 ios-btn cursor-pointer ${
-                  viewMode === 'preview'
-                    ? 'bg-rose-500 text-white border-rose-600 shadow-sm'
-                    : 'bg-white text-kitty-dark border-pink-200 hover:bg-pink-50'
-                }`}
-              >
-                {viewMode === 'preview' ? <Edit3 size={13} /> : <Eye size={13} />}
-                <span>{viewMode === 'preview' ? 'Edit Mode' : 'Live Preview'}</span>
-              </button>
-
-              {type === 'cloze' && viewMode === 'edit' && (
-                <button
-                  type="button"
-                  onClick={handleInsertCloze}
-                  className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 font-bold border border-pink-200 flex items-center justify-center space-x-1.5 ios-btn"
-                  title="Wrap selected text in {{c1::...}}"
-                >
-                  <span>+ Cloze</span>
-                  <kbd className="text-[10px] bg-white px-1.5 py-0.5 rounded-md border border-pink-200 font-mono">⌘⇧C</kbd>
-                </button>
-              )}
-            </div>
-          </div>
-
+        {/* Content Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+          
           {viewMode === 'preview' ? (
-            <div className="space-y-4 py-1">
-              {/* Front Face Preview */}
-              <div className="bg-white rounded-3xl border-2 border-pink-200 p-5 shadow-sm space-y-3">
-                <div className="flex items-center justify-between border-b border-pink-100 pb-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-pink-500 bg-pink-50 px-2.5 py-0.5 rounded-full border border-pink-200/60">
-                    Front / Question Face
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-medium">Rendered Formatting Preview</span>
-                </div>
+            /* Live Flip Preview */
+            <div className="space-y-3 py-1">
+              <div className="bg-white rounded-2xl border-2 border-pink-200 p-4 shadow-xs space-y-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200/60">
+                  Front
+                </span>
                 <RichCardContent
-                  content={front || '*(No front question entered yet)*'}
+                  content={front || '*(No question entered)*'}
                   showClozeAnswers={false}
-                  className="text-base text-slate-800 font-semibold"
+                  className="text-sm sm:text-base text-slate-900 font-semibold"
                 />
                 {frontImage && (
                   <div className="pt-2 flex justify-center">
-                    <img src={frontImage} alt="Front Attachment" className="max-h-44 rounded-xl border border-pink-100 object-contain shadow-xs" />
+                    <img src={frontImage} alt="Front" className="max-h-40 rounded-xl border border-pink-100 object-contain" />
                   </div>
                 )}
               </div>
 
-              {/* Back Face Preview */}
-              <div className="bg-[#fffdfd] rounded-3xl border-2 border-rose-300 p-5 shadow-sm space-y-3">
-                <div className="flex items-center justify-between border-b border-rose-100 pb-2">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200/60">
-                    Back / Answer Face
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-medium">Revealed on Flip</span>
-                </div>
+              <div className="bg-[#fffcfd] rounded-2xl border-2 border-rose-300 p-4 shadow-xs space-y-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200/60">
+                  Back
+                </span>
                 <RichCardContent
-                  content={back || (type === 'cloze' ? front : '*(No back answer entered yet)*')}
+                  content={back || (/\{\{c\d+::/i.test(front) ? front : '*(No answer entered)*')}
                   showClozeAnswers={true}
-                  className="text-base text-slate-800 font-medium"
+                  className="text-sm sm:text-base text-slate-800 font-medium"
                 />
                 {backImage && (
                   <div className="pt-2 flex justify-center">
-                    <img src={backImage} alt="Back Attachment" className="max-h-44 rounded-xl border border-rose-100 object-contain shadow-xs" />
+                    <img src={backImage} alt="Back" className="max-h-40 rounded-xl border border-rose-100 object-contain" />
                   </div>
                 )}
               </div>
             </div>
           ) : (
-            <>
-              {/* Front / Question */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-kitty-dark text-xs flex items-center space-x-1">
-                    <span>{type === 'cloze' ? 'Card Text with Cloze {{c1::answer}}' : 'Front (Question / Prompt / Concept)'}</span>
-                    <span className="text-pink-500 font-extrabold">*</span>
-                  </label>
-                  <span className="text-[10px] text-kitty-subtle bg-pink-50 px-2 py-0.5 rounded-full border border-pink-100 font-medium">HTML & Markdown Supported</span>
+            /* Standard Card Editor: Natural Index Card Interface */
+            <div className="space-y-3.5">
+              
+              {/* Card Face 1: FRONT */}
+              <div className="rounded-2xl border-2 border-pink-200/90 bg-white p-3.5 shadow-2xs focus-within:border-pink-500 focus-within:ring-2 focus-within:ring-pink-200 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-pink-600">
+                    Front
+                  </span>
+                  
+                  {/* Front card micro-actions (Cloze + Camera) */}
+                  <div className="flex items-center space-x-1.5">
+                    <button
+                      type="button"
+                      onClick={handleInsertCloze}
+                      className="px-2 py-0.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 text-[11px] font-bold border border-pink-200 flex items-center space-x-1 cursor-pointer"
+                      title="Hide selected text for cloze recall [ ... ]"
+                    >
+                      <span>[...] Cloze</span>
+                    </button>
+
+                    <input
+                      type="file"
+                      ref={frontFileInputRef}
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleImageFile(e.target.files[0], setFrontImage);
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => frontFileInputRef.current?.click()}
+                      className="p-1 rounded-lg text-slate-400 hover:text-pink-600 hover:bg-pink-50 transition-colors cursor-pointer"
+                      title="Attach photo or paste screenshot"
+                    >
+                      <Camera size={15} />
+                    </button>
+                  </div>
                 </div>
+
                 <textarea
                   ref={frontInputRef}
-                  rows={4}
-                  required
+                  rows={3}
                   value={front}
                   onChange={(e) => setFront(e.target.value)}
                   onPaste={(e) => handlePasteImage(e, setFrontImage)}
-                  placeholder={
-                    type === 'cloze'
-                      ? 'e.g. The capital of Japan is {{c1::Tokyo}}.'
-                      : 'e.g. What is the mechanism of action of beta-lactam antibiotics?'
-                  }
-                  className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
+                  placeholder="Question or prompt..."
+                  className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
                 />
 
-                {/* Front Screenshot / Attachment Controls */}
-                <div className="flex items-center justify-between pt-1">
-                  <input
-                    type="file"
-                    ref={frontFileInputRef}
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) handleImageFile(e.target.files[0], setFrontImage);
-                    }}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => frontFileInputRef.current?.click()}
-                    className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
-                  >
-                    <ImageIcon size={13} />
-                    <span>{frontImage ? 'Change Front Screenshot' : '📷 Attach Front Screenshot / Diagram'}</span>
-                  </button>
-                  <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
-                </div>
-
+                {/* Front Image Thumbnail */}
                 {frontImage && (
-                  <div 
-                    className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
-                    onClick={() => setPreviewImage({ src: frontImage, title: 'Front Attachment Preview' })}
-                    title="Click to expand"
-                  >
-                    <img src={frontImage} alt="Front Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
-                        <ZoomIn size={11} />
-                        <span>Expand</span>
-                      </span>
-                    </div>
+                  <div className="relative inline-block mt-2 rounded-xl overflow-hidden border border-pink-200 bg-pink-50/40">
+                    <img 
+                      src={frontImage} 
+                      alt="Front attachment" 
+                      onClick={() => setPreviewImage({ src: frontImage, title: 'Front Attachment' })}
+                      className="max-h-28 w-auto object-contain cursor-zoom-in" 
+                    />
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFrontImage(null);
-                      }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
-                      title="Remove Image"
+                      onClick={() => setFrontImage(null)}
+                      className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors cursor-pointer"
+                      title="Remove image"
                     >
                       <X size={12} />
                     </button>
@@ -490,186 +424,169 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                 )}
               </div>
 
-              {/* Back / Explanation */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-kitty-dark text-xs">
-                    {type === 'cloze' ? 'Extra Notes / Context (revealed on flip)' : 'Back (Answer / Explanation / Key Details)'}
-                  </label>
+              {/* Card Face 2: BACK */}
+              <div className="rounded-2xl border-2 border-rose-200/90 bg-white p-3.5 shadow-2xs focus-within:border-rose-400 focus-within:ring-2 focus-within:ring-rose-200 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">
+                    Back
+                  </span>
+
+                  {/* Back card micro-action (Camera) */}
+                  <div className="flex items-center space-x-1.5">
+                    <input
+                      type="file"
+                      ref={backFileInputRef}
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) handleImageFile(e.target.files[0], setBackImage);
+                      }}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => backFileInputRef.current?.click()}
+                      className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Attach photo or paste screenshot"
+                    >
+                      <Camera size={15} />
+                    </button>
+                  </div>
                 </div>
+
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={back}
                   onChange={(e) => setBack(e.target.value)}
                   onPaste={(e) => handlePasteImage(e, setBackImage)}
-                  placeholder="e.g. Inhibit penicillin-binding proteins (PBPs), halting peptidoglycan cell wall cross-linking..."
-                  className="w-full px-4 py-3 rounded-2xl border border-pink-200 bg-white/90 focus:outline-none focus:ring-2 focus:ring-pink-400 font-sans text-xs leading-relaxed resize-y shadow-xs"
+                  placeholder="Answer or key details..."
+                  className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
                 />
 
-                {/* Back Screenshot / Attachment Controls */}
-                <div className="flex items-center justify-between pt-1">
-                  <input
-                    type="file"
-                    ref={backFileInputRef}
-                    accept="image/*"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) handleImageFile(e.target.files[0], setBackImage);
-                    }}
-                    className="hidden"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => backFileInputRef.current?.click()}
-                    className="text-[11px] font-bold text-pink-600 hover:text-pink-700 flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-pink-50 hover:bg-pink-100 border border-pink-200/70 ios-btn cursor-pointer"
-                  >
-                    <ImageIcon size={13} />
-                    <span>{backImage ? 'Change Back Screenshot' : '📷 Attach Back Screenshot / Diagram'}</span>
-                  </button>
-                  <span className="text-[10px] text-kitty-subtle">Tip: Paste screenshot (Ctrl+V) directly</span>
-                </div>
-
+                {/* Back Image Thumbnail */}
                 {backImage && (
-                  <div 
-                    className="relative inline-block mt-2 rounded-2xl overflow-hidden border-2 border-pink-300 shadow-sm max-w-xs group bg-pink-50/40 cursor-zoom-in"
-                    onClick={() => setPreviewImage({ src: backImage, title: 'Back Attachment Preview' })}
-                    title="Click to expand"
-                  >
-                    <img src={backImage} alt="Back Attachment" className="max-h-36 w-auto object-contain transition-transform group-hover:scale-102" />
-                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <span className="px-2.5 py-1 rounded-full bg-white/90 text-slate-800 text-[10px] font-bold shadow-xs flex items-center space-x-1">
-                        <ZoomIn size={11} />
-                        <span>Expand</span>
-                      </span>
-                    </div>
+                  <div className="relative inline-block mt-2 rounded-xl overflow-hidden border border-rose-200 bg-rose-50/40">
+                    <img 
+                      src={backImage} 
+                      alt="Back attachment" 
+                      onClick={() => setPreviewImage({ src: backImage, title: 'Back Attachment' })}
+                      className="max-h-28 w-auto object-contain cursor-zoom-in" 
+                    />
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setBackImage(null);
-                      }}
-                      className="absolute top-1.5 right-1.5 p-1 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors shadow-sm cursor-pointer z-10"
-                      title="Remove Image"
+                      onClick={() => setBackImage(null)}
+                      className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white hover:bg-rose-600 transition-colors cursor-pointer"
+                      title="Remove image"
                     >
                       <X size={12} />
                     </button>
                   </div>
                 )}
               </div>
-            </>
+
+              {/* Progressive Disclosure: Optional Details Accordion */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowExtras(!showExtras)}
+                  className="w-full py-2 px-3 rounded-xl hover:bg-pink-50/80 text-slate-500 hover:text-pink-700 text-xs font-bold flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center space-x-1.5">
+                    <Sparkles size={13} className="text-pink-500" />
+                    <span>{showExtras ? 'Hide extra details' : '+ Add hint, mnemonic, or tags'}</span>
+                  </span>
+                  {showExtras ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
+
+                {showExtras && (
+                  <div className="mt-2 p-3 bg-pink-50/60 rounded-2xl border border-pink-200/80 space-y-2.5 animate-fadeIn">
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">💡 Hint / Key Takeaway</label>
+                      <input
+                        type="text"
+                        value={hint}
+                        onChange={(e) => setHint(e.target.value)}
+                        placeholder="e.g. Remember to cross-reference with..."
+                        className="w-full px-3 py-1.5 rounded-xl border border-pink-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">🧠 Memory Hook / Mnemonic</label>
+                      <input
+                        type="text"
+                        value={mnemonic}
+                        onChange={(e) => setMnemonic(e.target.value)}
+                        placeholder="e.g. ROYGBIV for rainbow colors"
+                        className="w-full px-3 py-1.5 rounded-xl border border-pink-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-700 mb-1">🏷️ Tags</label>
+                      <input
+                        type="text"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        placeholder="e.g. Chapter 3, Exam 1"
+                        className="w-full px-3 py-1.5 rounded-xl border border-pink-200 bg-white text-xs font-medium focus:outline-none focus:ring-2 focus:ring-pink-400"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
           )}
 
-          {/* Universal Learning Accelerators Section */}
-          <div className="bg-pink-50/50 rounded-2xl p-4 border border-pink-200/70 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="font-extrabold text-kitty-dark text-xs flex items-center space-x-1.5">
-                <Sparkles size={14} className="text-pink-600" />
-                <span>Memory Hooks & Metadata</span>
-              </span>
+        </div>
 
-              {/* Key Concept Toggle */}
-              <label className="flex items-center space-x-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={medicalMeta.highYield ?? true}
-                  onChange={(e) => setMedicalMeta(prev => ({ ...prev, highYield: e.target.checked }))}
-                  className="rounded text-pink-600 focus:ring-pink-400 accent-pink-500 w-3.5 h-3.5"
-                />
-                <span className="font-bold text-xs text-pink-700">⭐ Key Concept</span>
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  💡 Key Takeaway / Pearl
-                </label>
-                <input
-                  type="text"
-                  value={medicalMeta.takeaway || medicalMeta.clinicalPearl || ''}
-                  onChange={(e) => setMedicalMeta(prev => ({ ...prev, takeaway: e.target.value, clinicalPearl: e.target.value }))}
-                  placeholder="e.g. Bactericidal; resistance via beta-lactamases"
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs shadow-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  🧠 Mnemonic / Memory Hook
-                </label>
-                <input
-                  type="text"
-                  value={medicalMeta.mnemonic || ''}
-                  onChange={(e) => setMedicalMeta(prev => ({ ...prev, mnemonic: e.target.value }))}
-                  placeholder="e.g. Penicillin prevents peptidoglycan!"
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs shadow-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  📖 Textbook / Lecture Reference
-                </label>
-                <input
-                  type="text"
-                  value={medicalMeta.reference || medicalMeta.firstAidRef || ''}
-                  onChange={(e) => setMedicalMeta(prev => ({ ...prev, reference: e.target.value, firstAidRef: e.target.value }))}
-                  placeholder="e.g. Robbins Pathology p. 124, First Aid 2024"
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs shadow-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  🏷️ Tags (comma separated)
-                </label>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  placeholder="Pharmacology, Antibiotics, High-Yield"
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs shadow-xs"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Controls */}
-          <div className="pt-3 pb-safe flex items-center justify-between border-t border-pink-100">
+        {/* Footer Actions */}
+        <div className="px-5 py-3 bg-white border-t border-pink-100 flex items-center justify-between pb-safe">
+          {(front || back || frontImage || backImage) ? (
             <button
               type="button"
-              onClick={handleClearDraft}
-              className="text-xs text-kitty-subtle hover:text-rose-600 flex items-center space-x-1.5 py-2 px-2.5 rounded-xl hover:bg-rose-50 transition-colors"
+              onClick={handleClear}
+              className="text-xs text-slate-400 hover:text-rose-600 transition-colors font-medium flex items-center space-x-1 cursor-pointer"
             >
               <Trash2 size={13} />
-              <span>Discard Draft</span>
+              <span>Clear</span>
+            </button>
+          ) : (
+            <div />
+          )}
+
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              Cancel
             </button>
 
-            <div className="flex items-center space-x-2.5">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2.5 rounded-2xl text-kitty-dark hover:bg-pink-100/70 transition-colors font-bold text-xs ios-btn"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold shadow-md shadow-pink-300/50 hover:shadow-lg transition-all text-xs flex items-center space-x-2 ios-btn cursor-pointer"
-              >
-                <Save size={14} />
-                <span>{editingCard ? 'Update Flashcard' : 'Add Flashcard 🎀'}</span>
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => handleSubmit()}
+              disabled={!front.trim()}
+              className="px-5 py-2.5 rounded-2xl bg-[#ff3366] hover:bg-[#e11d48] disabled:opacity-40 text-white font-extrabold text-xs shadow-sm hover:shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
+            >
+              <span>{editingCard ? 'Save Changes' : 'Add Card 🎀'}</span>
+              <kbd className="hidden sm:inline-block ml-1 text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono font-normal">⌘↵</kbd>
+            </button>
           </div>
-        </form>
+        </div>
+
       </div>
 
-      <ImageLightboxModal
-        isOpen={!!previewImage}
-        src={previewImage?.src || null}
-        title={previewImage?.title || 'Screenshot Preview'}
-        onClose={() => setPreviewImage(null)}
-      />
+      {/* Lightbox for Image Expansion */}
+      {previewImage && (
+        <ImageLightboxModal
+          isOpen={true}
+          src={previewImage.src}
+          title={previewImage.title}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </div>
   );
 };

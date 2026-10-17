@@ -331,21 +331,32 @@ export const DeckList: React.FC<DeckListProps> = ({
               >
                 <div>
                   <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1">
+                    <div 
+                      onClick={() => {
+                        sounds.playClick();
+                        onStudyDeck(deck, totalDue > 0 ? 'due' : 'all');
+                      }}
+                      className="space-y-1.5 cursor-pointer flex-1 group"
+                    >
                       <div className="flex items-center space-x-2">
                         <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${theme.badge}`}>
-                          {deck.tags && deck.tags.length > 0 ? deck.tags[0] : 'Study Deck'}
+                          {deck.tags && deck.tags.length > 0 ? deck.tags[0] : 'Deck'}
                         </span>
                         {hasDraft && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 flex items-center space-x-1">
                             <FileEdit size={11} />
-                            <span>Draft Saved</span>
+                            <span>Draft</span>
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight">
-                        {deck.name}
-                      </h3>
+                      <div className="flex items-center space-x-2.5">
+                        <span className="text-2xl p-1.5 bg-white rounded-xl border border-pink-200/80 shadow-2xs select-none shrink-0 group-hover:scale-105 transition-transform">
+                          {deck.icon || '🎀'}
+                        </span>
+                        <h3 className="text-lg md:text-xl font-black text-slate-900 tracking-tight group-hover:text-pink-600 transition-colors">
+                          {deck.name}
+                        </h3>
+                      </div>
                     </div>
 
                     {/* Options Menu */}

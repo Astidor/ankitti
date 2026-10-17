@@ -45,8 +45,8 @@ export function App() {
   const [reviewLogs, setReviewLogs] = useState<ReviewLog[]>(storage.getReviewLogs());
   const [soundEnabled, setSoundEnabled] = useState<boolean>(account.soundEnabled ?? true);
 
-  // View state: 'landing' or 'app'
-  const [viewMode, setViewMode] = useState<'landing' | 'app'>('landing');
+  // View state: 'landing' or 'app' (Default to app/dashboard)
+  const [viewMode, setViewMode] = useState<'landing' | 'app'>('app');
 
   // App Studio state
   const [currentTab, setCurrentTab] = useState<'decks' | 'browser' | 'stats'>('decks');
@@ -224,14 +224,7 @@ export function App() {
     action();
   };
 
-  // Studio Guard: Unauthenticated visitors cannot stay in app studio
-  useEffect(() => {
-    if (viewMode === 'app' && !account?.email) {
-      setViewMode('landing');
-      setAuthModalMode('signup');
-      setIsAuthModalOpen(true);
-    }
-  }, [viewMode, account]);
+  // Allow guest visitors to use app seamlessly with local storage (no forced kick-out)
 
   const handleAuthSuccess = async (user: UserAccount) => {
     storage.setActiveAccount(user.id);
@@ -571,9 +564,13 @@ export function App() {
           {/* Brand & Home Navigation */}
           <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
             <button
-              onClick={() => { sounds.playClick(); setViewMode('landing'); }}
+              onClick={() => {
+                sounds.playClick();
+                setActiveStudyDeck(null);
+                setCurrentTab('decks');
+              }}
               className="flex items-center space-x-2 text-slate-700 hover:text-pink-600 transition-colors group ios-btn cursor-pointer"
-              title="Return to Landing Page"
+              title="Ankitti Dashboard"
             >
               <KittyBow size={24} className="group-hover:scale-110 transition-transform" />
               <span className="font-black text-xl tracking-tight text-[#be123c]">
@@ -584,9 +581,10 @@ export function App() {
             <button
               onClick={() => { sounds.playClick(); setViewMode('landing'); }}
               className="text-xs font-bold px-3 py-1 rounded-full text-pink-700 bg-pink-100/70 hover:bg-pink-100 border border-pink-200/80 transition-colors hidden sm:flex items-center space-x-1.5 ios-btn cursor-pointer shrink-0"
+              title="About Ankitti"
             >
               <Home size={12} />
-              <span>Landing</span>
+              <span>About</span>
             </button>
           </div>
 
