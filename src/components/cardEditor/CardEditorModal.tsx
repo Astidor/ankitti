@@ -271,7 +271,8 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!front.trim()) return;
+    const hasContent = Boolean(front.trim() || frontImage || back.trim() || backImage);
+    if (!hasContent) return;
 
     const tagList = tags.split(/[, ]+/).map(t => t.trim().replace(/^#/, '')).filter(Boolean);
     const isCloze = /\{\{c\d+::/i.test(front);
@@ -550,7 +551,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                   Front
                 </span>
                 <RichCardContent
-                  content={front || '*(No question entered)*'}
+                  content={front || (frontImage ? '' : '*(No question entered)*')}
                   showClozeAnswers={false}
                   className="text-sm sm:text-base text-slate-900 font-semibold"
                 />
@@ -566,7 +567,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                   Back
                 </span>
                 <RichCardContent
-                  content={back || (/\{\{c\d+::/i.test(front) ? front : '*(No answer entered)*')}
+                  content={back || (backImage ? '' : (/\{\{c\d+::/i.test(front) ? front : '*(No answer entered)*'))}
                   showClozeAnswers={true}
                   className="text-sm sm:text-base text-slate-800 font-medium"
                 />
@@ -632,7 +633,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                   onChange={(e) => setFront(e.target.value)}
                   onKeyDown={handleEditorKeyDown}
                   onPaste={(e) => handlePasteImage(e, setFrontImage)}
-                  placeholder="Question or prompt... (e.g. The powerhouse of the cell is...)"
+                  placeholder="Question or prompt... (or attach photo 📷)"
                   className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
                 />
 
@@ -708,7 +709,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                   onChange={(e) => setBack(e.target.value)}
                   onKeyDown={handleEditorKeyDown}
                   onPaste={(e) => handlePasteImage(e, setBackImage)}
-                  placeholder="Answer or key details..."
+                  placeholder="Answer or key details... (or attach photo 📷)"
                   className="w-full bg-transparent focus:outline-none font-medium text-slate-800 text-sm leading-relaxed resize-y placeholder-slate-400"
                 />
 
@@ -817,7 +818,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
             <button
               type="button"
               onClick={() => handleSubmit()}
-              disabled={!front.trim()}
+              disabled={!front.trim() && !frontImage && !back.trim() && !backImage}
               className="px-5 py-2.5 rounded-2xl bg-[#ff3366] hover:bg-[#e11d48] disabled:opacity-40 text-white font-extrabold text-xs shadow-sm hover:shadow-md transition-all flex items-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
             >
               <span>{editingCard ? 'Save Changes' : 'Add Card 🎀'}</span>

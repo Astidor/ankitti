@@ -755,8 +755,8 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
             medicalMeta, flagged
           } = body;
 
-          if (!deckId || !front) {
-            return jsonResponse({ error: 'Deck and front content are required' }, 400);
+          if (!deckId || (!front && !frontImage && !back && !backImage)) {
+            return jsonResponse({ error: 'Card text or image attachment is required' }, 400);
           }
 
           const randomBytes = crypto.getRandomValues(new Uint8Array(3));
@@ -774,7 +774,7 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
             user.id,
             deckId,
             type || 'basic',
-            front,
+            front || '',
             back || '',
             frontImage || null,
             backImage || null,
@@ -827,7 +827,7 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
         const statements = [];
 
         for (const card of cardsToInsert) {
-          if (!card.deckId || !card.front) continue;
+          if (!card.deckId || (!card.front && !card.frontImage && !card.back && !card.backImage)) continue;
           const cardId = card.id || `c_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
           statements.push(
             env.DB.prepare(`
@@ -841,7 +841,7 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
               user.id,
               card.deckId,
               card.type || 'basic',
-              card.front,
+              card.front || '',
               card.back || '',
               card.frontImage || null,
               card.backImage || null,
