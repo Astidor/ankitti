@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, FolderPlus, Palette, Sliders, Save, Sparkles } from 'lucide-react';
+import { X, Sliders, ChevronDown, ChevronUp } from 'lucide-react';
 import { Deck, DeckSettings } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
 import { sounds } from '../../services/audio';
@@ -12,7 +12,7 @@ interface DeckModalProps {
   onSaveDeck: (deck: Deck) => void;
 }
 
-const DECK_ICONS = ['🫀', '💊', '🧠', '🫁', '🦴', '🩸', '🧬', '🔬', '🩺', '👶', '🎀', '⭐'];
+const DECK_ICONS = ['🎀', '📚', '🧠', '🫀', '🔬', '💊', '⭐', '🌸', '💻', '🎨', '🌎', '⚡'];
 const DECK_COLORS = ['#ff4d88', '#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#6366f1'];
 
 export const DeckModal: React.FC<DeckModalProps> = ({
@@ -23,11 +23,12 @@ export const DeckModal: React.FC<DeckModalProps> = ({
 }) => {
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
-  const [icon, setIcon] = useState<string>('🫀');
+  const [icon, setIcon] = useState<string>('🎀');
   const [color, setColor] = useState<string>('#ff4d88');
   const [newCardsPerDay, setNewCardsPerDay] = useState<number>(20);
   const [reviewsPerDay, setReviewsPerDay] = useState<number>(150);
   const [learningSteps, setLearningSteps] = useState<string>('1 10');
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -35,41 +36,23 @@ export const DeckModal: React.FC<DeckModalProps> = ({
     if (editingDeck) {
       setName(editingDeck.name);
       setDescription(editingDeck.description);
-      setIcon(editingDeck.icon || '🫀');
+      setIcon(editingDeck.icon || '🎀');
       setColor(editingDeck.color || '#ff4d88');
       setNewCardsPerDay(editingDeck.settings.newCardsPerDay);
       setReviewsPerDay(editingDeck.settings.reviewsPerDay);
       setLearningSteps(editingDeck.settings.learningSteps.join(' '));
+      setShowAdvanced(false);
     } else {
-      // Check if draft deck name in storage
-      const draft = localStorage.getItem('ankitti_draft_deck');
-      if (draft) {
-        try {
-          const parsed = JSON.parse(draft);
-          setName(parsed.name || '');
-          setDescription(parsed.description || '');
-          setIcon(parsed.icon || '🫀');
-          setColor(parsed.color || '#ff4d88');
-        } catch {}
-      } else {
-        setName('');
-        setDescription('');
-        setIcon('🫀');
-        setColor('#ff4d88');
-        setNewCardsPerDay(20);
-        setReviewsPerDay(150);
-        setLearningSteps('1 10');
-      }
+      setName('');
+      setDescription('');
+      setIcon('🎀');
+      setColor('#ff4d88');
+      setNewCardsPerDay(20);
+      setReviewsPerDay(150);
+      setLearningSteps('1 10');
+      setShowAdvanced(false);
     }
   }, [isOpen, editingDeck]);
-
-  // Auto-save draft deck for newly created decks
-  useEffect(() => {
-    if (!isOpen || editingDeck) return;
-    if (name || description) {
-      localStorage.setItem('ankitti_draft_deck', JSON.stringify({ name, description, icon, color }));
-    }
-  }, [name, description, icon, color, isOpen, editingDeck]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,37 +83,33 @@ export const DeckModal: React.FC<DeckModalProps> = ({
 
     onSaveDeck(deckToSave);
     sounds.playRating(3);
-    localStorage.removeItem('ankitti_draft_deck');
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-lg shadow-2xl overflow-hidden border border-pink-200/80 ios-bottom-sheet sm:animate-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white rounded-t-[32px] sm:rounded-[28px] w-full max-w-md shadow-2xl overflow-hidden border border-pink-200/90 ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Header */}
-        <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
+        <div className="pt-2 pb-1 px-4 flex justify-center bg-white/70">
           <div className="w-10 h-1 bg-pink-200 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3 bg-white/80 border-b border-pink-100 select-none">
+        <div className="flex items-center justify-between px-5 py-3 bg-white border-b border-pink-100 select-none">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
+            <span className="p-1 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
               <KittyBow size={16} />
             </span>
-            <div>
-              <div className="text-xs font-black text-kitty-dark tracking-tight">
-                {editingDeck ? 'Deck Settings' : 'Create New Deck'}
-              </div>
-              <div className="text-[10px] text-kitty-subtle">Customize theme & daily spaced intervals</div>
+            <div className="text-xs font-black text-slate-800">
+              {editingDeck ? 'Deck Settings' : 'New Deck'}
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-pink-100/70 hover:bg-pink-200/70 text-kitty-subtle hover:text-kitty-dark flex items-center justify-center transition-colors ios-btn"
+            className="p-1.5 rounded-full bg-slate-100 hover:bg-pink-100 text-slate-500 hover:text-pink-700 transition-colors cursor-pointer"
             title="Close"
           >
             <X size={15} />
@@ -138,33 +117,35 @@ export const DeckModal: React.FC<DeckModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-kitty-dark mb-1.5">Deck Title</label>
+            <label className="block font-bold text-slate-700 mb-1.5">Deck Name</label>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl p-2.5 bg-pink-50 rounded-2xl border border-pink-200/80 shadow-xs">{icon}</span>
+              <span className="text-2xl p-2 bg-pink-50 rounded-2xl border border-pink-200 shadow-2xs shrink-0 select-none">
+                {icon}
+              </span>
               <input
                 type="text"
                 required
+                autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Japanese Core Vocabulary"
-                className="flex-1 px-4 py-2.5 rounded-2xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 font-bold text-sm shadow-xs"
+                placeholder="e.g. Spanish Vocabulary, Biology 101..."
+                className="flex-1 px-3.5 py-2.5 rounded-2xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 font-bold text-sm"
               />
             </div>
           </div>
 
           {/* Quick Icon Selector */}
           <div>
-            <label className="block font-semibold text-kitty-subtle mb-1.5 text-[11px]">Select Icon</label>
             <div className="flex flex-wrap gap-1.5">
               {DECK_ICONS.map(i => (
                 <button
                   type="button"
                   key={i}
                   onClick={() => setIcon(i)}
-                  className={`w-9 h-9 rounded-xl text-base flex items-center justify-center border transition-all ios-btn ${
-                    icon === i ? 'bg-pink-100 border-pink-400 scale-105 shadow-xs font-bold' : 'border-pink-100 hover:bg-pink-50 bg-white'
+                  className={`w-8 h-8 rounded-xl text-sm flex items-center justify-center border transition-all cursor-pointer ${
+                    icon === i ? 'bg-pink-100 border-pink-400 scale-105 shadow-2xs font-bold' : 'border-pink-100 hover:bg-pink-50 bg-white'
                   }`}
                 >
                   {i}
@@ -175,7 +156,6 @@ export const DeckModal: React.FC<DeckModalProps> = ({
 
           {/* Color accent */}
           <div>
-            <label className="block font-semibold text-kitty-subtle mb-1.5 text-[11px]">Deck Accent Color</label>
             <div className="flex space-x-2.5">
               {DECK_COLORS.map(c => (
                 <button
@@ -183,7 +163,7 @@ export const DeckModal: React.FC<DeckModalProps> = ({
                   key={c}
                   onClick={() => setColor(c)}
                   style={{ backgroundColor: c }}
-                  className={`w-6 h-6 rounded-full transition-transform ios-btn ${
+                  className={`w-6 h-6 rounded-full transition-transform cursor-pointer ${
                     color === c ? 'ring-2 ring-offset-2 ring-pink-500 scale-110 shadow-xs' : 'hover:scale-105 opacity-80 hover:opacity-100'
                   }`}
                 />
@@ -192,81 +172,84 @@ export const DeckModal: React.FC<DeckModalProps> = ({
           </div>
 
           <div>
-            <label className="block font-bold text-kitty-dark mb-1">Description / Subtitle</label>
-            <textarea
-              rows={2}
+            <input
+              type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Summary of topics, modules, or goals covered..."
-              className="w-full px-4 py-2.5 rounded-2xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 resize-none text-xs shadow-xs"
+              placeholder="Description or notes (optional)..."
+              className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs font-medium"
             />
           </div>
 
-          {/* Daily Study Options */}
-          <div className="bg-pink-50/50 p-4 rounded-2xl border border-pink-200/70 space-y-3">
-            <span className="font-extrabold text-kitty-dark block text-xs flex items-center space-x-1.5">
-              <Sliders size={13} className="text-pink-600" />
-              <span>Anki Daily Spaced Repetition Parameters</span>
-            </span>
+          {/* Collapsible Advanced Settings (Progressive Disclosure) */}
+          <div className="border-t border-pink-100 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full py-1.5 px-2 rounded-lg text-slate-500 hover:text-slate-800 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+            >
+              <span className="flex items-center space-x-1.5">
+                <Sliders size={12} className="text-slate-400" />
+                <span>Advanced daily study limits</span>
+              </span>
+              {showAdvanced ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            </button>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  New cards / day
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="999"
-                  value={newCardsPerDay}
-                  onChange={(e) => setNewCardsPerDay(parseInt(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs font-mono font-bold shadow-xs"
-                />
+            {showAdvanced && (
+              <div className="mt-2 p-3 bg-pink-50/60 rounded-xl border border-pink-200/80 space-y-2.5 animate-fadeIn">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">New cards / day</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="999"
+                      value={newCardsPerDay}
+                      onChange={(e) => setNewCardsPerDay(parseInt(e.target.value) || 0)}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-pink-200 bg-white text-xs font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-slate-600 mb-1">Max reviews / day</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="9999"
+                      value={reviewsPerDay}
+                      onChange={(e) => setReviewsPerDay(parseInt(e.target.value) || 0)}
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-pink-200 bg-white text-xs font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 mb-1">Learning intervals (minutes)</label>
+                  <input
+                    type="text"
+                    value={learningSteps}
+                    onChange={(e) => setLearningSteps(e.target.value)}
+                    placeholder="1 10"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-pink-200 bg-white text-xs font-mono"
+                  />
+                </div>
               </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                  Max reviews / day
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="9999"
-                  value={reviewsPerDay}
-                  onChange={(e) => setReviewsPerDay(parseInt(e.target.value) || 0)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs font-mono font-bold shadow-xs"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-semibold text-kitty-dark mb-1">
-                Learning steps (minutes, space-separated)
-              </label>
-              <input
-                type="text"
-                value={learningSteps}
-                onChange={(e) => setLearningSteps(e.target.value)}
-                placeholder="1 10"
-                className="w-full px-3.5 py-2 rounded-xl border border-pink-200 bg-white focus:outline-none focus:ring-2 focus:ring-pink-400 text-xs font-mono shadow-xs"
-              />
-            </div>
+            )}
           </div>
 
-          <div className="flex items-center justify-end space-x-2.5 pt-3 pb-safe border-t border-pink-100">
+          <div className="flex items-center justify-end space-x-2 pt-2 pb-safe border-t border-pink-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-2xl text-kitty-dark hover:bg-pink-100/70 transition-colors font-bold ios-btn"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold shadow-md shadow-pink-300/50 hover:shadow-lg transition-all flex items-center space-x-2 ios-btn cursor-pointer"
+              disabled={!name.trim()}
+              className="px-5 py-2.5 bg-[#ff3366] hover:bg-[#e11d48] disabled:opacity-40 text-white font-extrabold text-xs rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer"
             >
-              <Save size={14} />
-              <span>{editingDeck ? 'Save Changes' : 'Create Deck 🎀'}</span>
+              {editingDeck ? 'Save Changes' : 'Create Deck 🎀'}
             </button>
           </div>
         </form>
