@@ -12,7 +12,9 @@ import {
   ArrowLeft,
   Sparkles,
   LogIn,
-  LogOut
+  LogOut,
+  Smartphone,
+  WifiOff
 } from 'lucide-react';
 import { Deck, Card, UserAccount, ReviewLog, DeckStats } from './types/anki';
 import { storage } from './services/storage';
@@ -34,6 +36,7 @@ import { CardBrowser } from './components/browser/CardBrowser';
 import { PomodoroWidget } from './components/common/PomodoroWidget';
 import { KittyBow, KittyAvatar } from './components/common/KittyIllustrations';
 import { FloatingPetals } from './components/common/FloatingPetals';
+import { PwaInstallModal } from './components/common/PwaInstallModal';
 
 export function App() {
   const [account, setAccount] = useState<UserAccount>(storage.getActiveAccount());
@@ -66,6 +69,61 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [isAiDeckModalOpen, setIsAiDeckModalOpen] = useState<boolean>(false);
+
+  // PWA & Offline State
+  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [showOnlineToast, setShowOnlineToast] = useState<boolean>(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
+  const [isStandalone, setIsStandalone] = useState<boolean>(false);
+
+  // Monitor network connectivity and standalone PWA installation status
+  useEffect(() => {
+    // Check if running as installed standalone app on phone or desktop
+    const checkStandalone = () => {
+      const isStandaloneMode = 
+        window.matchMedia('(display-mode: standalone)').matches || 
+        (navigator as any).standalone === true;
+      setIsStandalone(Boolean(isStandaloneMode));
+    };
+    checkStandalone();
+
+    // Listen for browser install prompt (Android & Chromium)
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+
+    // Network online/offline event handlers
+    const handleOnline = () => {
+      setIsOnline(true);
+      setShowOnlineToast(true);
+      setTimeout(() => setShowOnlineToast(false), 4500);
+
+      // Auto-sync with cloud on reconnection
+      if (account.email) {
+        Promise.all([api.getDecks(), api.getCards()]).then(([remoteDecks, remoteCards]) => {
+          if (remoteDecks && remoteDecks.length > 0) setDecks(remoteDecks);
+          if (remoteCards && remoteCards.length > 0) setCards(remoteCards);
+        }).catch(() => {});
+      }
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [account.email]);
 
   // Auto-sync with real database if logged in
   useEffect(() => {
@@ -444,7 +502,23 @@ export function App() {
             setIsAuthModalOpen(true);
           }}
           onLogout={handleLogout}
+          onOpenInstall={() => setIsInstallModalOpen(true)}
         />
+
+        {/* Offline Status Alert Banner on Landing Page */}
+        {!isOnline && (
+          <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-md">
+            <WifiOff size={14} className="shrink-0 animate-pulse" />
+            <span>📡 Offline Mode Active — Studying, reviewing, and creating cards works completely offline without internet!</span>
+          </div>
+        )}
+
+        {/* Online Restored Toast */}
+        {showOnlineToast && (
+          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white text-xs font-extrabold py-2 px-5 rounded-full text-center flex items-center justify-center space-x-2 shadow-lg animate-fadeIn">
+            <span>✨ Back online! Synced smoothly with cloud.</span>
+          </div>
+        )}
 
         {/* Global Modals accessible if opened from Landing */}
         <AnkiImportModal
@@ -465,6 +539,13 @@ export function App() {
           isOpen={isAiDeckModalOpen}
           onClose={() => setIsAiDeckModalOpen(false)}
           onDeckCreated={handleAiDeckCreated}
+        />
+
+        <PwaInstallModal
+          isOpen={isInstallModalOpen}
+          onClose={() => setIsInstallModalOpen(false)}
+          installPrompt={installPrompt}
+          onInstallSuccess={() => setIsStandalone(true)}
         />
       </>
     );
@@ -605,6 +686,19 @@ export function App() {
               </button>
             </div>
 
+            {/* Install App on Phone / Desktop */}
+            {!isStandalone && (
+              <button
+                onClick={() => { sounds.playClick(); setIsInstallModalOpen(true); }}
+                className="flex px-2.5 sm:px-3 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-full text-xs font-extrabold transition-all items-center space-x-1 border border-pink-300 shadow-2xs ios-btn cursor-pointer shrink-0"
+                title="Install Ankitti to your phone home screen for offline study"
+              >
+                <Smartphone size={13} className="text-pink-600 shrink-0" />
+                <span className="hidden sm:inline">Install App</span>
+                <span className="sm:hidden">App</span>
+              </button>
+            )}
+
             {/* AI Deck Architect Action Button (Desktop/Tablet) */}
             <button
               onClick={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
@@ -655,6 +749,21 @@ export function App() {
           </div>
         </div>
       </header>
+
+      {/* Offline Status Alert Banner */}
+      {!isOnline && (
+        <div className="bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-sm animate-fadeIn">
+          <WifiOff size={14} className="shrink-0 animate-pulse" />
+          <span>📡 Offline Mode Active — Studying, reviewing, and creating cards works completely offline without internet!</span>
+        </div>
+      )}
+
+      {/* Online Restored Toast */}
+      {showOnlineToast && (
+        <div className="bg-emerald-600 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-sm animate-fadeIn">
+          <span>✨ Back online! Synced smoothly with cloud.</span>
+        </div>
+      )}
 
       {/* Main Workspace Frame (Natural Document Scrolling) */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-6 pb-24">
@@ -829,6 +938,14 @@ export function App() {
           </button>
         </nav>
       )}
+
+      {/* PWA Mobile Offline Installation Modal */}
+      <PwaInstallModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+        installPrompt={installPrompt}
+        onInstallSuccess={() => setIsStandalone(true)}
+      />
     </div>
   );
 }

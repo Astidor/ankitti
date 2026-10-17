@@ -1,0 +1,49 @@
+{
+  "id": "/",
+  "name": "Ankitti 🎀 — Kawaii Spaced Repetition Flashcards",
+  "short_name": "Ankitti 🎀",
+  "description": "Master anything with aesthetic, kawaii spaced repetition flashcards powered by the SM-2 algorithm, Anki imports, and focus timers.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff8fa",
+  "theme_color": "#fff8fa",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Study Due Cards 🎀",
+      "short_name": "Study",
+      "description": "Review your cards scheduled for today",
+      "url": "/?action=study",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Add Flashcard 📝",
+      "short_name": "New Card",
+      "description": "Create a new flashcard or cloze deletion",
+      "url": "/?action=new-card",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

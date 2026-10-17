@@ -14,7 +14,8 @@ import {
   Volume2,
   Zap,
   Heart,
-  BookOpen
+  BookOpen,
+  Smartphone
 } from 'lucide-react';
 import { KittyBow, AestheticMascot, CuteSparkleStar } from '../common/KittyIllustrations';
 import { FloatingPetals } from '../common/FloatingPetals';
@@ -29,6 +30,7 @@ interface LandingPageProps {
   onOpenImport: () => void;
   onOpenAuth?: (mode: 'login' | 'signup') => void;
   onLogout?: () => void;
+  onOpenInstall?: () => void;
 }
 
 const DEMO_CARDS = [
@@ -66,6 +68,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenImport,
   onOpenAuth,
   onLogout,
+  onOpenInstall,
 }) => {
   const [demoIndex, setDemoIndex] = useState<number>(0);
   const [isDemoFlipped, setIsDemoFlipped] = useState<boolean>(false);
@@ -116,6 +119,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2 sm:space-x-2.5">
+            {onOpenInstall && (
+              <button
+                onClick={() => { sounds.playClick(); onOpenInstall(); }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-bold text-pink-700 bg-pink-100 hover:bg-pink-200 border border-pink-300 transition-all ios-btn cursor-pointer shadow-2xs"
+                title="Install Ankitti to your phone home screen for offline study"
+              >
+                <Smartphone size={13} className="text-pink-600 shrink-0" />
+                <span className="hidden sm:inline">Install App</span>
+                <span className="sm:hidden">App</span>
+              </button>
+            )}
             {user?.email ? (
               <div className="flex items-center space-x-2">
                 <span className="hidden sm:inline-flex items-center space-x-1.5 text-xs font-extrabold text-pink-700 bg-pink-50 px-3 py-1.5 rounded-full border border-pink-200 shadow-xs">

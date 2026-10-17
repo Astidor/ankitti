@@ -1001,7 +1001,19 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
     }
 
     if (env.ASSETS && typeof env.ASSETS.fetch === 'function') {
-      return env.ASSETS.fetch(request);
+      const response = await env.ASSETS.fetch(request);
+      if (url.pathname === '/sw.js') {
+        const headers = new Headers(response.headers);
+        headers.set('Content-Type', 'application/javascript; charset=utf-8');
+        headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        headers.set('Service-Worker-Allowed', '/');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        });
+      }
+      return response;
     }
 
     return new Response('Not Found', { status: 404 });
