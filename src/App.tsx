@@ -812,6 +812,7 @@ export function App() {
               <div className="max-w-3xl mx-auto">
                 <StatsModal
                   isOpen={true}
+                  isInline={true}
                   account={account}
                   decks={decks}
                   cards={cards}

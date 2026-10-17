@@ -413,51 +413,63 @@ export const DeckList: React.FC<DeckListProps> = ({
                     {deck.description || 'No description provided.'}
                   </p>
 
-                  {/* Anki SM-2 Card Count Pills */}
-                  <div className="flex items-center gap-2 mt-4">
-                    <div className="px-3 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-100 text-xs font-bold flex items-center space-x-1">
-                      <span className="text-[10px] text-blue-500 uppercase tracking-wider">New:</span>
-                      <span>{stats.newCount}</span>
-                    </div>
+                  {/* Sleek Anki Card Count Pills */}
+                  <div className="flex items-center flex-wrap gap-1.5 mt-3.5 pt-3 border-t border-pink-100/70 text-xs font-bold">
+                    {stats.newCount > 0 && (
+                      <span className="flex items-center space-x-1 text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                        <span>{stats.newCount} new</span>
+                      </span>
+                    )}
 
-                    <div className="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 text-xs font-bold flex items-center space-x-1">
-                      <span className="text-[10px] text-amber-500 uppercase tracking-wider">Learn:</span>
-                      <span>{stats.learnCount}</span>
-                    </div>
+                    {stats.learnCount > 0 && (
+                      <span className="flex items-center space-x-1 text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/70">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        <span>{stats.learnCount} learn</span>
+                      </span>
+                    )}
 
-                    <div className="px-3 py-1 rounded-xl bg-pink-50 text-pink-700 border border-pink-200 text-xs font-bold flex items-center space-x-1">
-                      <span className="text-[10px] text-pink-500 uppercase tracking-wider">Due:</span>
-                      <span>{stats.dueCount}</span>
-                    </div>
+                    {stats.dueCount > 0 ? (
+                      <span className="flex items-center space-x-1 text-pink-700 bg-pink-100/90 px-2.5 py-0.5 rounded-full border border-pink-300 font-extrabold shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff3366] animate-pulse" />
+                        <span>{stats.dueCount} due</span>
+                      </span>
+                    ) : (
+                      <span className="flex items-center space-x-1 text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/70 font-semibold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>Completed</span>
+                      </span>
+                    )}
 
-                    <div className="ml-auto text-[11px] text-slate-400 font-semibold font-mono">
-                      Total: {stats.total}
+                    <div className="ml-auto text-[11px] text-slate-400 font-medium">
+                      {stats.total} cards
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom Action Area: Study + Relearn Anytime */}
-                <div className="pt-4 mt-3 border-t border-pink-200/50 flex items-center justify-between gap-1.5 sm:gap-2">
+                <div className="pt-3 mt-2 flex items-center justify-between gap-2">
                   <button
                     onClick={() => { sounds.playClick(); onAddCardToDeck(deck); }}
-                    className="p-2 text-slate-500 hover:text-pink-600 hover:bg-white rounded-full transition-colors ios-btn shrink-0"
+                    className="py-1.5 px-3 rounded-full text-slate-600 hover:text-pink-600 hover:bg-white border border-transparent hover:border-pink-200 transition-colors text-xs font-bold flex items-center space-x-1 shrink-0 cursor-pointer"
                     title="Add flashcard to this deck"
                   >
-                    <Plus size={18} />
+                    <Plus size={15} />
+                    <span>Card</span>
                   </button>
 
-                  <div className="flex items-center space-x-1.5 sm:space-x-2">
-                    {/* Relearn Anytime Button */}
+                  <div className="flex items-center space-x-2">
+                    {/* Relearn / Practice All Button */}
                     <button
                       onClick={() => {
                         sounds.playClick();
                         onStudyDeck(deck, 'all');
                       }}
-                      className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center space-x-1 shadow-xs ios-btn shrink-0"
-                      title="Study and repeat all cards in this deck right now (relearn mode)"
+                      className="px-3 py-1.5 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-xs font-bold transition-all flex items-center space-x-1 shadow-2xs shrink-0 cursor-pointer"
+                      title="Practice all cards in this deck"
                     >
                       <RotateCcw size={12} className="text-amber-500 shrink-0" />
-                      <span>Relearn</span>
+                      <span>Review All</span>
                     </button>
 
                     {/* Primary Study Due Button */}
@@ -466,14 +478,14 @@ export const DeckList: React.FC<DeckListProps> = ({
                         sounds.playClick();
                         onStudyDeck(deck, totalDue > 0 ? 'due' : 'all');
                       }}
-                      className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm ios-btn shrink-0 ${
+                      className={`px-4 py-1.5 rounded-full text-xs font-black transition-all flex items-center space-x-1.5 shadow-sm shrink-0 cursor-pointer ${
                         totalDue > 0
-                          ? 'bg-[#ff3366] hover:bg-[#e11d48] text-white'
+                          ? 'bg-[#ff3366] hover:bg-[#e11d48] text-white hover:shadow-md active:scale-95'
                           : 'bg-white hover:bg-pink-50 text-slate-700 border border-pink-200'
                       }`}
                     >
                       <Play size={12} className={totalDue > 0 ? 'fill-white' : 'fill-slate-600'} />
-                      <span>{totalDue > 0 ? `Study (${totalDue})` : 'Practice All'}</span>
+                      <span>{totalDue > 0 ? `Study (${totalDue})` : 'Study'}</span>
                     </button>
                   </div>
                 </div>
