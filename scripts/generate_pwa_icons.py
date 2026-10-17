@@ -23,4 +23,11 @@ inner = base_img.resize((410, 410), Image.Resampling.LANCZOS)
 maskable.paste(inner, (51, 51), inner if inner.mode == 'RGBA' else None)
 maskable.save('public/icon-maskable.png', 'PNG')
 
-print('Generated PWA icons successfully!')
+# 5. Generate 48x48 favicon for Google Search results
+im_48 = base_img.resize((48, 48), Image.Resampling.LANCZOS)
+im_48.save('public/favicon-48x48.png', 'PNG')
+
+# 6. Generate multi-resolution favicon.ico (16, 32, 48) for root fallback
+base_img.save('public/favicon.ico', format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
+
+print('Generated PWA & Google Search icons successfully!')
