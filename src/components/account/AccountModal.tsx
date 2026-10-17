@@ -11,7 +11,9 @@ import {
   Check, 
   Mail, 
   Target,
-  ShieldCheck
+  ShieldCheck,
+  Cloud,
+  CloudOff
 } from 'lucide-react';
 import { UserAccount } from '../../types/anki';
 import { storage } from '../../services/storage';
@@ -25,6 +27,7 @@ interface AccountModalProps {
   onClose: () => void;
   onAccountChange: (account: UserAccount) => void;
   onResetData: () => void;
+  onOpenAuth?: (mode: 'login' | 'signup') => void;
 }
 
 const GOAL_OPTIONS = [
@@ -45,6 +48,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   onClose,
   onAccountChange,
   onResetData,
+  onOpenAuth,
 }) => {
   const [name, setName] = useState<string>(currentAccount.name);
   const [role, setRole] = useState<string>(currentAccount.role);
@@ -133,25 +137,56 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
           
-          {/* User Identity Card */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 border border-pink-200/80 shadow-xs flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-pink-200 flex items-center justify-center shadow-xs">
-                <KittyAvatar size={34} />
-              </div>
-              <div>
-                <div className="font-extrabold text-sm text-slate-800">{currentAccount.name}</div>
-                <div className="text-[11px] text-slate-500 flex items-center space-x-1 mt-0.5">
-                  <Mail size={12} className="text-pink-500" />
-                  <span>{currentAccount.email || 'Local User'}</span>
+          {/* User Identity & Cloud Sync Card */}
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 border border-pink-200/80 shadow-xs space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 rounded-2xl bg-white border border-pink-200 flex items-center justify-center shadow-xs">
+                  <KittyAvatar size={34} />
+                </div>
+                <div>
+                  <div className="font-extrabold text-sm text-slate-800">{currentAccount.name}</div>
+                  <div className="text-[11px] text-slate-500 flex items-center space-x-1 mt-0.5">
+                    <Mail size={12} className="text-pink-500" />
+                    <span>{currentAccount.email || 'Local Guest Mode (This Device)'}</span>
+                  </div>
                 </div>
               </div>
+
+              {currentAccount.email ? (
+                <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
+                  <Cloud size={12} className="text-emerald-600" />
+                  <span>Cloud Synced</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold">
+                  <CloudOff size={12} className="text-amber-600" />
+                  <span>Local Only</span>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
-              <ShieldCheck size={12} className="text-emerald-600" />
-              <span>Verified</span>
-            </div>
+            {/* If unauthenticated, show high-yield Cloud Storage CTA */}
+            {!currentAccount.email && (
+              <div className="pt-2 border-t border-pink-100/80">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="text-[11px] text-slate-600 leading-snug">
+                    <strong className="text-slate-800">Want to study across your phone & laptop?</strong> Create an account to enable cloud storage and automatic backup.
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onOpenAuth?.('signup');
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#ff3366] hover:bg-[#e11d48] text-white font-extrabold text-[11px] flex items-center justify-center space-x-1.5 shadow-xs shrink-0 cursor-pointer transition-all"
+                  >
+                    <Cloud size={13} />
+                    <span>Enable Cloud Sync</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Profile Details Form */}

@@ -14,7 +14,8 @@ import {
   LogIn,
   LogOut,
   Smartphone,
-  WifiOff
+  WifiOff,
+  Cloud
 } from 'lucide-react';
 import { Deck, Card, UserAccount, ReviewLog, DeckStats } from './types/anki';
 import { storage } from './services/storage';
@@ -737,11 +738,12 @@ export function App() {
               </div>
             ) : (
               <button
-                onClick={() => { sounds.playClick(); setAuthModalMode('login'); setIsAuthModalOpen(true); }}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-white hover:bg-pink-50 border border-pink-300 text-pink-700 text-xs font-bold transition-colors ios-btn shadow-xs cursor-pointer shrink-0"
+                onClick={() => { sounds.playClick(); setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-[#ff3366] hover:bg-[#e11d48] text-white text-xs font-bold transition-all ios-btn shadow-xs cursor-pointer shrink-0"
+                title="Create an account to enable cloud storage and sync across devices"
               >
-                <LogIn size={13} />
-                <span>Sign In</span>
+                <Cloud size={13} />
+                <span>Cloud Sync</span>
               </button>
             )}
           </div>
@@ -858,6 +860,11 @@ export function App() {
         onResetData={() => {
           localStorage.clear();
           window.location.reload();
+        }}
+        onOpenAuth={(mode) => {
+          setIsAccountModalOpen(false);
+          setAuthModalMode(mode);
+          setIsAuthModalOpen(true);
         }}
       />
 
