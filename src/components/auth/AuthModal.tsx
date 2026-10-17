@@ -89,10 +89,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <KittyBow size={18} />
             </span>
             <div>
-              <div className="text-sm font-black text-kitty-dark tracking-tight">
-                Ankitti Account Studio
+              <div className="text-sm font-black text-slate-800 tracking-tight">
+                {mode === 'login' ? 'Sign In to Cloud' : 'Cloud Storage & Sync'}
               </div>
-              <div className="text-[10px] text-kitty-subtle">Real-time database sync & progress backup</div>
+              <div className="text-[10px] text-pink-600 font-semibold">Study across all your devices seamlessly</div>
             </div>
           </div>
 
