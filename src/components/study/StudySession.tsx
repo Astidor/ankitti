@@ -447,24 +447,34 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
           {/* Back Body (Scroll-safe, dynamic height, never clipped!) */}
           <div className="my-auto py-5 space-y-4">
-            {/* Question summary badge */}
-            <div className="p-3 bg-pink-50/50 rounded-2xl border border-pink-100 text-xs text-slate-600 font-medium leading-relaxed">
-              <span className="font-bold text-pink-700 block text-[10px] uppercase tracking-wider mb-0.5">Prompt</span>
-              <RichCardContent
-                content={currentCard.front}
-                showClozeAnswers={true}
-                className="line-clamp-2 text-xs text-slate-600"
-              />
-            </div>
+            {/* Question prompt badge */}
+            {(currentCard.front || currentCard.frontImage) && (
+              <div className="p-3 sm:p-3.5 bg-pink-50/60 rounded-2xl border border-pink-100 text-xs text-slate-600 font-medium leading-relaxed">
+                <span className="font-extrabold text-pink-700 block text-[10px] uppercase tracking-wider mb-1">
+                  Question
+                </span>
+                {currentCard.front ? (
+                  <RichCardContent
+                    content={currentCard.front}
+                    showClozeAnswers={true}
+                    className="line-clamp-3 text-xs sm:text-sm text-slate-700 font-medium"
+                  />
+                ) : (
+                  <span className="text-xs text-slate-500 italic">🖼️ [Image Flashcard]</span>
+                )}
+              </div>
+            )}
 
             {/* Answer Content */}
-            <div className="text-base sm:text-lg text-slate-900 leading-relaxed">
-              <RichCardContent
-                content={currentCard.back}
-                showClozeAnswers={true}
-                className="text-base sm:text-lg text-slate-900 leading-relaxed font-medium"
-              />
-            </div>
+            {currentCard.back && (
+              <div className="text-base sm:text-xl text-slate-900 leading-relaxed font-medium">
+                <RichCardContent
+                  content={currentCard.back}
+                  showClozeAnswers={true}
+                  className="text-base sm:text-xl text-slate-900 leading-relaxed font-medium"
+                />
+              </div>
+            )}
 
               {/* Back Screenshot Attachment */}
               {currentCard.backImage && (
@@ -536,37 +546,45 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {/* Again (1) */}
               <button
                 onClick={() => handleRating(1)}
-                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-800 border-2 border-rose-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="relative py-2.5 sm:py-3.5 px-1 sm:px-2 min-h-[56px] rounded-2xl bg-rose-50/80 hover:bg-rose-100 text-rose-800 border-2 border-rose-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center group"
+                title="Rating: Again (Shortcut: 1)"
               >
-                <div className="text-[10px] sm:text-[11px] text-rose-600 uppercase tracking-wider font-extrabold">Again</div>
-                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.again}</div>
+                <span className="hidden sm:inline-block absolute top-1 right-1.5 text-[9px] font-mono text-rose-400 bg-white/90 px-1 rounded border border-rose-200/60 font-bold">1</span>
+                <div className="text-[10px] sm:text-xs text-rose-600 uppercase tracking-wider font-black">Again</div>
+                <div className="text-[11px] sm:text-xs font-mono font-bold text-slate-700 mt-0.5">{previews.again}</div>
               </button>
 
               {/* Hard (2) */}
               <button
                 onClick={() => handleRating(2)}
-                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="relative py-2.5 sm:py-3.5 px-1 sm:px-2 min-h-[56px] rounded-2xl bg-amber-50/80 hover:bg-amber-100 text-amber-900 border-2 border-amber-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center group"
+                title="Rating: Hard (Shortcut: 2)"
               >
-                <div className="text-[10px] sm:text-[11px] text-amber-700 uppercase tracking-wider font-extrabold">Hard</div>
-                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.hard}</div>
+                <span className="hidden sm:inline-block absolute top-1 right-1.5 text-[9px] font-mono text-amber-500 bg-white/90 px-1 rounded border border-amber-200/60 font-bold">2</span>
+                <div className="text-[10px] sm:text-xs text-amber-700 uppercase tracking-wider font-black">Hard</div>
+                <div className="text-[11px] sm:text-xs font-mono font-bold text-slate-700 mt-0.5">{previews.hard}</div>
               </button>
 
               {/* Good (3) */}
               <button
                 onClick={() => handleRating(3)}
-                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-pink-50 hover:bg-pink-100 text-pink-800 border-2 border-pink-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="relative py-2.5 sm:py-3.5 px-1 sm:px-2 min-h-[56px] rounded-2xl bg-pink-100 hover:bg-pink-200/80 text-pink-900 border-2 border-pink-400 font-bold transition-all text-center ios-btn shadow-sm active:scale-95 cursor-pointer flex flex-col items-center justify-center group"
+                title="Rating: Good (Shortcut: 3 or Space)"
               >
-                <div className="text-[10px] sm:text-[11px] text-pink-600 uppercase tracking-wider font-extrabold">Good</div>
-                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.good}</div>
+                <span className="hidden sm:inline-block absolute top-1 right-1.5 text-[9px] font-mono text-pink-600 bg-white/90 px-1 rounded border border-pink-300 font-bold">3</span>
+                <div className="text-[10px] sm:text-xs text-pink-700 uppercase tracking-wider font-black">Good</div>
+                <div className="text-[11px] sm:text-xs font-mono font-bold text-pink-950 mt-0.5">{previews.good}</div>
               </button>
 
               {/* Easy (4) */}
               <button
                 onClick={() => handleRating(4)}
-                className="py-2.5 sm:py-3 px-1 sm:px-2 min-h-[54px] rounded-2xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="relative py-2.5 sm:py-3.5 px-1 sm:px-2 min-h-[56px] rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 text-emerald-900 border-2 border-emerald-200/90 font-bold transition-all text-center ios-btn shadow-xs active:scale-95 cursor-pointer flex flex-col items-center justify-center group"
+                title="Rating: Easy (Shortcut: 4)"
               >
-                <div className="text-[10px] sm:text-[11px] text-emerald-700 uppercase tracking-wider font-extrabold">Easy</div>
-                <div className="text-[11px] sm:text-xs font-mono font-black mt-0.5">{previews.easy}</div>
+                <span className="hidden sm:inline-block absolute top-1 right-1.5 text-[9px] font-mono text-emerald-500 bg-white/90 px-1 rounded border border-emerald-200/60 font-bold">4</span>
+                <div className="text-[10px] sm:text-xs text-emerald-700 uppercase tracking-wider font-black">Easy</div>
+                <div className="text-[11px] sm:text-xs font-mono font-bold text-slate-700 mt-0.5">{previews.easy}</div>
               </button>
             </div>
           </div>

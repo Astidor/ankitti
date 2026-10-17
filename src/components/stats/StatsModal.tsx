@@ -5,6 +5,7 @@ import { KittyBow } from '../common/KittyIllustrations';
 
 interface StatsModalProps {
   isOpen: boolean;
+  isInline?: boolean;
   account: UserAccount;
   decks: Deck[];
   cards: Card[];
@@ -14,6 +15,7 @@ interface StatsModalProps {
 
 export const StatsModal: React.FC<StatsModalProps> = ({
   isOpen,
+  isInline = false,
   account,
   decks,
   cards,
@@ -72,42 +74,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({
     return 'bg-pink-700';
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 ios-bottom-sheet sm:animate-none">
-        
-        {/* iOS Grabber & Header */}
-        <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
-          <div className="w-10 h-1 bg-pink-200 rounded-full" />
-        </div>
-
-        <div className="flex items-center justify-between px-5 py-3 bg-white/80 border-b border-pink-100 select-none">
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
-              <KittyBow size={16} />
-            </span>
-            <div>
-              <div className="text-xs font-black text-kitty-dark tracking-tight">
-                Study Mastery & Spaced Heatmap
-              </div>
-              <div className="text-[10px] text-kitty-subtle">Real-time recall analytics & streak tracker</div>
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-pink-100/70 hover:bg-pink-200/70 text-kitty-subtle hover:text-kitty-dark flex items-center justify-center transition-colors ios-btn"
-            title="Close"
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
-          
-          {/* Top Banner: Exam Countdown & Daily Streak */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  const statsBody = (
+    <div className="space-y-5 text-xs">
+      {/* Top Banner: Exam Countdown & Daily Streak */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Exam Countdown */}
             <div className="bg-[#FF4D80] text-white rounded-2xl p-4 shadow-md shadow-pink-200 flex flex-col justify-between">
               <div className="flex items-center justify-between">
@@ -251,6 +221,72 @@ export const StatsModal: React.FC<StatsModalProps> = ({
               </div>
             </div>
           </div>
+    </div>
+  );
+
+  if (isInline) {
+    return (
+      <div className="bg-white/95 backdrop-blur-xl rounded-[28px] w-full shadow-sm border border-pink-200/80 p-5 sm:p-7 space-y-6 animate-fadeIn">
+        <div className="flex items-center justify-between pb-4 border-b border-pink-100 select-none">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-2 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
+              <KittyBow size={20} />
+            </span>
+            <div>
+              <div className="text-base font-black text-kitty-dark tracking-tight">
+                Study Mastery & Spaced Repetition Heatmap
+              </div>
+              <div className="text-xs text-kitty-subtle font-medium">Real-time recall analytics & streak tracker</div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="px-3.5 py-1.5 rounded-xl bg-pink-100/70 hover:bg-pink-200/70 text-kitty-dark font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+          >
+            <span>Back to Decks</span>
+          </button>
+        </div>
+
+        {statsBody}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 ios-bottom-sheet sm:animate-none">
+        
+        {/* iOS Grabber & Header */}
+        <div className="pt-2.5 pb-1 px-4 flex justify-center bg-white/70">
+          <div className="w-10 h-1 bg-pink-200 rounded-full" />
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-3 bg-white/80 border-b border-pink-100 select-none">
+          <div className="flex items-center space-x-2">
+            <span className="p-1.5 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
+              <KittyBow size={16} />
+            </span>
+            <div>
+              <div className="text-xs font-black text-kitty-dark tracking-tight">
+                Study Mastery & Spaced Heatmap
+              </div>
+              <div className="text-[10px] text-kitty-subtle">Real-time recall analytics & streak tracker</div>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-pink-100/70 hover:bg-pink-200/70 text-kitty-subtle hover:text-kitty-dark flex items-center justify-center transition-colors ios-btn"
+            title="Close"
+          >
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Modal Body */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+          {statsBody}
         </div>
 
         {/* Footer */}

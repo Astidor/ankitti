@@ -69,8 +69,8 @@ export const PomodoroWidget: React.FC<PomodoroWidgetProps> = ({ isOpen, onClose 
   const progressPercent = ((totalSeconds - currentTotal) / totalSeconds) * 100;
 
   return (
-    <div className="fixed top-12 right-6 z-40 animate-fadeIn">
-      <div className="mac-window rounded-3xl p-4 w-72 shadow-mac-lg border border-pink-200">
+    <div className="fixed top-16 right-3 sm:right-6 z-50 animate-fadeIn max-w-[calc(100vw-24px)]">
+      <div className="mac-window rounded-3xl p-4 w-72 max-w-full shadow-mac-lg border border-pink-200">
         
         {/* Widget Header with Kitty Ears */}
         <div className="flex items-center justify-between pb-2 border-b border-pink-100">
