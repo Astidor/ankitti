@@ -664,7 +664,75 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
         }
       }
 
-      // --- 6. DECKS UPDATE & DELETE ---
+      // --- 6. MERGE DECKS ---
+      if (url.pathname === '/api/decks/merge' && request.method === 'POST') {
+        const body: any = await request.json().catch(() => ({}));
+        const { sourceDeckId, targetDeckId, deleteSourceDeck = true, tagMergedCards = true } = body;
+
+        if (!sourceDeckId || !targetDeckId) {
+          return jsonResponse({ error: 'sourceDeckId and targetDeckId are required' }, 400);
+        }
+
+        if (sourceDeckId === targetDeckId) {
+          return jsonResponse({ error: 'Cannot merge a deck into itself' }, 400);
+        }
+
+        // Verify both decks belong to current user
+        const sourceDeck = await env.DB.prepare('SELECT * FROM decks WHERE id = ? AND user_id = ?').bind(sourceDeckId, user.id).first();
+        const targetDeck = await env.DB.prepare('SELECT * FROM decks WHERE id = ? AND user_id = ?').bind(targetDeckId, user.id).first();
+
+        if (!sourceDeck || !targetDeck) {
+          return jsonResponse({ error: 'Source or target deck not found' }, 404);
+        }
+
+        const now = Date.now();
+        // Count cards to merge
+        const countRow = await env.DB.prepare('SELECT COUNT(*) as cnt FROM cards WHERE deck_id = ? AND user_id = ?').bind(sourceDeckId, user.id).first();
+        const count = countRow?.cnt || 0;
+
+        // If tagging requested, update tags
+        if (tagMergedCards) {
+          const cleanName = String(sourceDeck.name).replace(/[^a-zA-Z0-9_\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff-]/g, '').slice(0, 24);
+          const tagName = cleanName ? `from-${cleanName}` : 'merged-deck';
+          
+          const { results = [] } = await env.DB.prepare('SELECT id, tags_json FROM cards WHERE deck_id = ? AND user_id = ?').bind(sourceDeckId, user.id).all();
+          for (const c of results) {
+            let tags: string[] = [];
+            try { tags = c.tags_json ? JSON.parse(c.tags_json) : []; } catch {}
+            if (!tags.includes(tagName)) tags.push(tagName);
+            await env.DB.prepare('UPDATE cards SET deck_id = ?, tags_json = ?, updated_at = ? WHERE id = ?').bind(
+              targetDeckId,
+              JSON.stringify(tags),
+              now,
+              c.id
+            ).run();
+          }
+        } else {
+          await env.DB.prepare('UPDATE cards SET deck_id = ?, updated_at = ? WHERE deck_id = ? AND user_id = ?').bind(
+            targetDeckId,
+            now,
+            sourceDeckId,
+            user.id
+          ).run();
+        }
+
+        // Update target deck timestamp
+        await env.DB.prepare('UPDATE decks SET updated_at = ? WHERE id = ? AND user_id = ?').bind(now, targetDeckId, user.id).run();
+
+        // Optionally delete source deck
+        if (deleteSourceDeck) {
+          await env.DB.prepare('DELETE FROM decks WHERE id = ? AND user_id = ?').bind(sourceDeckId, user.id).run();
+          await env.DB.prepare('DELETE FROM drafts WHERE deck_id = ? AND user_id = ?').bind(sourceDeckId, user.id).run();
+        }
+
+        return jsonResponse({
+          success: true,
+          mergedCardCount: count,
+          message: `Successfully merged ${count} cards into ${targetDeck.name}!`
+        });
+      }
+
+      // --- 7. DECKS UPDATE & DELETE ---
       const deckMatch = url.pathname.match(/^\/api\/decks\/([^/]+)$/);
       if (deckMatch) {
         const deckId = deckMatch[1];

@@ -206,6 +206,42 @@ class ApiService {
     }
   }
 
+  public async mergeDecks(
+    sourceDeckId: string,
+    targetDeckId: string,
+    options: {
+      deleteSourceDeck?: boolean;
+      tagMergedCards?: boolean;
+    } = {}
+  ): Promise<{ success: boolean; mergedCardCount: number }> {
+    const localRes = storage.mergeDecks(sourceDeckId, targetDeckId, options);
+    if (!this.token) {
+      return { success: true, mergedCardCount: localRes.mergedCardCount };
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/decks/merge`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          sourceDeckId,
+          targetDeckId,
+          deleteSourceDeck: options.deleteSourceDeck ?? true,
+          tagMergedCards: options.tagMergedCards ?? true,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        return { success: true, mergedCardCount: data.mergedCardCount ?? localRes.mergedCardCount };
+      }
+    } catch (err) {
+      console.warn('API mergeDecks error, preserved locally:', err);
+    }
+
+    return { success: true, mergedCardCount: localRes.mergedCardCount };
+  }
+
   // ==========================================
   // CARDS CRUD (with attachments)
   // ==========================================

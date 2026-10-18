@@ -26,10 +26,12 @@ import { ImportResult } from './services/ankiImporter';
 import { LandingPage } from './components/landing/LandingPage';
 import { DeckList } from './components/decks/DeckList';
 import { DeckModal } from './components/decks/DeckModal';
+import { MergeDeckModal } from './components/decks/MergeDeckModal';
 import { StudySession, StudyFilterMode } from './components/study/StudySession';
 import { CardEditorModal } from './components/cardEditor/CardEditorModal';
 import { AnkiImportModal } from './components/ankiImport/AnkiImportModal';
 import { StatsModal } from './components/stats/StatsModal';
+import { DEFAULT_DECK_SETTINGS } from './services/scheduler';
 import { AccountModal } from './components/account/AccountModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { AiDeckModal } from './components/ai/AiDeckModal';
@@ -62,6 +64,9 @@ export function App() {
 
   const [isDeckModalOpen, setIsDeckModalOpen] = useState<boolean>(false);
   const [editingDeck, setEditingDeck] = useState<Deck | null>(null);
+
+  const [isMergeModalOpen, setIsMergeModalOpen] = useState<boolean>(false);
+  const [mergeSourceDeck, setMergeSourceDeck] = useState<Deck | null>(null);
 
   const [isImportModalOpen, setIsImportModalOpen] = useState<boolean>(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
@@ -360,6 +365,53 @@ export function App() {
     a.click();
     URL.revokeObjectURL(url);
     sounds.playRating(4);
+  };
+
+  const handleOpenMergeDeck = (deck?: Deck) => {
+    sounds.playClick();
+    setMergeSourceDeck(deck || null);
+    setIsMergeModalOpen(true);
+  };
+
+  const handleMergeDecks = async (
+    sourceDeckId: string,
+    targetDeckId: string,
+    options: { deleteSourceDeck: boolean; tagMergedCards: boolean },
+    newDeckData?: { name: string; icon: string; color: string }
+  ) => {
+    let finalTargetDeckId = targetDeckId;
+
+    if (newDeckData) {
+      const newDeck: Deck = {
+        id: `deck_${Date.now()}`,
+        name: newDeckData.name,
+        description: `Merged from ${decks.find(d => d.id === sourceDeckId)?.name || 'deck'}`,
+        icon: newDeckData.icon,
+        color: newDeckData.color,
+        settings: DEFAULT_DECK_SETTINGS,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      try {
+        await api.createDeck(newDeck);
+      } catch {
+        storage.saveDeck(newDeck);
+      }
+      finalTargetDeckId = newDeck.id;
+    }
+
+    try {
+      await api.mergeDecks(sourceDeckId, finalTargetDeckId, options);
+    } catch {
+      storage.mergeDecks(sourceDeckId, finalTargetDeckId, options);
+    }
+
+    setDecks(storage.getDecks());
+    setCards(storage.getCards());
+
+    if (activeStudyDeck?.id === sourceDeckId && options.deleteSourceDeck) {
+      setActiveStudyDeck(null);
+    }
   };
 
   // Study review callback
@@ -795,6 +847,7 @@ export function App() {
                 onCreateDeck={() => { setEditingDeck(null); setIsDeckModalOpen(true); }}
                 onOpenImport={() => setIsImportModalOpen(true)}
                 onOpenAiDeck={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
+                onMergeDeck={handleOpenMergeDeck}
               />
             )}
 
@@ -841,6 +894,15 @@ export function App() {
         editingDeck={editingDeck}
         onClose={() => setIsDeckModalOpen(false)}
         onSaveDeck={handleSaveDeck}
+      />
+
+      <MergeDeckModal
+        isOpen={isMergeModalOpen}
+        decks={decks}
+        initialSourceDeck={mergeSourceDeck}
+        getDeckCardCount={(deckId) => cards.filter(c => c.deckId === deckId).length}
+        onClose={() => setIsMergeModalOpen(false)}
+        onMergeDecks={handleMergeDecks}
       />
 
       <AnkiImportModal

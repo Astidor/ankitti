@@ -16,7 +16,8 @@ import {
   Clock,
   Layers,
   FileEdit,
-  Heart
+  Heart,
+  GitMerge
 } from 'lucide-react';
 import { Deck, DeckStats } from '../../types/anki';
 import { sounds } from '../../services/audio';
@@ -36,6 +37,7 @@ interface DeckListProps {
   onCreateDeck: () => void;
   onOpenImport: () => void;
   onOpenAiDeck?: () => void;
+  onMergeDeck?: (deck?: Deck) => void;
 }
 
 const BENTO_THEMES = [
@@ -88,6 +90,7 @@ export const DeckList: React.FC<DeckListProps> = ({
   onCreateDeck,
   onOpenImport,
   onOpenAiDeck,
+  onMergeDeck,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
@@ -281,6 +284,17 @@ export const DeckList: React.FC<DeckListProps> = ({
             </button>
           )}
 
+          {onMergeDeck && decks.length >= 2 && (
+            <button
+              onClick={() => { sounds.playClick(); onMergeDeck(); }}
+              className="px-4 py-2 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs ios-btn cursor-pointer"
+              title="Merge two decks into one"
+            >
+              <GitMerge size={14} className="text-pink-500" />
+              <span>Merge Decks</span>
+            </button>
+          )}
+
           <button
             onClick={() => { sounds.playClick(); onOpenImport(); }}
             className="px-4 py-2 bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs ios-btn cursor-pointer"
@@ -395,6 +409,15 @@ export const DeckList: React.FC<DeckListProps> = ({
                             <Download size={14} />
                             <span>Export Deck</span>
                           </button>
+                          {onMergeDeck && (
+                            <button
+                              onClick={() => { onMergeDeck(deck); setActiveMenuId(null); }}
+                              className="w-full px-3 py-2 text-left rounded-xl hover:bg-pink-50 hover:text-pink-600 flex items-center space-x-2"
+                            >
+                              <GitMerge size={14} className="text-pink-500" />
+                              <span>Merge Deck</span>
+                            </button>
+                          )}
                           <div className="border-t border-slate-100 my-1"></div>
                           <button
                             onClick={() => { onDeleteDeck(deck.id); setActiveMenuId(null); }}

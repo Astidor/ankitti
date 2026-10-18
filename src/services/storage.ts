@@ -320,6 +320,62 @@ export class StorageService {
     this.clearDraftsForDeck(deckId);
   }
 
+  public mergeDecks(
+    sourceDeckId: string,
+    targetDeckId: string,
+    options: {
+      deleteSourceDeck?: boolean;
+      tagMergedCards?: boolean;
+    } = {}
+  ): { mergedCardCount: number } {
+    const { deleteSourceDeck = true, tagMergedCards = true } = options;
+    const decks = this.getDecks();
+    const sourceDeck = decks.find(d => d.id === sourceDeckId);
+    const targetDeck = decks.find(d => d.id === targetDeckId);
+
+    if (!sourceDeck || !targetDeck) {
+      throw new Error('Source or target deck not found');
+    }
+
+    const allCards = this.getCards();
+    let mergedCardCount = 0;
+    const cleanName = sourceDeck.name.replace(/[^a-zA-Z0-9_\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff-]/g, '').slice(0, 24);
+    const tagName = cleanName ? `from-${cleanName}` : 'merged-deck';
+
+    const updatedCards = allCards.map(card => {
+      if (card.deckId === sourceDeckId) {
+        mergedCardCount++;
+        const currentTags = card.tags || [];
+        const newTags = tagMergedCards && !currentTags.includes(tagName)
+          ? [...currentTags, tagName]
+          : currentTags;
+        return {
+          ...card,
+          deckId: targetDeckId,
+          tags: newTags,
+        };
+      }
+      return card;
+    });
+
+    this.saveCards(updatedCards);
+
+    const targetIdx = decks.findIndex(d => d.id === targetDeckId);
+    if (targetIdx >= 0) {
+      decks[targetIdx] = { ...decks[targetIdx], updatedAt: Date.now() };
+    }
+
+    if (deleteSourceDeck) {
+      const remainingDecks = decks.filter(d => d.id !== sourceDeckId);
+      this.saveDecks(remainingDecks);
+      this.clearDraftsForDeck(sourceDeckId);
+    } else {
+      this.saveDecks(decks);
+    }
+
+    return { mergedCardCount };
+  }
+
   // CARDS
   public getCards(deckId?: string): Card[] {
     const key = `${STORAGE_PREFIX}cards_${this.activeAccountId}`;
