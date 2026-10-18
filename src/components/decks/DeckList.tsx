@@ -36,7 +36,7 @@ interface DeckListProps {
   onExportDeck: (deck: Deck) => void;
   onCreateDeck: () => void;
   onOpenImport: () => void;
-  onOpenAiDeck?: () => void;
+  onOpenAiDeck?: (deck?: Deck) => void;
   onMergeDeck?: (deck?: Deck) => void;
 }
 
@@ -395,6 +395,15 @@ export const DeckList: React.FC<DeckListProps> = ({
                             <Plus size={14} />
                             <span>Add Flashcard</span>
                           </button>
+                          {onOpenAiDeck && (
+                            <button
+                              onClick={() => { onOpenAiDeck(deck); setActiveMenuId(null); }}
+                              className="w-full px-3 py-2 text-left rounded-xl hover:bg-purple-50 hover:text-purple-600 flex items-center space-x-2"
+                            >
+                              <Sparkles size={14} className="text-purple-500" />
+                              <span>AI Add Cards 🪄</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => { onEditDeck(deck); setActiveMenuId(null); }}
                             className="w-full px-3 py-2 text-left rounded-xl hover:bg-slate-50 flex items-center space-x-2"

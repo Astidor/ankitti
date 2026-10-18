@@ -75,6 +75,7 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
   const [isAiDeckModalOpen, setIsAiDeckModalOpen] = useState<boolean>(false);
+  const [aiDeckTargetDeck, setAiDeckTargetDeck] = useState<Deck | null>(null);
 
   // PWA & Offline State
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -263,18 +264,28 @@ export function App() {
   };
 
   // AI Deck Generation Handler
+  const handleOpenAiDeck = (deck?: Deck) => {
+    sounds.playClick();
+    setAiDeckTargetDeck(deck || null);
+    setIsAiDeckModalOpen(true);
+  };
+
   const handleAiDeckCreated = async (deck: Deck, newCards: Card[]) => {
     try {
-      await api.createDeck(deck);
+      const exists = decks.some(d => d.id === deck.id);
+      if (!exists) {
+        await api.createDeck(deck);
+      }
       for (const card of newCards) {
         await api.createCard(card);
       }
     } catch (err) {
       console.warn('AI deck cloud sync error (preserved locally):', err);
     }
-    setDecks(prev => [deck, ...prev]);
-    setCards(prev => [...newCards, ...prev]);
+    setDecks(storage.getDecks());
+    setCards(storage.getCards());
     setIsAiDeckModalOpen(false);
+    setAiDeckTargetDeck(null);
     sounds.playRating(4);
   };
 
@@ -583,7 +594,12 @@ export function App() {
 
         <AiDeckModal
           isOpen={isAiDeckModalOpen}
-          onClose={() => setIsAiDeckModalOpen(false)}
+          decks={decks}
+          initialDeckId={aiDeckTargetDeck?.id || null}
+          onClose={() => {
+            setIsAiDeckModalOpen(false);
+            setAiDeckTargetDeck(null);
+          }}
           onDeckCreated={handleAiDeckCreated}
         />
 
@@ -752,7 +768,7 @@ export function App() {
 
             {/* AI Deck Architect Action Button (Desktop/Tablet) */}
             <button
-              onClick={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
+              onClick={() => handleOpenAiDeck()}
               className="hidden md:flex px-3.5 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white rounded-full text-xs font-extrabold transition-all items-center space-x-1.5 shadow-sm hover:shadow-md ios-btn cursor-pointer shrink-0 whitespace-nowrap"
               title="Generate flashcards with AI Deck Architect"
             >
@@ -846,7 +862,7 @@ export function App() {
                 onExportDeck={handleExportDeck}
                 onCreateDeck={() => { setEditingDeck(null); setIsDeckModalOpen(true); }}
                 onOpenImport={() => setIsImportModalOpen(true)}
-                onOpenAiDeck={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
+                onOpenAiDeck={(deck) => handleOpenAiDeck(deck)}
                 onMergeDeck={handleOpenMergeDeck}
               />
             )}
@@ -940,7 +956,12 @@ export function App() {
 
       <AiDeckModal
         isOpen={isAiDeckModalOpen}
-        onClose={() => setIsAiDeckModalOpen(false)}
+        decks={decks}
+        initialDeckId={aiDeckTargetDeck?.id || null}
+        onClose={() => {
+          setIsAiDeckModalOpen(false);
+          setAiDeckTargetDeck(null);
+        }}
         onDeckCreated={handleAiDeckCreated}
       />
 
@@ -997,7 +1018,7 @@ export function App() {
 
           {/* AI Deck Architect Modal Trigger */}
           <button
-            onClick={() => { sounds.playClick(); setIsAiDeckModalOpen(true); }}
+            onClick={() => handleOpenAiDeck()}
             className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all text-purple-600 font-semibold cursor-pointer active:scale-95"
             title="AI Deck Architect"
           >

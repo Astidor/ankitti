@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Sparkles, 
@@ -12,7 +12,8 @@ import {
   CheckCircle2,
   Trash2,
   Layers,
-  HelpCircle
+  HelpCircle,
+  FolderPlus
 } from 'lucide-react';
 import { Deck, Card, AiDeckResponse, AiDeckCardItem } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
@@ -22,6 +23,8 @@ import { KittyBow, AestheticMascot } from '../common/KittyIllustrations';
 
 interface AiDeckModalProps {
   isOpen: boolean;
+  decks?: Deck[];
+  initialDeckId?: string | null;
   onClose: () => void;
   onDeckCreated: (deck: Deck, cards: Card[]) => void;
 }
@@ -36,9 +39,13 @@ const PRESET_TOPICS = [
 
 export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   isOpen,
+  decks = [],
+  initialDeckId,
   onClose,
   onDeckCreated,
 }) => {
+  const [destinationMode, setDestinationMode] = useState<'existing' | 'new'>('new');
+  const [targetDeckId, setTargetDeckId] = useState<string>('');
   const [topic, setTopic] = useState('');
   const [notes, setNotes] = useState('');
   const [cardCount, setCardCount] = useState<number>(6);
@@ -47,6 +54,20 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [generatedResult, setGeneratedResult] = useState<AiDeckResponse | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (initialDeckId && decks.some(d => d.id === initialDeckId)) {
+      setDestinationMode('existing');
+      setTargetDeckId(initialDeckId);
+    } else if (decks.length > 0) {
+      setTargetDeckId(decks[0].id);
+      setDestinationMode(initialDeckId ? 'existing' : (decks.length > 0 ? 'existing' : 'new'));
+    } else {
+      setDestinationMode('new');
+    }
+  }, [isOpen, initialDeckId, decks]);
 
   if (!isOpen) return null;
 
@@ -87,31 +108,42 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
     }
   };
 
+  const selectedDeck = decks.find(d => d.id === targetDeckId);
+  const selectedCount = Object.values(selectedIndices).filter(Boolean).length;
+
   const handleImportToCollection = async () => {
     if (!generatedResult) return;
 
     setIsLoading(true);
     try {
       const now = Date.now();
-      const deckId = `deck_ai_${now}`;
+      let targetDeck: Deck;
 
-      // 1. Create Deck
-      const newDeck: Deck = {
-        id: deckId,
-        name: generatedResult.deck.name,
-        description: generatedResult.deck.description,
-        icon: generatedResult.deck.icon || '🤖',
-        color: generatedResult.deck.color || '#ff4d88',
-        settings: {
-          ...DEFAULT_DECK_SETTINGS,
-          newCardsPerDay: 20,
-          reviewsPerDay: 100,
-        },
-        createdAt: now,
-        updatedAt: now,
-      };
-
-      await api.createDeck(newDeck);
+      if (destinationMode === 'existing' && targetDeckId && decks.length > 0) {
+        const found = decks.find(d => d.id === targetDeckId);
+        if (!found) {
+          throw new Error('Target destination deck not found');
+        }
+        targetDeck = found;
+      } else {
+        // Create brand new deck
+        const deckId = `deck_ai_${now}`;
+        targetDeck = {
+          id: deckId,
+          name: generatedResult.deck.name,
+          description: generatedResult.deck.description,
+          icon: generatedResult.deck.icon || '🤖',
+          color: generatedResult.deck.color || '#ff4d88',
+          settings: {
+            ...DEFAULT_DECK_SETTINGS,
+            newCardsPerDay: 20,
+            reviewsPerDay: 100,
+          },
+          createdAt: now,
+          updatedAt: now,
+        };
+        await api.createDeck(targetDeck);
+      }
 
       // 2. Create Selected Cards
       const createdCards: Card[] = [];
@@ -121,7 +153,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
         const item = cardsToCreate[i];
         const card: Card = {
           id: `card_ai_${i}_${now}`,
-          deckId,
+          deckId: targetDeck.id,
           type: item.type,
           front: item.front,
           back: item.back,
@@ -147,7 +179,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
       }
 
       sounds.playRating(4);
-      onDeckCreated(newDeck, createdCards);
+      onDeckCreated(targetDeck, createdCards);
       onClose();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to import deck';
@@ -214,6 +246,67 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           {!generatedResult && (
             <form onSubmit={handleGenerate} className="space-y-4">
               
+              {/* Destination Selector: Add to Existing Deck vs Create New Deck */}
+              <div className="p-3 bg-pink-50/60 rounded-2xl border border-pink-200/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center space-x-1.5">
+                    <Layers size={13} className="text-pink-600" />
+                    <span>Destination Deck</span>
+                  </span>
+
+                  {decks.length > 0 && (
+                    <div className="inline-flex p-0.5 bg-white rounded-xl border border-pink-200 text-[10px] font-bold shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => { sounds.playClick(); setDestinationMode('existing'); }}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          destinationMode === 'existing'
+                            ? 'bg-[#FF4D80] text-white shadow-xs font-black'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        Add to Existing
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { sounds.playClick(); setDestinationMode('new'); }}
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                          destinationMode === 'new'
+                            ? 'bg-[#FF4D80] text-white shadow-xs font-black'
+                            : 'text-slate-500 hover:text-slate-800'
+                        }`}
+                      >
+                        + New Deck
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {destinationMode === 'existing' && decks.length > 0 ? (
+                  <div className="space-y-1 pt-0.5">
+                    <select
+                      value={targetDeckId}
+                      onChange={(e) => setTargetDeckId(e.target.value)}
+                      className="w-full text-xs font-bold text-slate-800 bg-white border border-pink-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                    >
+                      {decks.map(d => (
+                        <option key={d.id} value={d.id}>
+                          {d.icon || '🎀'} {d.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="text-[10px] text-pink-700 font-medium px-1 flex items-center space-x-1">
+                      <span>✓ AI cards will be added directly into</span>
+                      <strong className="font-bold underline">{selectedDeck?.name || 'this deck'}</strong>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-slate-500 font-medium px-1">
+                    AI will automatically title, style, and create a brand new deck in your collection.
+                  </div>
+                )}
+              </div>
+
               {/* Presets */}
               <div>
                 <label className="block font-bold text-kitty-dark mb-1.5 text-[11px] flex items-center justify-between">
@@ -357,21 +450,26 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               <div className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl border border-pink-200/90 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <span className="text-3xl p-2 bg-white rounded-2xl shadow-xs border border-pink-200">
-                    {generatedResult.deck.icon || '🤖'}
+                    {destinationMode === 'existing' ? (selectedDeck?.icon || '📁') : (generatedResult.deck.icon || '🤖')}
                   </span>
                   <div>
+                    <div className="text-[10px] font-black uppercase tracking-wider text-pink-600">
+                      {destinationMode === 'existing' ? 'Destination Deck' : 'New Deck Title'}
+                    </div>
                     <h3 className="font-black text-slate-900 text-sm">
-                      {generatedResult.deck.name}
+                      {destinationMode === 'existing' ? selectedDeck?.name : generatedResult.deck.name}
                     </h3>
                     <p className="text-[11px] text-kitty-subtle mt-0.5">
-                      {generatedResult.deck.description}
+                      {destinationMode === 'existing'
+                        ? 'Cards will be added directly into this existing deck.'
+                        : generatedResult.deck.description}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
                   <span className="text-xs font-black text-pink-600 bg-white px-3 py-1 rounded-full border border-pink-200 shadow-xs">
-                    {Object.values(selectedIndices).filter(Boolean).length} / {generatedResult.cards.length} Cards
+                    {selectedCount} / {generatedResult.cards.length} Cards
                   </span>
                 </div>
               </div>
@@ -437,12 +535,14 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 <button
                   type="button"
                   onClick={handleImportToCollection}
-                  disabled={isLoading || Object.values(selectedIndices).filter(Boolean).length === 0}
+                  disabled={isLoading || selectedCount === 0}
                   className="flex-1 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all flex items-center justify-center space-x-2 ios-btn cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle2 size={15} />
                   <span>
-                    Add Deck to Collection ({Object.values(selectedIndices).filter(Boolean).length} Cards) 🎀
+                    {destinationMode === 'existing'
+                      ? `Add ${selectedCount} Cards to "${selectedDeck?.name || 'Deck'}" 🎀`
+                      : `Create Deck & Add ${selectedCount} Cards 🎀`}
                   </span>
                 </button>
               </div>
