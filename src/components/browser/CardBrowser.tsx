@@ -61,17 +61,17 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Top Filter & Search Controls */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-xs">
+      {/* Top Filter & Search Controls Bento Bar */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#EFE8DE] shadow-bento">
         {/* Search Input */}
         <div className="relative flex-1">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cocoa-400" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search cards, clozes, answers, tags..."
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-400/50 focus:border-rose-400 transition-all shadow-xs"
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] text-xs font-semibold text-[#3E2D28] placeholder-cocoa-400 focus:outline-none focus:ring-2 focus:ring-strawberry-300 focus:border-strawberry-400 transition-all shadow-2xs"
           />
         </div>
 
@@ -81,7 +81,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
           <select
             value={selectedDeckId}
             onChange={(e) => setSelectedDeckId(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-400/50 shadow-xs"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-[#EFE8DE] bg-white text-xs font-bold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-300 shadow-2xs cursor-pointer"
           >
             <option value="all">All Decks ({cards.length})</option>
             {decks.map(d => (
@@ -93,7 +93,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
           <select
             value={filterState}
             onChange={(e) => setFilterState(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-rose-400/50 shadow-xs"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-[#EFE8DE] bg-white text-xs font-bold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-300 shadow-2xs cursor-pointer"
           >
             <option value="all">All States</option>
             <option value="new">New</option>
@@ -103,7 +103,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
 
           <button
             onClick={onNewCard}
-            className="hidden sm:flex px-3.5 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs transition-all items-center space-x-1.5 ios-btn cursor-pointer whitespace-nowrap"
+            className="hidden sm:flex px-4 py-2 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all items-center space-x-1.5 squishy-btn cursor-pointer whitespace-nowrap"
           >
             <Plus size={14} />
             <span>Add Card</span>
@@ -112,28 +112,28 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
       </div>
 
       {/* Cards List / Table Container */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div className="bento-card overflow-hidden">
         {/* Mobile View: Native Cards */}
-        <div className="md:hidden divide-y divide-slate-100">
+        <div className="md:hidden divide-y divide-[#EFE8DE]">
           {filteredCards.map(card => {
             const stateBadge = {
               new: (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 inline-block">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-taro-50 text-taro-700 border border-taro-200 inline-block">
                   New
                 </span>
               ),
               learning: (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 inline-block">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-honey-50 text-honey-700 border border-honey-200 inline-block">
                   Learning
                 </span>
               ),
               relearning: (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 inline-block">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-strawberry-50 text-strawberry-700 border border-strawberry-200 inline-block">
                   Relearn
                 </span>
               ),
               review: (
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-matcha-50 text-matcha-700 border border-matcha-200 inline-block">
                   Review
                 </span>
               ),
@@ -143,12 +143,12 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
               <div
                 key={card.id}
                 onClick={() => onEditCard(card)}
-                className="p-4 hover:bg-slate-50/70 active:bg-slate-100/70 transition-colors cursor-pointer space-y-2"
+                className="p-4 hover:bg-[#FAF7F2] transition-colors cursor-pointer space-y-2"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center space-x-1.5">
                     {stateBadge}
-                    <span className="text-[11px] font-semibold text-slate-700 truncate max-w-[140px]">
+                    <span className="text-[11px] font-bold text-cocoa-700 truncate max-w-[140px]">
                       {getDeckName(card.deckId)}
                     </span>
                   </div>
@@ -166,7 +166,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                             });
                           }
                         }}
-                        className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer"
+                        className="p-1.5 rounded-lg bg-[#FAF7F2] text-cocoa-600 hover:bg-slate-200 cursor-pointer"
                         title="View Attachment"
                       >
                         <ImageIcon size={13} />
@@ -174,7 +174,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                     )}
                     <button
                       onClick={() => onEditCard(card)}
-                      className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg text-cocoa-500 hover:text-[#3E2D28] hover:bg-[#FAF7F2] transition-colors cursor-pointer"
                       title="Edit"
                     >
                       <Edit3 size={14} />
@@ -183,7 +183,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                       onClick={() => {
                         if (confirm('Delete this card?')) onDeleteCard(card.id);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-1.5 rounded-lg text-cocoa-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={14} />
@@ -191,17 +191,17 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                   </div>
                 </div>
 
-                <div className="font-semibold text-slate-900 text-xs leading-snug line-clamp-2">
+                <div className="font-bold text-[#3E2D28] text-xs leading-snug line-clamp-2">
                   {stripPreviewText(card.front) || (card.frontImage ? '[Image Attachment]' : '(Empty)')}
                 </div>
 
-                <div className="text-slate-600 text-xs line-clamp-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 font-normal">
+                <div className="text-cocoa-600 text-xs line-clamp-2 bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EFE8DE] font-medium">
                   {stripPreviewText(card.back) || (card.backImage ? '[Image Attachment]' : '(Empty)')}
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-0.5">
-                  <span>Interval: <strong className="text-slate-700 font-semibold">{formatIntervalPreview(card.interval || 0)}</strong></span>
-                  <span>Ease: <strong className="text-slate-700 font-semibold">{Math.round((card.easeFactor || 2.5) * 100)}%</strong></span>
+                <div className="flex items-center justify-between text-[11px] text-cocoa-400 font-mono pt-0.5">
+                  <span>Interval: <strong className="text-cocoa-700 font-bold">{formatIntervalPreview(card.interval || 0)}</strong></span>
+                  <span>Ease: <strong className="text-cocoa-700 font-bold">{Math.round((card.easeFactor || 2.5) * 100)}%</strong></span>
                 </div>
               </div>
             );
@@ -211,37 +211,37 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
         {/* Desktop View: Full Data Table */}
         <div className="hidden md:block overflow-x-auto max-h-[560px]">
           <table className="w-full text-left border-collapse text-xs">
-            <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm border-b border-slate-200 font-semibold text-slate-700 select-none z-10">
+            <thead className="sticky top-0 bg-[#FAF7F2] border-b border-[#EFE8DE] font-bold text-cocoa-600 select-none z-10">
               <tr>
-                <th className="py-2.5 px-4 w-24 text-center">State</th>
-                <th className="py-2.5 px-4">Deck</th>
-                <th className="py-2.5 px-4 w-1/3">Front / Question</th>
-                <th className="py-2.5 px-4 w-1/3">Back / Key Answer</th>
-                <th className="py-2.5 px-3">Interval</th>
-                <th className="py-2.5 px-3">Ease</th>
-                <th className="py-2.5 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 w-24 text-center">State</th>
+                <th className="py-3 px-4">Deck</th>
+                <th className="py-3 px-4 w-1/3">Front / Question</th>
+                <th className="py-3 px-4 w-1/3">Back / Key Answer</th>
+                <th className="py-3 px-3">Interval</th>
+                <th className="py-3 px-3">Ease</th>
+                <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-[#EFE8DE]">
               {filteredCards.map(card => {
                 const stateBadge = {
                   new: (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 inline-block">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-taro-50 text-taro-700 border border-taro-200 inline-block">
                       New
                     </span>
                   ),
                   learning: (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 inline-block">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-honey-50 text-honey-700 border border-honey-200 inline-block">
                       Learning
                     </span>
                   ),
                   relearning: (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 inline-block">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-strawberry-50 text-strawberry-700 border border-strawberry-200 inline-block">
                       Relearn
                     </span>
                   ),
                   review: (
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-block">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-matcha-50 text-matcha-700 border border-matcha-200 inline-block">
                       Review
                     </span>
                   ),
@@ -251,39 +251,39 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                   <tr
                     key={card.id}
                     onClick={() => onEditCard(card)}
-                    className="hover:bg-slate-50/70 transition-colors cursor-pointer group"
+                    className="hover:bg-[#FAF7F2]/80 transition-colors cursor-pointer group"
                   >
                     <td className="py-3 px-4 text-center">{stateBadge}</td>
-                    <td className="py-3 px-4 font-semibold text-slate-700 whitespace-nowrap">
+                    <td className="py-3 px-4 font-bold text-cocoa-700 whitespace-nowrap">
                       {getDeckName(card.deckId)}
                     </td>
-                    <td className="py-3 px-4 font-medium text-slate-900 max-w-xs truncate">
+                    <td className="py-3 px-4 font-bold text-[#3E2D28] max-w-xs truncate">
                       <div className="flex items-center space-x-2">
                         {card.frontImage && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold">Image</span>
+                          <span className="px-1.5 py-0.5 rounded bg-strawberry-100 text-strawberry-700 text-[10px] font-bold">Image</span>
                         )}
                         <span className="truncate">{stripPreviewText(card.front) || '(Empty front)'}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-slate-600 max-w-xs truncate font-normal">
+                    <td className="py-3 px-4 text-cocoa-600 max-w-xs truncate font-medium">
                       <div className="flex items-center space-x-2">
                         {card.backImage && (
-                          <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold">Image</span>
+                          <span className="px-1.5 py-0.5 rounded bg-strawberry-100 text-strawberry-700 text-[10px] font-bold">Image</span>
                         )}
                         <span className="truncate">{stripPreviewText(card.back) || '(Empty back)'}</span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap font-medium">
+                    <td className="py-3 px-3 font-mono text-cocoa-600 whitespace-nowrap font-bold">
                       {formatIntervalPreview(card.interval || 0)}
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-600 whitespace-nowrap font-medium">
+                    <td className="py-3 px-3 font-mono text-cocoa-600 whitespace-nowrap font-bold">
                       {Math.round((card.easeFactor || 2.5) * 100)}%
                     </td>
                     <td className="py-3 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end space-x-1">
                         <button
                           onClick={() => onEditCard(card)}
-                          className="p-1 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-xl text-cocoa-400 hover:text-[#3E2D28] hover:bg-white transition-colors cursor-pointer"
                           title="Edit Card"
                         >
                           <Edit3 size={14} />
@@ -292,7 +292,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                           onClick={() => {
                             if (confirm('Delete this card?')) onDeleteCard(card.id);
                           }}
-                          className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-xl text-cocoa-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                           title="Delete Card"
                         >
                           <Trash2 size={14} />

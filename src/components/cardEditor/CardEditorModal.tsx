@@ -356,23 +356,23 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-t-[28px] sm:rounded-2xl w-full max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200 ios-bottom-sheet sm:animate-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white rounded-t-[32px] sm:rounded-3xl w-full max-w-xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden border border-[#EFE8DE] ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber & Minimal Header */}
-        <div className="pt-2 pb-1 px-4 flex justify-center bg-slate-50 sm:hidden">
-          <div className="w-10 h-1 bg-slate-300 rounded-full" />
+        <div className="pt-2 pb-1 px-4 flex justify-center bg-[#FAF7F2] sm:hidden">
+          <div className="w-10 h-1 bg-[#EFE8DE] rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-slate-100 select-none">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-[#EFE8DE] select-none">
           <div className="flex items-center space-x-2">
-            <span className="p-1 bg-rose-50 rounded-lg text-rose-500 flex items-center justify-center">
+            <span className="p-1 bg-strawberry-50 rounded-lg text-strawberry-500 flex items-center justify-center border border-strawberry-100">
               <KittyBow size={16} />
             </span>
-            <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-900">
+            <div className="flex items-center space-x-1.5 text-xs font-bold text-[#3E2D28]">
               <span>{editingCard ? 'Edit Card' : 'New Card'}</span>
-              <span className="text-slate-300">•</span>
-              <span className="text-rose-600 font-semibold max-w-[180px] sm:max-w-xs truncate">{deck.name}</span>
+              <span className="text-cocoa-300">•</span>
+              <span className="text-strawberry-600 font-bold max-w-[180px] sm:max-w-xs truncate">{deck.name}</span>
             </div>
           </div>
 
@@ -381,10 +381,10 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
             <button
               type="button"
               onClick={() => setViewMode(viewMode === 'edit' ? 'preview' : 'edit')}
-              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+              className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
                 viewMode === 'preview'
-                  ? 'bg-rose-500 text-white border-rose-600'
-                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50 border-slate-200'
+                  ? 'bg-strawberry-500 text-white border-strawberry-600'
+                  : 'text-cocoa-500 hover:text-[#3E2D28] hover:bg-[#FAF7F2] border-[#EFE8DE]'
               }`}
               title={viewMode === 'preview' ? 'Edit Mode' : 'Preview Card'}
             >
@@ -394,7 +394,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
             {/* Close Button */}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE8DE] text-cocoa-500 hover:text-[#3E2D28] transition-colors cursor-pointer"
               title="Close"
             >
               <X size={15} />
@@ -455,7 +455,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => applyFormat('cloze')}
-                className="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs flex items-center space-x-1 shadow-xs transition-all active:scale-95 cursor-pointer"
+                className="px-2.5 py-1 rounded-lg bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs flex items-center space-x-1 shadow-xs transition-all squishy-btn cursor-pointer"
                 title="Wrap selection in Cloze deletion {{c1::...}} (Ctrl+Shift+C)"
               >
                 <span>[...]</span>
@@ -818,9 +818,9 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({
               type="button"
               onClick={() => handleSubmit()}
               disabled={!front.trim() && !frontImage && !back.trim() && !backImage}
-              className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 disabled:opacity-40 text-white font-semibold text-xs shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:cursor-not-allowed"
+              className="px-4 py-2 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 disabled:opacity-40 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center space-x-1.5 squishy-btn cursor-pointer disabled:cursor-not-allowed"
             >
-              <span>{editingCard ? 'Save Changes' : 'Add Card'}</span>
+              <span>{editingCard ? 'Save Changes' : 'Add Card 🎀'}</span>
               <kbd className="hidden sm:inline-block ml-1 text-[10px] bg-white/20 px-1 py-0.2 rounded font-mono font-normal">⌘↵</kbd>
             </button>
           </div>

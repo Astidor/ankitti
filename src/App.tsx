@@ -11,11 +11,12 @@ import {
   FileEdit,
   ArrowLeft,
   Sparkles,
-  LogIn,
   LogOut,
   Smartphone,
   WifiOff,
-  Cloud
+  Cloud,
+  CheckCircle2,
+  Sprout
 } from 'lucide-react';
 import { Deck, Card, UserAccount, ReviewLog, DeckStats } from './types/anki';
 import { storage } from './services/storage';
@@ -37,8 +38,7 @@ import { AuthModal } from './components/auth/AuthModal';
 import { AiDeckModal } from './components/ai/AiDeckModal';
 import { CardBrowser } from './components/browser/CardBrowser';
 import { PomodoroWidget } from './components/common/PomodoroWidget';
-import { KittyBow, KittyAvatar } from './components/common/KittyIllustrations';
-import { FloatingPetals } from './components/common/FloatingPetals';
+import { KittyBow, KittyAvatar, AestheticMascot } from './components/common/KittyIllustrations';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
 
 export function App() {
@@ -48,7 +48,7 @@ export function App() {
   const [reviewLogs, setReviewLogs] = useState<ReviewLog[]>(storage.getReviewLogs());
   const [soundEnabled, setSoundEnabled] = useState<boolean>(account.soundEnabled ?? true);
 
-  // View state: 'landing' or 'app' (Default to app/dashboard)
+  // View state: 'landing' or 'app' (Default to app)
   const [viewMode, setViewMode] = useState<'landing' | 'app'>('app');
 
   // App Studio state
@@ -84,9 +84,8 @@ export function App() {
   const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState<boolean>(false);
 
-  // Monitor network connectivity and standalone PWA installation status
+  // Monitor connectivity & PWA install status
   useEffect(() => {
-    // Check if running as installed standalone app on phone or desktop
     const checkStandalone = () => {
       const isStandaloneMode = 
         window.matchMedia('(display-mode: standalone)').matches || 
@@ -95,7 +94,6 @@ export function App() {
     };
     checkStandalone();
 
-    // Listen for browser install prompt (Android & Chromium)
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setInstallPrompt(e);
@@ -103,13 +101,11 @@ export function App() {
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
-    // Network online/offline event handlers
     const handleOnline = () => {
       setIsOnline(true);
       setShowOnlineToast(true);
       setTimeout(() => setShowOnlineToast(false), 4500);
 
-      // Auto-sync with cloud on reconnection
       if (account.email) {
         Promise.all([api.getDecks(), api.getCards()]).then(([remoteDecks, remoteCards]) => {
           if (remoteDecks && remoteDecks.length > 0) setDecks(remoteDecks);
@@ -132,7 +128,7 @@ export function App() {
     };
   }, [account.email]);
 
-  // Auto-sync with real database if logged in
+  // Auto-sync with real cloud database if logged in
   useEffect(() => {
     async function initUserSession() {
       try {
@@ -166,7 +162,6 @@ export function App() {
     refreshDraftStatus();
   }, [refreshDraftStatus, isCardEditorOpen]);
 
-  // Sync sound settings
   useEffect(() => {
     sounds.enabled = soundEnabled;
   }, [soundEnabled]);
@@ -174,23 +169,18 @@ export function App() {
   // Global keyboard shortcuts
   useEffect(() => {
     const handleGlobalKeys = (e: KeyboardEvent) => {
-      // Ignore if typing inside input / textarea
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
         return;
       }
-
-      // Cmd/Ctrl + N: New card
       if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
         handleOpenNewCard();
       }
-      // Cmd/Ctrl + Shift + N: New deck
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'n') {
         e.preventDefault();
         setEditingDeck(null);
         setIsDeckModalOpen(true);
       }
-      // Cmd/Ctrl + I: Import
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') {
         e.preventDefault();
         setIsImportModalOpen(true);
@@ -201,7 +191,6 @@ export function App() {
     return () => window.removeEventListener('keydown', handleGlobalKeys);
   }, [decks]);
 
-  // Reload data for active account
   const reloadData = async () => {
     const acc = storage.getActiveAccount();
     setAccount(acc);
@@ -221,7 +210,6 @@ export function App() {
     refreshDraftStatus();
   };
 
-  // Auth Handlers & Studio Access Guard
   const requireAuth = (action: () => void, mode: 'login' | 'signup' = 'signup') => {
     if (!account?.email) {
       setAuthModalMode(mode);
@@ -230,8 +218,6 @@ export function App() {
     }
     action();
   };
-
-  // Allow guest visitors to use app seamlessly with local storage (no forced kick-out)
 
   const handleAuthSuccess = async (user: UserAccount) => {
     storage.setActiveAccount(user.id);
@@ -254,7 +240,6 @@ export function App() {
   const handleLogout = async () => {
     await api.logout();
     const guestAccount = storage.getActiveAccount();
-    // Clear email so account is strictly unauthenticated
     delete (guestAccount as any).email;
     setAccount(guestAccount);
     setDecks(storage.getDecks());
@@ -263,7 +248,6 @@ export function App() {
     sounds.playClick();
   };
 
-  // AI Deck Generation Handler
   const handleOpenAiDeck = (deck?: Deck) => {
     sounds.playClick();
     setAiDeckTargetDeck(deck || null);
@@ -289,7 +273,6 @@ export function App() {
     sounds.playRating(4);
   };
 
-  // Card Management
   const handleSaveCard = async (card: Card) => {
     try {
       const exists = cards.some(c => c.id === card.id);
@@ -328,7 +311,6 @@ export function App() {
     setIsCardEditorOpen(true);
   };
 
-  // Deck Management
   const handleSaveDeck = async (deck: Deck) => {
     try {
       const exists = decks.some(d => d.id === deck.id);
@@ -425,7 +407,6 @@ export function App() {
     }
   };
 
-  // Study review callback
   const handleUpdateCardAfterReview = (updatedCard: Card, rating: 1 | 2 | 3 | 4) => {
     storage.saveCard(updatedCard);
     api.updateCard(updatedCard).catch(e => console.warn(e));
@@ -450,14 +431,11 @@ export function App() {
     setAccount(storage.getActiveAccount());
   };
 
-  // Anki Import callback
   const handleImportComplete = async (result: ImportResult, targetDeckId?: string) => {
-    // 1. Ensure cardDeckId is mapped to targetDeckId if specified
     const cardsToImport = targetDeckId
       ? result.cards.map(c => ({ ...c, deckId: targetDeckId }))
       : result.cards;
 
-    // 2. Instantly update React decks state & local storage
     if (!targetDeckId) {
       result.decks.forEach(d => storage.saveDeck(d));
       setDecks(prev => {
@@ -467,7 +445,6 @@ export function App() {
       });
     }
 
-    // 3. Instantly update React cards state & local storage
     storage.bulkAddCards(cardsToImport);
     setCards(prev => {
       const existingIds = new Set(prev.map(c => c.id));
@@ -477,7 +454,6 @@ export function App() {
 
     sounds.playRating(4);
 
-    // 4. Persist to Cloudflare D1 in background
     try {
       if (!targetDeckId) {
         for (const d of result.decks) {
@@ -533,7 +509,7 @@ export function App() {
     return !!storage.getDraft(deckId);
   };
 
-  // If in Landing Page mode, render the rich, high-converting LandingPage
+  // If in Landing Page mode, render LandingPage
   if (viewMode === 'landing') {
     return (
       <>
@@ -562,22 +538,19 @@ export function App() {
           onOpenInstall={() => setIsInstallModalOpen(true)}
         />
 
-        {/* Offline Status Alert Banner on Landing Page */}
         {!isOnline && (
-          <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-md">
+          <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-md">
             <WifiOff size={14} className="shrink-0 animate-pulse" />
-            <span>📡 Offline Mode Active — Studying, reviewing, and creating cards works completely offline without internet!</span>
+            <span>📡 Offline Mode Active — Studying works completely offline!</span>
           </div>
         )}
 
-        {/* Online Restored Toast */}
         {showOnlineToast && (
-          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white text-xs font-extrabold py-2 px-5 rounded-full text-center flex items-center justify-center space-x-2 shadow-lg animate-fadeIn">
+          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-matcha-600 text-white text-xs font-bold py-2 px-5 rounded-full text-center flex items-center justify-center space-x-2 shadow-lg animate-fadeIn">
             <span>✨ Back online! Synced smoothly with cloud.</span>
           </div>
         )}
 
-        {/* Global Modals accessible if opened from Landing */}
         <AnkiImportModal
           isOpen={isImportModalOpen}
           decks={decks}
@@ -613,125 +586,192 @@ export function App() {
     );
   }
 
-  // App Studio Mode (Operate Mode) with Natural, Responsive Page Scrolling
+  // 🌸 APP STUDIO: PERSISTENT LEFT SIDEBAR CADDY + BENTO WORKSPACE 🌸
   return (
-    <div className="min-h-screen bg-transparent text-slate-900 flex flex-col font-sans select-auto relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#3E2D28] flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
       
-      {/* Focus Pomodoro Timer Overlay */}
-      <PomodoroWidget 
-        isOpen={isPomodoroOpen} 
-        onClose={() => setIsPomodoroOpen(false)} 
-      />
-
-      {/* Modern Frosted App Header */}
-      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-xs pt-safe">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
+      {/* 🍱 PERSISTENT LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen sticky top-0 bg-white/95 backdrop-blur-md border-r border-[#EFE8DE] p-4.5 justify-between shrink-0 shadow-xs z-30 select-none">
+        
+        {/* Top Segment: Brand, Companion Greeting, Nav & Add Action */}
+        <div className="space-y-4">
           
-          {/* Brand & Home Navigation */}
-          <div className="flex items-center space-x-3 shrink-0">
+          {/* Logo & About Link */}
+          <div className="flex items-center justify-between pb-1">
             <button
               onClick={() => {
                 sounds.playClick();
                 setActiveStudyDeck(null);
                 setCurrentTab('decks');
               }}
-              className="flex items-center space-x-2 text-slate-900 hover:text-rose-600 transition-colors group ios-btn cursor-pointer"
-              title="Ankitti Dashboard"
+              className="flex items-center space-x-2.5 text-left group cursor-pointer"
+              title="Ankitti Bento Studio"
             >
-              <KittyBow size={24} className="text-rose-500 group-hover:scale-105 transition-transform" />
-              <span className="font-extrabold text-xl tracking-tight text-slate-900">
-                Ankitti
-              </span>
+              <div className="p-1.5 rounded-xl bg-[#FFF0F5] border border-[#FFD1DC] group-hover:scale-105 transition-transform shadow-2xs">
+                <KittyBow size={20} />
+              </div>
+              <div>
+                <span className="font-extrabold text-lg tracking-tight text-[#3E2D28] block leading-none">
+                  Ankitti 🎀
+                </span>
+                <span className="text-[10px] font-bold text-strawberry-600 tracking-wider uppercase">
+                  Bento Studio
+                </span>
+              </div>
             </button>
 
             <button
               onClick={() => { sounds.playClick(); setViewMode('landing'); }}
-              className="text-xs font-semibold px-2.5 py-1 rounded-full text-slate-600 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition-colors hidden sm:flex items-center space-x-1.5 ios-btn cursor-pointer shrink-0"
-              title="About Ankitti"
+              className="text-[10px] font-bold px-2 py-1 rounded-full text-cocoa-500 bg-[#FAF7F2] hover:bg-[#EFE8DE] border border-[#EFE8DE] transition-colors flex items-center space-x-1 cursor-pointer"
+              title="Return to Landing Page"
             >
-              <Home size={12} />
+              <Home size={11} />
               <span>About</span>
             </button>
           </div>
 
-          {/* Segmented Controller: Decks | Card Browser | Spaced Heatmap (Desktop/Tablet) */}
-          {!activeStudyDeck && (
-            <div className="hidden md:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 text-xs font-medium shadow-xs shrink-0">
-              <button
-                onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'decks' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Layers size={13} className={currentTab === 'decks' ? 'text-rose-500' : 'text-slate-400'} />
-                <span>Decks</span>
-              </button>
-
-              <button
-                onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'browser' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Search size={13} className={currentTab === 'browser' ? 'text-rose-500' : 'text-slate-400'} />
-                <span>Card Browser</span>
-              </button>
-
-              <button
-                onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'stats' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <BarChart2 size={13} className={currentTab === 'stats' ? 'text-rose-500' : 'text-slate-400'} />
-                <span>Stats & Heatmap</span>
-              </button>
+          {/* Cute Study Companion Status Card */}
+          <div className="p-3 bg-gradient-to-r from-[#FFF0F5] to-[#F8F4FF] rounded-2xl border border-[#FFD1DC]/80 shadow-2xs flex items-center space-x-3">
+            <div className="w-11 h-11 rounded-2xl bg-white border border-[#FFD1DC] p-1 shrink-0 flex items-center justify-center shadow-2xs">
+              <img 
+                src="/assets/reading_mascot.png" 
+                alt="Companion Mascot" 
+                className="w-full h-full object-cover rounded-xl"
+              />
             </div>
-          )}
-
-          {activeStudyDeck && (
-            <div className="flex items-center space-x-2 shrink-0">
-              <button
-                onClick={() => { sounds.playClick(); setActiveStudyDeck(null); }}
-                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors ios-btn cursor-pointer whitespace-nowrap shadow-xs"
-              >
-                <ArrowLeft size={13} />
-                <span>Exit Session</span>
-              </button>
-              <span className="text-xs font-bold text-slate-800 hidden md:inline truncate max-w-xs">
-                Studying: {activeStudyDeck.name}
-              </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] font-bold text-strawberry-700 truncate">
+                Study Buddy 🌸
+              </div>
+              <div className="text-[10px] text-cocoa-600 font-medium truncate">
+                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Ready for focus session! ✨'}
+              </div>
             </div>
-          )}
+          </div>
 
-          {/* Right Action Tools */}
-          <div className="flex items-center space-x-2 shrink-0">
+          {/* Primary Action Button: Add Flashcard */}
+          <button
+            onClick={() => handleOpenNewCard()}
+            className="w-full py-2.5 px-4 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-95 text-white font-extrabold text-xs shadow-squishy-pink flex items-center justify-center space-x-2 transition-all squishy-btn cursor-pointer"
+            title="Create a new flashcard (Shortcut: Cmd/Ctrl+N)"
+          >
+            <Plus size={15} strokeWidth={2.5} />
+            <span>+ Add Flashcard</span>
+            <kbd className="text-[9px] bg-white/25 px-1 py-0.2 rounded font-mono font-normal">⌘N</kbd>
+          </button>
+
+          {/* Persistent Sidebar Navigation Links */}
+          <nav className="space-y-1 text-xs font-bold pt-1">
             
-            {hasAnyDraft && (
-              <button 
-                onClick={() => handleOpenNewCard()}
-                className="cursor-pointer hidden sm:flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs hover:bg-amber-100 transition-colors ios-btn shrink-0 whitespace-nowrap"
-                title="Unfinished card draft saved in browser"
-              >
-                <FileEdit size={12} className="text-amber-600" />
-                <span>Draft Saved</span>
-              </button>
-            )}
+            {/* Decks Tab */}
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setActiveStudyDeck(null);
+                setCurrentTab('decks');
+              }}
+              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+                currentTab === 'decks' && !activeStudyDeck
+                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
+                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+              }`}
+            >
+              <Layers size={16} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <span className="flex-1 text-left">My Decks Shelf</span>
+              <span className="text-[10px] px-2 py-0.2 rounded-full bg-white border border-[#EFE8DE] text-cocoa-600">
+                {decks.length}
+              </span>
+            </button>
 
-            {/* Utility Controls (Pomodoro + Sound Toggle) */}
-            <div className="flex items-center bg-slate-100/90 p-0.5 rounded-full border border-slate-200/80 shrink-0">
-              <button
-                onClick={() => setIsPomodoroOpen(prev => !prev)}
-                className={`p-1.5 rounded-full transition-all ios-btn cursor-pointer ${
-                  isPomodoroOpen 
-                    ? 'bg-rose-500 text-white shadow-xs' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
-                }`}
-                title="Focus Pomodoro Timer"
-              >
-                <Timer size={15} />
-              </button>
+            {/* Card Browser Tab */}
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setActiveStudyDeck(null);
+                setCurrentTab('browser');
+              }}
+              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+                currentTab === 'browser' && !activeStudyDeck
+                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
+                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+              }`}
+            >
+              <Search size={16} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <span className="flex-1 text-left">Card Catalog</span>
+              <span className="text-[10px] px-2 py-0.2 rounded-full bg-white border border-[#EFE8DE] text-cocoa-600">
+                {cards.length}
+              </span>
+            </button>
 
+            {/* Study Garden & Stats Tab */}
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setActiveStudyDeck(null);
+                setCurrentTab('stats');
+              }}
+              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+                currentTab === 'stats' && !activeStudyDeck
+                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
+                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+              }`}
+            >
+              <BarChart2 size={16} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <span className="flex-1 text-left">Study Garden & Stats</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-matcha-100 text-matcha-800">
+                Heatmap
+              </span>
+            </button>
+          </nav>
+        </div>
+
+        {/* Middle: Integrated Focus Pomodoro Station in Sidebar */}
+        <div className="py-2">
+          <PomodoroWidget 
+            isOpen={true} 
+            isInline={true} 
+          />
+        </div>
+
+        {/* Bottom Segment: User Profile, Sync Badge & Utilities */}
+        <div className="space-y-2 pt-2 border-t border-[#EFE8DE]">
+          
+          {hasAnyDraft && (
+            <button
+              onClick={() => handleOpenNewCard()}
+              className="w-full flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-honey-100 border border-honey-300 text-honey-900 text-xs font-bold shadow-2xs cursor-pointer hover:bg-honey-200 transition-colors"
+            >
+              <FileEdit size={13} className="text-honey-700" />
+              <span className="truncate">Draft Card Auto-Saved</span>
+            </button>
+          )}
+
+          {/* User Profile Pill */}
+          <div className="flex items-center justify-between p-2 rounded-2xl bg-[#FAF7F2] border border-[#EFE8DE]">
+            <button
+              onClick={() => setIsAccountModalOpen(true)}
+              className="flex items-center space-x-2 min-w-0 text-left cursor-pointer group"
+              title="Open Account Preferences"
+            >
+              <KittyAvatar size={30} />
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-[#3E2D28] truncate group-hover:text-strawberry-600 transition-colors">
+                  {account.name}
+                </div>
+                <div className="text-[10px] text-cocoa-400 flex items-center space-x-1">
+                  {account.email ? (
+                    <span className="text-matcha-600 font-semibold flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-matcha-500" />
+                      <span>Cloud Synced</span>
+                    </span>
+                  ) : (
+                    <span>Local Guest</span>
+                  )}
+                </div>
+              </div>
+            </button>
+
+            <div className="flex items-center space-x-1">
               <button
                 onClick={() => {
                   const next = !soundEnabled;
@@ -739,158 +779,229 @@ export function App() {
                   sounds.enabled = next;
                   if (next) sounds.playRating(4);
                 }}
-                className={`p-1.5 rounded-full transition-all ios-btn cursor-pointer ${
-                  soundEnabled 
-                    ? 'text-rose-600 hover:bg-white/80' 
-                    : 'text-slate-400 hover:bg-white/80'
+                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                  soundEnabled ? 'text-strawberry-500 hover:bg-white' : 'text-cocoa-400 hover:bg-white'
                 }`}
-                title={soundEnabled ? 'Mute Sounds' : 'Unmute Sounds'}
+                title={soundEnabled ? 'Mute audio' : 'Unmute audio'}
               >
                 {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
               </button>
-            </div>
 
-            {/* Install App on Phone / Desktop */}
-            {!isStandalone && (
-              <button
-                onClick={() => { sounds.playClick(); setIsInstallModalOpen(true); }}
-                className="hidden sm:flex px-3 py-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-full text-xs font-semibold transition-all items-center space-x-1.5 border border-slate-200 shadow-xs ios-btn cursor-pointer shrink-0"
-                title="Install Ankitti to your phone home screen for offline study"
-              >
-                <Smartphone size={13} className="text-slate-600 shrink-0" />
-                <span>Install</span>
-              </button>
-            )}
-
-            {/* AI Deck Architect Action Button (Desktop/Tablet) */}
-            <button
-              onClick={() => handleOpenAiDeck()}
-              className="hidden md:flex px-3.5 py-1.5 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:opacity-95 text-white rounded-full text-xs font-semibold transition-all items-center space-x-1.5 shadow-xs ios-btn cursor-pointer shrink-0 whitespace-nowrap"
-              title="Generate flashcards with AI Deck Architect"
-            >
-              <Sparkles size={13} className="text-amber-200 shrink-0" />
-              <span>AI Deck</span>
-            </button>
-
-            {/* Add Card Primary Button (Desktop/Tablet) */}
-            <button
-              onClick={() => handleOpenNewCard()}
-              className="hidden md:flex px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full text-xs font-semibold transition-all items-center space-x-1.5 shadow-xs ios-btn cursor-pointer shrink-0 whitespace-nowrap"
-            >
-              <Plus size={14} />
-              <span>Add Card</span>
-            </button>
-
-            {/* User Account / Auth */}
-            {account.email ? (
-              <div className="flex items-center space-x-1 shrink-0">
-                <button
-                  onClick={() => setIsAccountModalOpen(true)}
-                  className="flex items-center space-x-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors ios-btn cursor-pointer shadow-xs"
-                  title={`Logged in as ${account.email}`}
-                >
-                  <KittyAvatar size={20} />
-                  <span className="max-w-[75px] truncate hidden md:inline font-semibold text-slate-900">{account.name}</span>
-                </button>
+              {account.email ? (
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors ios-btn cursor-pointer"
+                  className="p-1.5 rounded-xl text-cocoa-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut size={15} />
                 </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => { sounds.playClick(); setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all ios-btn shadow-xs cursor-pointer shrink-0"
-                title="Create an account to enable cloud storage and sync across devices"
-              >
-                <Cloud size={13} />
-                <span>Sync</span>
-              </button>
-            )}
+              ) : (
+                <button
+                  onClick={() => { sounds.playClick(); setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
+                  className="p-1.5 rounded-xl text-strawberry-600 hover:bg-white transition-colors cursor-pointer"
+                  title="Enable Cloud Sync"
+                >
+                  <Cloud size={15} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      {/* Offline Status Alert Banner */}
-      {!isOnline && (
-        <div className="bg-amber-600 text-white text-xs font-semibold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
-          <WifiOff size={14} className="shrink-0" />
-          <span>Offline Mode Active — Studying and reviewing works completely offline without internet.</span>
-        </div>
-      )}
+      {/* 🍱 MAIN STAGE: THE BENTO DESK MAT WORKSPACE 🍱 */}
+      <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* Mobile Top Header (Phone Only) */}
+        <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EFE8DE] px-4 py-3 flex items-center justify-between shadow-2xs">
+          <div 
+            onClick={() => {
+              sounds.playClick();
+              setActiveStudyDeck(null);
+              setCurrentTab('decks');
+            }}
+            className="flex items-center space-x-2 cursor-pointer"
+          >
+            <KittyBow size={20} />
+            <span className="font-extrabold text-base tracking-tight text-[#3E2D28]">Ankitti 🎀</span>
+          </div>
 
-      {/* Online Restored Toast */}
-      {showOnlineToast && (
-        <div className="bg-emerald-600 text-white text-xs font-semibold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
-          <span>Back online! Synced smoothly with cloud.</span>
-        </div>
-      )}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setIsPomodoroOpen(prev => !prev)}
+              className="p-2 rounded-xl bg-[#FAF7F2] text-strawberry-600 border border-[#EFE8DE] cursor-pointer"
+              title="Focus Timer"
+            >
+              <Timer size={16} />
+            </button>
 
-      {/* Main Workspace Frame (Natural Document Scrolling) */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 pt-6 pb-24">
-        {activeStudyDeck ? (
-          <StudySession
-            deck={activeStudyDeck}
-            cards={cards.filter(c => c.deckId === activeStudyDeck.id)}
-            initialFilterMode={studyMode}
-            initialMode={studyMode}
-            onBack={() => setActiveStudyDeck(null)}
-            onUpdateCard={handleUpdateCardAfterReview}
-            onEditCard={handleEditCard}
-          />
-        ) : (
-          <>
-            {currentTab === 'decks' && (
-              <DeckList
-                decks={decks}
-                getDeckStats={getDeckStats}
-                hasDraftForDeck={hasDraftForDeck}
-                onStudyDeck={(deck, mode = 'due') => {
-                  setActiveStudyDeck(deck);
-                  setStudyMode(mode);
-                }}
-                onAddCardToDeck={(deck) => handleOpenNewCard(deck)}
-                onEditDeck={(deck) => { setEditingDeck(deck); setIsDeckModalOpen(true); }}
-                onDeleteDeck={handleDeleteDeck}
-                onExportDeck={handleExportDeck}
-                onCreateDeck={() => { setEditingDeck(null); setIsDeckModalOpen(true); }}
-                onOpenImport={() => setIsImportModalOpen(true)}
-                onOpenAiDeck={(deck) => handleOpenAiDeck(deck)}
-                onMergeDeck={handleOpenMergeDeck}
-              />
-            )}
+            <button
+              onClick={() => setIsAccountModalOpen(true)}
+              className="cursor-pointer"
+            >
+              <KittyAvatar size={28} />
+            </button>
+          </div>
+        </header>
 
-            {currentTab === 'browser' && (
-              <CardBrowser
-                decks={decks}
-                cards={cards}
-                onEditCard={handleEditCard}
-                onDeleteCard={handleDeleteCard}
-                onNewCard={() => handleOpenNewCard()}
-              />
-            )}
+        {/* Offline Status Alert Banner */}
+        {!isOnline && (
+          <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
+            <WifiOff size={14} className="shrink-0" />
+            <span>Offline Mode Active — Studying works completely offline without internet.</span>
+          </div>
+        )}
 
-            {currentTab === 'stats' && (
-              <div className="max-w-3xl mx-auto">
-                <StatsModal
-                  isOpen={true}
-                  isInline={true}
-                  account={account}
+        {/* Online Restored Toast */}
+        {showOnlineToast && (
+          <div className="bg-matcha-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
+            <span>Back online! Synced smoothly with cloud. ✨</span>
+          </div>
+        )}
+
+        {/* Top Active Study Header Bar (When inside an active flashcard deck) */}
+        {activeStudyDeck && (
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#EFE8DE] px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs">
+            <button
+              onClick={() => { sounds.playClick(); setActiveStudyDeck(null); }}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE8DE] text-[#3E2D28] text-xs font-bold border border-[#EFE8DE] transition-colors cursor-pointer"
+            >
+              <ArrowLeft size={13} />
+              <span>Exit Study Mode</span>
+            </button>
+
+            <div className="flex items-center space-x-2 text-xs font-bold text-[#3E2D28]">
+              <span className="p-1 rounded-lg bg-strawberry-50 text-strawberry-600">
+                <KittyBow size={14} />
+              </span>
+              <span className="truncate max-w-xs">{activeStudyDeck.name}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Workspace Canvas (Natural Scroll Area) */}
+        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 pb-24 md:pb-12">
+          {activeStudyDeck ? (
+            <StudySession
+              deck={activeStudyDeck}
+              cards={cards.filter(c => c.deckId === activeStudyDeck.id)}
+              initialFilterMode={studyMode}
+              initialMode={studyMode}
+              onBack={() => setActiveStudyDeck(null)}
+              onUpdateCard={handleUpdateCardAfterReview}
+              onEditCard={handleEditCard}
+            />
+          ) : (
+            <>
+              {currentTab === 'decks' && (
+                <DeckList
+                  decks={decks}
+                  getDeckStats={getDeckStats}
+                  hasDraftForDeck={hasDraftForDeck}
+                  onStudyDeck={(deck, mode = 'due') => {
+                    setActiveStudyDeck(deck);
+                    setStudyMode(mode);
+                  }}
+                  onAddCardToDeck={(deck) => handleOpenNewCard(deck)}
+                  onEditDeck={(deck) => { setEditingDeck(deck); setIsDeckModalOpen(true); }}
+                  onDeleteDeck={handleDeleteDeck}
+                  onExportDeck={handleExportDeck}
+                  onCreateDeck={() => { setEditingDeck(null); setIsDeckModalOpen(true); }}
+                  onOpenImport={() => setIsImportModalOpen(true)}
+                  onOpenAiDeck={(deck) => handleOpenAiDeck(deck)}
+                  onMergeDeck={handleOpenMergeDeck}
+                />
+              )}
+
+              {currentTab === 'browser' && (
+                <CardBrowser
                   decks={decks}
                   cards={cards}
-                  reviewLogs={reviewLogs}
-                  onClose={() => setCurrentTab('decks')}
+                  onEditCard={handleEditCard}
+                  onDeleteCard={handleDeleteCard}
+                  onNewCard={() => handleOpenNewCard()}
                 />
-              </div>
-            )}
-          </>
-        )}
-      </main>
+              )}
 
-      {/* Modals */}
+              {currentTab === 'stats' && (
+                <div className="max-w-4xl mx-auto">
+                  <StatsModal
+                    isOpen={true}
+                    isInline={true}
+                    account={account}
+                    decks={decks}
+                    cards={cards}
+                    reviewLogs={reviewLogs}
+                    onClose={() => setCurrentTab('decks')}
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </div>
+
+      {/* Floating Pomodoro Widget for Mobile / Small Screens */}
+      <div className="md:hidden">
+        <PomodoroWidget 
+          isOpen={isPomodoroOpen} 
+          onClose={() => setIsPomodoroOpen(false)} 
+        />
+      </div>
+
+      {/* Mobile Bottom Navigation Dock (Phone Only) */}
+      {!activeStudyDeck && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-[#EFE8DE] px-4 pt-1 pb-safe shadow-[0_-4px_20px_rgba(62,45,40,0.06)] flex items-center justify-around select-none">
+          <button
+            onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              currentTab === 'decks' ? 'text-strawberry-600 font-extrabold' : 'text-cocoa-500 font-semibold'
+            }`}
+          >
+            <Layers size={19} className={currentTab === 'decks' ? 'text-strawberry-500' : 'text-cocoa-400'} />
+            <span className="text-[11px] mt-0.5">Decks</span>
+          </button>
+
+          <button
+            onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              currentTab === 'browser' ? 'text-strawberry-600 font-extrabold' : 'text-cocoa-500 font-semibold'
+            }`}
+          >
+            <Search size={19} className={currentTab === 'browser' ? 'text-strawberry-500' : 'text-cocoa-400'} />
+            <span className="text-[11px] mt-0.5">Cards</span>
+          </button>
+
+          <button
+            onClick={() => handleOpenNewCard()}
+            className="w-12 h-12 -mt-5 rounded-full bg-strawberry-500 active:bg-strawberry-600 text-white flex items-center justify-center shadow-lg shadow-strawberry-500/30 border-2 border-white transition-transform active:scale-95 cursor-pointer"
+            title="Create New Card"
+          >
+            <Plus size={24} strokeWidth={2.5} />
+          </button>
+
+          <button
+            onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
+              currentTab === 'stats' ? 'text-strawberry-600 font-extrabold' : 'text-cocoa-500 font-semibold'
+            }`}
+          >
+            <BarChart2 size={19} className={currentTab === 'stats' ? 'text-strawberry-500' : 'text-cocoa-400'} />
+            <span className="text-[11px] mt-0.5">Garden</span>
+          </button>
+
+          <button
+            onClick={() => handleOpenAiDeck()}
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-taro-600 font-semibold cursor-pointer active:scale-95"
+            title="AI Deck Architect"
+          >
+            <Sparkles size={19} className="text-taro-500" />
+            <span className="text-[11px] mt-0.5">AI Deck</span>
+          </button>
+        </nav>
+      )}
+
+      {/* Global Modals */}
       {(targetDeckForCard || decks[0]) && (
         <CardEditorModal
           isOpen={isCardEditorOpen}
@@ -961,70 +1072,6 @@ export function App() {
         onDeckCreated={handleAiDeckCreated}
       />
 
-      {/* Mobile Bottom Navigation Bar (Phone Only) */}
-      {!activeStudyDeck && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/80 px-4 pt-1 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center justify-around select-none">
-          {/* Decks Tab */}
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'decks' 
-                ? 'text-rose-600 font-bold' 
-                : 'text-slate-500 font-medium hover:text-slate-900'
-            }`}
-          >
-            <Layers size={20} className={currentTab === 'decks' ? 'text-rose-500' : 'text-slate-400'} />
-            <span className="text-[11px] mt-0.5 tracking-tight">Decks</span>
-          </button>
-
-          {/* Card Browser Tab */}
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'browser' 
-                ? 'text-rose-600 font-bold' 
-                : 'text-slate-500 font-medium hover:text-slate-900'
-            }`}
-          >
-            <Search size={20} className={currentTab === 'browser' ? 'text-rose-500' : 'text-slate-400'} />
-            <span className="text-[11px] mt-0.5 tracking-tight">Cards</span>
-          </button>
-
-          {/* Quick Floating Add Card Button */}
-          <button
-            onClick={() => handleOpenNewCard()}
-            className="w-12 h-12 -mt-5 rounded-full bg-rose-500 active:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 border-2 border-white transition-transform active:scale-95 cursor-pointer"
-            title="Create New Card"
-          >
-            <Plus size={24} strokeWidth={2.5} />
-          </button>
-
-          {/* Stats Tab */}
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'stats' 
-                ? 'text-rose-600 font-bold' 
-                : 'text-slate-500 font-medium hover:text-slate-900'
-            }`}
-          >
-            <BarChart2 size={20} className={currentTab === 'stats' ? 'text-rose-500' : 'text-slate-400'} />
-            <span className="text-[11px] mt-0.5 tracking-tight">Stats</span>
-          </button>
-
-          {/* AI Deck Architect Modal Trigger */}
-          <button
-            onClick={() => handleOpenAiDeck()}
-            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-purple-600 font-medium cursor-pointer active:scale-95"
-            title="AI Deck Architect"
-          >
-            <Sparkles size={20} className="text-purple-500" />
-            <span className="text-[11px] mt-0.5 tracking-tight text-purple-600 font-semibold">AI Deck</span>
-          </button>
-        </nav>
-      )}
-
-      {/* PWA Mobile Offline Installation Modal */}
       <PwaInstallModal
         isOpen={isInstallModalOpen}
         onClose={() => setIsInstallModalOpen(false)}

@@ -144,7 +144,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           name: generatedResult.deck.name,
           description: generatedResult.deck.description,
           icon: generatedResult.deck.icon || '🤖',
-          color: generatedResult.deck.color || '#f43f5e',
+          color: generatedResult.deck.color || '#FF4D88',
           settings: {
             ...DEFAULT_DECK_SETTINGS,
             newCardsPerDay: 20,
@@ -208,32 +208,32 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-t-[28px] sm:rounded-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border border-slate-200 flex flex-col ios-bottom-sheet sm:animate-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#FAF7F2] rounded-t-[28px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border border-[#EFE8DE] flex flex-col ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber */}
-        <div className="pt-2 pb-1 flex justify-center bg-slate-50 sm:hidden">
-          <div className="w-10 h-1 bg-slate-300 rounded-full" />
+        <div className="pt-2 pb-1 flex justify-center bg-white/50 sm:hidden">
+          <div className="w-10 h-1 bg-cocoa-200 rounded-full" />
         </div>
 
         {/* Modal Header */}
-        <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100 bg-white">
+        <div className="px-5 py-3.5 flex items-center justify-between border-b border-[#EFE8DE] bg-white">
           <div className="flex items-center space-x-2.5">
-            <span className="p-1.5 bg-rose-50 rounded-lg text-rose-500 border border-rose-100 flex items-center justify-center">
+            <span className="p-1.5 bg-strawberry-50 rounded-xl text-strawberry-600 border border-strawberry-100 flex items-center justify-center">
               <Bot size={18} />
             </span>
             <div>
-              <div className="text-sm font-bold text-slate-900 tracking-tight flex items-center space-x-1.5">
+              <div className="text-sm font-extrabold text-[#3E2D28] tracking-tight flex items-center space-x-1.5">
                 <span>AI Deck Architect</span>
                 <KittyBow size={15} />
               </div>
-              <div className="text-[11px] text-slate-500">Generate high-yield flashcards with clozes and mnemonics</div>
+              <div className="text-[11px] text-cocoa-500">Generate high-yield flashcards with clozes and mnemonics</div>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-500 hover:text-[#3E2D28] transition-colors cursor-pointer"
             title="Close"
           >
             <X size={15} />
@@ -245,8 +245,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           
           {/* Error Notice */}
           {errorMessage && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-start space-x-2.5">
-              <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
+            <div className="p-3.5 bg-strawberry-50 border border-strawberry-200 rounded-2xl text-strawberry-800 text-xs flex items-start space-x-2.5">
+              <AlertCircle size={16} className="text-strawberry-600 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <strong className="block font-bold">Notice</strong>
                 <span>{errorMessage}</span>
@@ -258,22 +258,22 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
             <form onSubmit={handleGenerate} className="space-y-4">
               
               {/* Destination Selector: Add to Existing Deck vs Create New Deck */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+              <div className="p-3.5 bg-white rounded-2xl border border-[#EFE8DE] space-y-2 shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 flex items-center space-x-1.5">
-                    <Layers size={13} className="text-slate-500" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-cocoa-600 flex items-center space-x-1.5">
+                    <Layers size={13} className="text-cocoa-500" />
                     <span>Destination</span>
                   </span>
 
                   {decks.length > 0 && (
-                    <div className="inline-flex p-0.5 bg-white rounded-lg border border-slate-200 text-[10px] font-semibold shadow-2xs">
+                    <div className="inline-flex p-0.5 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE] text-[10px] font-bold shadow-2xs">
                       <button
                         type="button"
                         onClick={() => { sounds.playClick(); setDestinationMode('existing'); }}
-                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                           destinationMode === 'existing'
-                            ? 'bg-rose-500 text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-800'
+                            ? 'bg-strawberry-500 text-white shadow-2xs'
+                            : 'text-cocoa-500 hover:text-cocoa-800'
                         }`}
                       >
                         Add to Existing
@@ -281,10 +281,10 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                       <button
                         type="button"
                         onClick={() => { sounds.playClick(); setDestinationMode('new'); }}
-                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                           destinationMode === 'new'
-                            ? 'bg-rose-500 text-white shadow-xs'
-                            : 'text-slate-500 hover:text-slate-800'
+                            ? 'bg-strawberry-500 text-white shadow-2xs'
+                            : 'text-cocoa-500 hover:text-cocoa-800'
                         }`}
                       >
                         + New Deck
@@ -294,11 +294,11 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 </div>
 
                 {destinationMode === 'existing' && decks.length > 0 ? (
-                  <div className="space-y-1 pt-0.5">
+                  <div className="space-y-1.5 pt-0.5">
                     <select
                       value={targetDeckId}
                       onChange={(e) => setTargetDeckId(e.target.value)}
-                      className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
+                      className="w-full text-xs font-bold text-[#3E2D28] bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400"
                     >
                       {decks.map(d => (
                         <option key={d.id} value={d.id}>
@@ -306,13 +306,13 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                         </option>
                       ))}
                     </select>
-                    <div className="text-[10px] text-slate-500 font-medium px-1 flex items-center space-x-1">
+                    <div className="text-[10px] text-cocoa-600 font-semibold px-1 flex items-center space-x-1">
                       <span>✓ Cards will be added into</span>
-                      <strong className="font-semibold text-slate-800">{selectedDeck?.name || 'this deck'}</strong>
+                      <strong className="font-bold text-[#3E2D28]">{selectedDeck?.name || 'this deck'}</strong>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-slate-500 font-normal px-1">
+                  <div className="text-[10px] text-cocoa-500 font-normal px-1">
                     AI will automatically title and create a brand new deck in your collection.
                   </div>
                 )}
@@ -320,9 +320,9 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
 
               {/* Presets */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1.5 text-[11px] flex items-center justify-between">
+                <label className="block font-bold text-cocoa-700 mb-1.5 text-[11px] flex items-center justify-between">
                   <span>Quick Presets</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Click to fill</span>
+                  <span className="text-[10px] text-cocoa-400 font-normal">Click to fill</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESET_TOPICS.map((p, idx) => (
@@ -330,7 +330,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                       type="button"
                       key={idx}
                       onClick={() => setTopic(p.topic)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 text-[11px] font-medium transition-all cursor-pointer"
+                      className="px-2.5 py-1 rounded-xl bg-white hover:bg-strawberry-50 hover:text-strawberry-700 hover:border-strawberry-200 text-cocoa-700 border border-[#EFE8DE] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
                     >
                       {p.label}
                     </button>
@@ -340,8 +340,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
 
               {/* Topic Input */}
               <div className="space-y-1">
-                <label className="block font-semibold text-slate-700 text-xs">
-                  Topic or Concept <span className="text-rose-500 font-bold">*</span>
+                <label className="block font-bold text-cocoa-700 text-xs">
+                  Topic or Concept <span className="text-strawberry-500 font-bold">*</span>
                 </label>
                 <input
                   type="text"
@@ -349,33 +349,33 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. Japanese JLPT N5 Verbs, or Cardiac Arrhythmias..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE8DE] text-xs text-[#3E2D28] font-bold focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
                 />
               </div>
 
               {/* Source Notes Paste Area */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="block font-semibold text-slate-700 text-xs">
+                  <label className="block font-bold text-cocoa-700 text-xs">
                     Paste Lecture Notes or Text (Optional)
                   </label>
-                  <span className="text-[10px] text-slate-400">Extract high-yield cards</span>
+                  <span className="text-[10px] text-cocoa-400">Extract high-yield cards</span>
                 </div>
                 <textarea
                   rows={4}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Paste your raw notes, study guides, or syllabus here. The AI will distill them into optimal flashcards with clozes and mnemonics..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-normal focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs resize-y"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE8DE] text-xs text-[#3E2D28] font-normal focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs resize-y"
                 />
               </div>
 
               {/* Generation Controls: Card count & Card Style */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3.5 rounded-2xl border border-[#EFE8DE] shadow-2xs">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="font-semibold text-slate-700 text-[11px]">
-                      Cards to Generate: <strong className="text-rose-600">{cardCount}</strong>
+                    <label className="font-bold text-cocoa-700 text-[11px]">
+                      Cards to Generate: <strong className="text-strawberry-600">{cardCount}</strong>
                     </label>
                   </div>
                   <input
@@ -385,9 +385,9 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     step="1"
                     value={cardCount}
                     onChange={(e) => setCardCount(parseInt(e.target.value))}
-                    className="w-full accent-rose-500 cursor-pointer"
+                    className="w-full accent-strawberry-500 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
+                  <div className="flex justify-between text-[10px] text-cocoa-400 mt-0.5 font-semibold">
                     <span>3 Quick</span>
                     <span>8 Standard</span>
                     <span>15 Deep</span>
@@ -395,15 +395,15 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="font-semibold text-slate-700 text-[11px] block mb-1.5">
+                  <label className="font-bold text-cocoa-700 text-[11px] block mb-1.5">
                     Flashcard Style
                   </label>
-                  <div className="inline-flex p-0.5 bg-white rounded-lg border border-slate-200 shadow-2xs w-full">
+                  <div className="inline-flex p-0.5 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE] shadow-2xs w-full">
                     <button
                       type="button"
                       onClick={() => setStyle('mixed')}
-                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
-                        style === 'mixed' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
+                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                        style === 'mixed' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
                       }`}
                     >
                       Mixed
@@ -411,8 +411,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setStyle('basic')}
-                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
-                        style === 'basic' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
+                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                        style === 'basic' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
                       }`}
                     >
                       Q&A
@@ -420,8 +420,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setStyle('cloze')}
-                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
-                        style === 'cloze' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
+                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                        style === 'cloze' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
                       }`}
                     >
                       Cloze
@@ -431,25 +431,25 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Custom API Key Collapsible */}
-              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden text-xs">
+              <div className="rounded-2xl border border-[#EFE8DE] bg-white overflow-hidden text-xs shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setShowKeyInput(!showKeyInput)}
-                  className="w-full px-3.5 py-2 flex items-center justify-between text-left text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                  className="w-full px-3.5 py-2.5 flex items-center justify-between text-left text-cocoa-700 hover:text-[#3E2D28] transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center space-x-1.5 font-medium text-[11px]">
-                    <Key size={13} className="text-slate-400" />
+                  <span className="flex items-center space-x-1.5 font-bold text-[11px]">
+                    <Key size={13} className="text-strawberry-500" />
                     <span>DeepSeek API Key {customApiKey ? '✓ (Custom key configured)' : '(Optional)'}</span>
                   </span>
-                  <span className="text-[10px] text-slate-500 font-semibold">
+                  <span className="text-[10px] text-cocoa-500 font-bold">
                     {showKeyInput ? 'Hide' : 'Configure'}
                   </span>
                 </button>
                 
                 {showKeyInput && (
-                  <div className="p-3 pt-1 space-y-2 border-t border-slate-100 bg-slate-50">
-                    <p className="text-[11px] text-slate-600 leading-relaxed">
-                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-slate-200 text-slate-800 px-1 py-0.5 rounded text-[10px]">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key:
+                  <div className="p-3 pt-1 space-y-2 border-t border-[#EFE8DE] bg-[#FAF7F2]">
+                    <p className="text-[11px] text-cocoa-600 leading-relaxed font-normal">
+                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-white border border-[#EFE8DE] text-cocoa-800 px-1.5 py-0.5 rounded text-[10px]">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key:
                     </p>
                     <div className="flex items-center space-x-2">
                       <input
@@ -457,19 +457,19 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                         value={customApiKey}
                         onChange={(e) => handleSaveCustomKey(e.target.value)}
                         placeholder="sk-..."
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
+                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#EFE8DE] text-xs font-mono text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400"
                       />
                       {customApiKey && (
                         <button
                           type="button"
                           onClick={() => handleSaveCustomKey('')}
-                          className="px-2.5 py-1.5 text-[10px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 cursor-pointer"
+                          className="px-2.5 py-2 text-[10px] font-bold text-strawberry-700 bg-strawberry-50 hover:bg-strawberry-100 rounded-xl border border-strawberry-200 cursor-pointer"
                         >
                           Clear
                         </button>
                       )}
                     </div>
-                    <div className="text-[10px] text-slate-400">
+                    <div className="text-[10px] text-cocoa-400">
                       Stored only in your local browser storage. Never committed to git.
                     </div>
                   </div>
@@ -481,7 +481,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading || !topic.trim()}
-                  className="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs hover:shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
+                  className="squishy-btn w-full py-3 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   {isLoading ? (
                     <div className="flex items-center space-x-2">
@@ -504,19 +504,19 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
             <div className="space-y-4 animate-fadeIn">
               
               {/* Deck Summary Card */}
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+              <div className="p-3.5 bg-white rounded-2xl border border-[#EFE8DE] flex items-center justify-between shadow-2xs">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl p-1.5 bg-white rounded-xl shadow-2xs border border-slate-200">
+                  <span className="text-2xl p-2 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE]">
                     {destinationMode === 'existing' ? (selectedDeck?.icon || '📁') : (generatedResult.deck.icon || '🤖')}
                   </span>
                   <div>
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-rose-600">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-strawberry-600">
                       {destinationMode === 'existing' ? 'Destination Deck' : 'New Deck Title'}
                     </div>
-                    <h3 className="font-bold text-slate-900 text-sm">
+                    <h3 className="font-extrabold text-[#3E2D28] text-sm">
                       {destinationMode === 'existing' ? selectedDeck?.name : generatedResult.deck.name}
                     </h3>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-cocoa-500 mt-0.5">
                       {destinationMode === 'existing'
                         ? 'Cards will be added directly into this deck.'
                         : generatedResult.deck.description}
@@ -525,7 +525,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs font-semibold text-slate-700 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
+                  <span className="text-xs font-bold text-cocoa-700 bg-[#FAF7F2] px-3 py-1 rounded-full border border-[#EFE8DE] shadow-2xs">
                     {selectedCount} / {generatedResult.cards.length} Cards
                   </span>
                 </div>
@@ -539,37 +539,37 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <div
                       key={idx}
                       onClick={() => toggleSelect(idx)}
-                      className={`p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start space-x-3 ${
+                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start space-x-3 ${
                         isSelected 
-                          ? 'bg-white border-slate-300 shadow-2xs ring-1 ring-rose-500/20' 
-                          : 'bg-slate-50 border-slate-200 opacity-60'
+                          ? 'bg-white border-strawberry-200 shadow-2xs ring-1 ring-strawberry-400/20' 
+                          : 'bg-[#FAF7F2] border-[#EFE8DE] opacity-60'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="rounded text-rose-600 focus:ring-rose-400 mt-1 accent-rose-500 w-4 h-4 cursor-pointer"
+                        className="rounded text-strawberry-600 focus:ring-strawberry-400 mt-1 accent-strawberry-500 w-4 h-4 cursor-pointer"
                       />
 
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-strawberry-100/70 text-strawberry-700">
                             {card.type === 'cloze' ? 'Cloze' : 'Q&A'}
                           </span>
-                          <span className="text-[10px] text-slate-400 font-mono">#{idx + 1}</span>
+                          <span className="text-[10px] text-cocoa-400 font-mono">#{idx + 1}</span>
                         </div>
 
-                        <div className="font-semibold text-slate-900 text-xs">
+                        <div className="font-bold text-[#3E2D28] text-xs">
                           {card.front}
                         </div>
 
-                        <div className="text-slate-600 text-[11px] leading-relaxed">
+                        <div className="text-cocoa-600 text-[11px] leading-relaxed">
                           {card.back}
                         </div>
 
                         {card.takeaway && (
-                          <div className="text-[10px] text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 inline-block font-medium">
+                          <div className="text-[10px] text-matcha-800 bg-matcha-50 px-2 py-0.5 rounded-md border border-matcha-200 inline-block font-semibold">
                             💡 {card.takeaway}
                           </div>
                         )}
@@ -580,11 +580,11 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-slate-100">
+              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-[#EFE8DE]">
                 <button
                   type="button"
                   onClick={() => setGeneratedResult(null)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition-colors cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-white hover:bg-cocoa-100 text-cocoa-700 font-semibold text-xs border border-[#EFE8DE] transition-colors cursor-pointer"
                 >
                   ← Back to Prompt
                 </button>
@@ -593,7 +593,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                   type="button"
                   onClick={handleImportToCollection}
                   disabled={isLoading || selectedCount === 0}
-                  className="flex-1 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
+                  className="squishy-btn flex-1 py-2.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle2 size={15} />
                   <span>

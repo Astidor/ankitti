@@ -25,12 +25,13 @@
 
   body {
     font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #0f172a;
-    background-color: #faf9fb;
-    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(244, 63, 94, 0.05), transparent 70%);
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
+    color: #3E2D28; /* Warm Cocoa Primary Ink */
+    background-color: #FAF7F2; /* Warm Cotton-Paper Canvas */
+    background-image: 
+      radial-gradient(circle at 15% 10%, rgba(255, 209, 220, 0.22), transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(216, 243, 220, 0.20), transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(232, 215, 241, 0.15), transparent 60%);
+    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -39,47 +40,138 @@
   }
 
   ::selection {
-    background-color: #ffe4e6;
-    color: #9f1239;
+    background-color: #FFD1DC;
+    color: #831037;
   }
 }
 
-/* Modern Frosted Glass Header & Surfaces */
-.ios-glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.ios-card {
+/* Bento Studio Card Component */
+.bento-card {
   background: #ffffff;
-  border-radius: 1.25rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1.5rem;
+  border: 1px solid #EFE8DE;
+  box-shadow: 0 4px 20px -2px rgba(62, 45, 40, 0.04), 0 2px 6px -1px rgba(62, 45, 40, 0.02);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.ios-card:hover {
+.bento-card:hover {
   transform: translateY(-2px);
-  border-color: #fecdd3;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border-color: #FFD1DC;
+  box-shadow: 0 12px 28px -4px rgba(62, 45, 40, 0.08), 0 4px 10px -2px rgba(62, 45, 40, 0.03);
 }
 
-.ios-card:active {
-  transform: scale(0.99);
+/* Squishy Tactile Button Physics */
+.squishy-btn {
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease, filter 0.15s ease;
+  user-select: none;
 }
 
-/* Subtle Spring Button Feedback */
-.ios-btn {
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+.squishy-btn:active {
+  transform: scale(0.96) translateY(1px);
 }
 
-.ios-btn:active {
-  transform: scale(0.97);
+/* Washi-Tape Accent Sticker */
+.washi-tape {
+  position: relative;
+  background: rgba(255, 209, 220, 0.65);
+  backdrop-filter: blur(4px);
+  border-left: 2px dashed rgba(225, 29, 95, 0.4);
+  border-right: 2px dashed rgba(225, 29, 95, 0.4);
 }
 
-/* Modern Scrollbars */
+/* 3D Perspective Flashcard Container */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Rich Flashcard Cloze Deletion Tags */
+.cloze-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.625rem;
+  background-color: #FFF0F5;
+  color: #BE124C;
+  font-weight: 700;
+  border: 1px dashed #FF85A2;
+  box-shadow: 0 1px 3px rgba(255, 77, 136, 0.12);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.cloze-badge:hover {
+  background-color: #FFE4EE;
+  transform: scale(1.03);
+}
+
+.cloze-active {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 0.625rem;
+  background-color: #E2F6E8;
+  color: #1B652A;
+  font-weight: 700;
+  border: 1px solid #9BDBAF;
+  box-shadow: 0 1px 3px rgba(35, 134, 54, 0.12);
+}
+
+/* Rich Card Markdown Formatting */
+.card-rich-content strong,
+.card-rich-content b {
+  color: #2C1F1B;
+  font-weight: 800;
+}
+
+.card-rich-content em,
+.card-rich-content i {
+  color: #BE124C;
+  font-style: italic;
+}
+
+.card-rich-content u {
+  text-decoration: underline;
+  text-decoration-color: #FF85A2;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+
+.card-rich-content s,
+.card-rich-content strike {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.card-rich-content code {
+  background: #F5EFE9;
+  color: #BE124C;
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.85em;
+  font-weight: 600;
+  border: 1px solid #EAE1D9;
+}
+
+.card-rich-content mark {
+  background: #FEF0A3;
+  color: #3E2D28;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.35rem;
+}
+
+/* Warm Cozy Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -90,162 +182,19 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: #EAE1D9;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: #D5C7BC;
 }
 
-/* Cloze Deletion Badges */
-.cloze-badge {
-  background-color: #fff1f2;
-  color: #be123c;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-  border: 1px dashed #fda4af;
-  display: inline-block;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.cloze-badge:hover {
-  background-color: #ffe4e6;
-  border-color: #fb7185;
-}
-
-.cloze-active {
-  background-color: #f43f5e;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 2px 10px;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
-  display: inline-block;
-}
-
-/* iOS Safe Areas */
+/* Mobile Safe Area Padding */
 .pt-safe {
-  padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
+  padding-top: max(env(safe-area-inset-top, 0px), 12px);
 }
 
 .pb-safe {
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.85rem);
-}
-
-.mb-safe {
-  margin-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem);
-}
-
-@keyframes iosSlideUp {
-  from {
-    transform: translateY(100%);
-    opacity: 0.95;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.ios-bottom-sheet {
-  animation: iosSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Rich Flashcard Typography & Markdown Presentation */
-.card-rich-content {
-  font-family: inherit;
-  color: inherit;
-  word-break: break-word;
-  line-height: 1.6;
-}
-
-.card-rich-content h1 {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #0f172a;
-  margin-top: 0.75rem;
-  margin-bottom: 0.35rem;
-  letter-spacing: -0.02em;
-}
-
-.card-rich-content h2 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-top: 0.65rem;
-  margin-bottom: 0.25rem;
-  letter-spacing: -0.01em;
-}
-
-.card-rich-content h3 {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #334155;
-  margin-top: 0.5rem;
-  margin-bottom: 0.25rem;
-}
-
-.card-rich-content b,
-.card-rich-content strong {
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.card-rich-content u {
-  text-decoration: underline;
-  text-decoration-color: #f43f5e;
-  text-decoration-thickness: 1.5px;
-  text-underline-offset: 3px;
-}
-
-.card-rich-content i,
-.card-rich-content em {
-  font-style: italic;
-  color: #475569;
-}
-
-.card-rich-content s,
-.card-rich-content strike,
-.card-rich-content del {
-  text-decoration: line-through;
-  opacity: 0.65;
-}
-
-.card-rich-content code {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.86em;
-  background-color: #f1f5f9;
-  color: #be123c;
-  padding: 0.15rem 0.4rem;
-  border-radius: 0.35rem;
-  border: 1px solid #e2e8f0;
-}
-
-.card-rich-content ul,
-.card-rich-content ol {
-  margin: 0.5rem 0;
-  padding-left: 1.25rem;
-}
-
-.card-rich-content ul {
-  list-style-type: disc;
-}
-
-.card-rich-content ol {
-  list-style-type: decimal;
-}
-
-.card-rich-content li {
-  margin: 0.2rem 0;
-  line-height: 1.5;
-}
-
-.card-rich-content mark {
-  background-color: #fef08a;
-  color: #713f12;
-  padding: 0.1rem 0.35rem;
-  border-radius: 0.25rem;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
 }

@@ -7,51 +7,98 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#fff1f2',
-          100: '#ffe4e6',
-          200: '#fecdd3',
-          300: '#fda4af',
-          400: '#fb7185',
-          500: '#f43f5e', // Vibrant, elegant rose
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
+        // Warm Cozy Cocoa Palette (Gentle, friendly, high-contrast)
+        cocoa: {
+          50: '#FBF9F7',
+          100: '#F5EFE9',
+          200: '#EAE1D9',
+          300: '#D5C7BC',
+          400: '#A89892',
+          500: '#7C6D68',
+          600: '#5F514C',
+          700: '#4A3E39',
+          800: '#3E2D28', // Primary warm text
+          900: '#2C1F1B',
         },
-        kitty: {
+        // Strawberry Milk (Ankitti Brand Pink)
+        strawberry: {
+          50: '#FFF0F5',
+          100: '#FFE4EE',
+          200: '#FFD1DC',
+          300: '#FFB3C6',
+          400: '#FF85A2',
+          500: '#FF4D88', // Vibrant cute pink
+          600: '#E11D5F',
+          700: '#BE124C',
+          800: '#9B113F',
+          900: '#831037',
+        },
+        // Matcha Green (Health, progress, learning)
+        matcha: {
+          50: '#F0FAF3',
+          100: '#E2F6E8',
+          200: '#C5ECD2',
+          300: '#9BDBAF',
+          400: '#68C485',
+          500: '#34A853',
+          600: '#238636',
+          700: '#1B652A',
+        },
+        // Taro Lavender (Wisdom, memory, deep focus)
+        taro: {
+          50: '#F8F4FF',
+          100: '#EFE7FE',
+          200: '#E1D2FD',
+          300: '#CAB2FA',
+          400: '#AC87F5',
+          500: '#8B5CF6',
+          600: '#7337EB',
+          700: '#5F24D4',
+        },
+        // Buttercream Honey (Streaks, alerts, favorites)
+        honey: {
+          50: '#FFFDF0',
+          100: '#FEF9D9',
+          200: '#FEF0A3',
+          300: '#FDE468',
+          400: '#FBCF2E',
+          500: '#F59E0B',
+          600: '#D97706',
+          700: '#B45309',
+        },
+        // Canvas Ground & Surfaces
+        bento: {
+          canvas: '#FAF7F2',
+          mat: '#FFFFFF',
+          caddy: '#F7F3EC',
+          border: '#EFE8DE',
+          borderLight: '#F5EFE6',
+          shadow: 'rgba(62, 45, 40, 0.06)',
+        },
+        brand: {
           50: '#fff1f4',
           100: '#ffe4ea',
           200: '#fecdd8',
           300: '#fda4b8',
           400: '#fb7195',
-          500: '#f43f5e',
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
-          red: '#f43f5e',
-          gold: '#f59e0b',
-          dark: '#0f172a',
-          subtle: '#64748b',
-          cream: '#faf9fb',
+          500: '#ff4d88',
+          600: '#e11d5f',
+          700: '#be124c',
+          800: '#9b113f',
+          900: '#831037',
         },
-        surface: {
-          DEFAULT: '#ffffff',
-          muted: '#f8fafc',
-          subtle: '#f1f5f9',
-          border: '#e2e8f0',
-        }
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
         mono: ['"JetBrains Mono"', '"SF Mono"', 'Menlo', 'monospace'],
       },
       boxShadow: {
-        'xs': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
-        'card-hover': '0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04)',
-        'glow-rose': '0 0 25px rgba(244, 63, 94, 0.25)',
+        'xs': '0 1px 2px 0 rgba(62, 45, 40, 0.04)',
+        'bento': '0 4px 20px -2px rgba(62, 45, 40, 0.05), 0 2px 6px -1px rgba(62, 45, 40, 0.03)',
+        'bento-hover': '0 12px 30px -4px rgba(62, 45, 40, 0.09), 0 4px 10px -2px rgba(62, 45, 40, 0.04)',
+        'squishy': '0 3px 0 0 #E2D7CC',
+        'squishy-pink': '0 3px 0 0 #D81B60',
+        'squishy-matcha': '0 3px 0 0 #1B652A',
       },
       keyframes: {
         fadeIn: {
@@ -59,18 +106,24 @@ export default {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         scaleIn: {
-          '0%': { opacity: '0', transform: 'scale(0.97)' },
+          '0%': { opacity: '0', transform: 'scale(0.96)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
-        float: {
+        bouncyPop: {
+          '0%': { transform: 'scale(0.95)' },
+          '50%': { transform: 'scale(1.02)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        floatGentle: {
           '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-4px)' },
+          '50%': { transform: 'translateY(-3px)' },
         },
       },
       animation: {
-        fadeIn: 'fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        scaleIn: 'scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        float: 'float 4s ease-in-out infinite',
+        fadeIn: 'fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        scaleIn: 'scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        bouncyPop: 'bouncyPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+        floatGentle: 'floatGentle 4s ease-in-out infinite',
       }
     },
   },

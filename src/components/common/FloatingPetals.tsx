@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 
 interface FloatingPetalsProps {
-  enabled: boolean;
+  enabled?: boolean;
 }
 
-export const FloatingPetals: React.FC<FloatingPetalsProps> = ({ enabled }) => {
+export const FloatingPetals: React.FC<FloatingPetalsProps> = ({ enabled = true }) => {
   const petals = useMemo(() => {
     return Array.from({ length: 6 }).map((_, idx) => {
       const left = 5 + (idx * 16) + Math.random() * 8;

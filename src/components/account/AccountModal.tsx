@@ -100,30 +100,30 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-2xl w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#FAF7F2] rounded-t-[28px] sm:rounded-[28px] w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-[#EFE8DE]">
         
-        {/* iOS Grabber & Header */}
-        <div className="pt-2 pb-1 px-4 flex justify-center bg-slate-50 sm:hidden">
-          <div className="w-10 h-1 bg-slate-300 rounded-full" />
+        {/* iOS Grabber */}
+        <div className="pt-2 pb-1 px-4 flex justify-center bg-white/50 sm:hidden">
+          <div className="w-10 h-1 bg-cocoa-200 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-slate-100 select-none">
-          <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-rose-50 rounded-lg text-rose-500 border border-rose-100 flex items-center justify-center">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-[#EFE8DE] select-none">
+          <div className="flex items-center space-x-2.5">
+            <span className="p-1.5 bg-strawberry-50 rounded-xl text-strawberry-600 border border-strawberry-100 flex items-center justify-center">
               <KittyBow size={16} />
             </span>
             <div>
-              <div className="text-sm font-bold text-slate-900 tracking-tight">
+              <div className="text-sm font-extrabold text-[#3E2D28] tracking-tight">
                 Account & Preferences
               </div>
-              <div className="text-[11px] text-slate-500">Manage your study profile and data backups</div>
+              <div className="text-[11px] text-cocoa-500">Manage your study profile and data backups</div>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+            className="p-1.5 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-500 hover:text-[#3E2D28] transition-colors cursor-pointer"
             title="Close"
           >
             <X size={15} />
@@ -134,29 +134,29 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
           
           {/* User Identity & Cloud Sync Card */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+          <div className="p-4 rounded-2xl bg-white border border-[#EFE8DE] space-y-3 shadow-2xs">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-11 h-11 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-2xs">
+                <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] flex items-center justify-center shadow-2xs">
                   <KittyAvatar size={32} />
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-slate-900">{currentAccount.name}</div>
-                  <div className="text-[11px] text-slate-500 flex items-center space-x-1 mt-0.5">
-                    <Mail size={12} className="text-slate-400" />
+                  <div className="font-extrabold text-sm text-[#3E2D28]">{currentAccount.name}</div>
+                  <div className="text-[11px] text-cocoa-500 flex items-center space-x-1 mt-0.5">
+                    <Mail size={12} className="text-cocoa-400" />
                     <span>{currentAccount.email || 'Local Guest Mode (This Device)'}</span>
                   </div>
                 </div>
               </div>
 
               {currentAccount.email ? (
-                <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-semibold">
-                  <Cloud size={12} className="text-emerald-600" />
+                <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-matcha-50 border border-matcha-200 text-matcha-800 text-[10px] font-bold">
+                  <Cloud size={12} className="text-matcha-600" />
                   <span>Cloud Synced</span>
                 </div>
               ) : (
-                <div className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold">
-                  <CloudOff size={12} className="text-amber-600" />
+                <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-honey-50 border border-honey-200 text-honey-800 text-[10px] font-bold">
+                  <CloudOff size={12} className="text-honey-600" />
                   <span>Local Only</span>
                 </div>
               )}
@@ -164,10 +164,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
             {/* Cloud Storage CTA */}
             {!currentAccount.email && (
-              <div className="pt-2 border-t border-slate-200/60">
+              <div className="pt-2.5 border-t border-[#EFE8DE]">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <div className="text-[11px] text-slate-600 leading-snug">
-                    <strong className="text-slate-800 font-semibold">Want to study across multiple devices?</strong> Create an account for automatic cloud backup.
+                  <div className="text-[11px] text-cocoa-600 leading-snug">
+                    <strong className="text-[#3E2D28] font-bold">Want to study across multiple devices?</strong> Create an account for automatic cloud backup.
                   </div>
                   <button
                     type="button"
@@ -175,7 +175,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                       onClose();
                       onOpenAuth?.('signup');
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-rose-500 hover:bg-rose-600 text-white font-semibold text-[11px] flex items-center justify-center space-x-1.5 shadow-2xs shrink-0 cursor-pointer transition-all"
+                    className="squishy-btn px-3.5 py-1.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-[11px] flex items-center justify-center space-x-1.5 shadow-squishy-pink shrink-0 cursor-pointer transition-all"
                   >
                     <Cloud size={13} />
                     <span>Enable Cloud Sync</span>
@@ -186,15 +186,15 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           </div>
 
           {/* Profile Details Form */}
-          <form onSubmit={handleSaveProfile} className="space-y-3.5 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-            <div className="font-semibold text-slate-800 text-xs flex items-center space-x-1.5 border-b border-slate-100 pb-2">
-              <Sparkles size={14} className="text-rose-500" />
+          <form onSubmit={handleSaveProfile} className="space-y-3.5 bg-white p-4 rounded-2xl border border-[#EFE8DE] shadow-2xs">
+            <div className="font-bold text-[#3E2D28] text-xs flex items-center space-x-1.5 border-b border-[#EFE8DE] pb-2">
+              <Sparkles size={14} className="text-strawberry-500" />
               <span>Study Preferences</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
                   Learner Name
                 </label>
                 <input
@@ -202,12 +202,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-medium text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
                   Role / Specialization
                 </label>
                 <input
@@ -215,12 +215,12 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
                   placeholder="e.g. Student, Engineer, Polyglot"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-medium text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
                   Primary Learning Goal
                 </label>
                 <input
@@ -229,7 +229,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   value={targetExam}
                   onChange={(e) => setTargetExam(e.target.value)}
                   placeholder="e.g. Japanese JLPT N5, USMLE"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-medium text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
                 />
                 <datalist id="goal-options">
                   {GOAL_OPTIONS.map(opt => (
@@ -239,23 +239,23 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium text-slate-700 mb-1">
+                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
                   Target Exam Date
                 </label>
                 <input
                   type="date"
                   value={examDate}
                   onChange={(e) => setExamDate(e.target.value)}
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 bg-white font-mono text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-mono text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
                 />
               </div>
 
               <div className="sm:col-span-2">
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-medium text-slate-700">
+                  <label className="text-[11px] font-bold text-cocoa-700">
                     Daily Card Target
                   </label>
-                  <span className="text-xs font-semibold text-rose-600 font-mono">
+                  <span className="text-xs font-bold text-strawberry-600 font-mono">
                     {dailyGoal} cards / day
                   </span>
                 </div>
@@ -266,18 +266,18 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   step="5"
                   value={dailyGoal}
                   onChange={(e) => setDailyGoal(Number(e.target.value))}
-                  className="w-full accent-rose-500 cursor-pointer"
+                  className="w-full accent-strawberry-500 cursor-pointer"
                 />
               </div>
             </div>
 
             {/* Sound Toggle */}
-            <div className="flex items-center justify-between pt-2.5 border-t border-slate-100">
+            <div className="flex items-center justify-between pt-2.5 border-t border-[#EFE8DE]">
               <div className="flex items-center space-x-2">
-                {soundEnabled ? <Volume2 size={16} className="text-rose-500" /> : <VolumeX size={16} className="text-slate-400" />}
+                {soundEnabled ? <Volume2 size={16} className="text-strawberry-500" /> : <VolumeX size={16} className="text-cocoa-400" />}
                 <div>
-                  <span className="font-semibold text-slate-800 block text-xs">Audio Feedback</span>
-                  <span className="text-[10px] text-slate-500">Audio chimes on card flips and rating choices</span>
+                  <span className="font-bold text-[#3E2D28] block text-xs">Audio Feedback</span>
+                  <span className="text-[10px] text-cocoa-500">Audio chimes on card flips and rating choices</span>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer select-none">
@@ -291,7 +291,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                   }}
                   className="sr-only peer"
                 />
-                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
+                <div className="w-9 h-5 bg-cocoa-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-cocoa-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-strawberry-500"></div>
               </label>
             </div>
 
@@ -299,7 +299,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               <button
                 type="submit"
                 disabled={isSaving}
-                className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
+                className="squishy-btn px-5 py-2.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
               >
                 {saveSuccess ? <Check size={14} /> : <Sparkles size={14} />}
                 <span>{saveSuccess ? 'Changes Saved' : 'Save Preferences'}</span>
@@ -308,8 +308,8 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           </form>
 
           {/* Backup & Data Management */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2.5">
-            <span className="font-semibold text-slate-800 block text-xs">
+          <div className="bg-white p-4 rounded-2xl border border-[#EFE8DE] space-y-2.5 shadow-2xs">
+            <span className="font-bold text-[#3E2D28] block text-xs">
               Data Management & Backup
             </span>
 
@@ -317,9 +317,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
               <button
                 type="button"
                 onClick={handleExportBackup}
-                className="px-3.5 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-2xs flex items-center space-x-1.5 cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] hover:bg-white text-cocoa-700 font-semibold text-xs shadow-2xs flex items-center space-x-1.5 cursor-pointer"
               >
-                <Download size={13} className="text-slate-500" />
+                <Download size={13} className="text-cocoa-500" />
                 <span>Export Backup (.json)</span>
               </button>
 
@@ -332,7 +332,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
                     onClose();
                   }
                 }}
-                className="px-3.5 py-1.5 rounded-lg bg-white border border-rose-200 hover:bg-rose-50 text-rose-700 font-medium text-xs shadow-2xs flex items-center space-x-1.5 ml-auto cursor-pointer"
+                className="px-3.5 py-2 rounded-xl bg-white border border-strawberry-200 hover:bg-strawberry-50 text-strawberry-700 font-semibold text-xs shadow-2xs flex items-center space-x-1.5 ml-auto cursor-pointer"
               >
                 <RotateCcw size={13} />
                 <span>Reset to Starters</span>
@@ -342,10 +342,10 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <div className="p-3.5 bg-white border-t border-[#EFE8DE] flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-medium text-xs transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] hover:bg-cocoa-100 text-cocoa-700 font-bold text-xs transition-colors cursor-pointer"
           >
             Done
           </button>
