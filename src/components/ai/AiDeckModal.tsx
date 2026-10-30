@@ -13,7 +13,8 @@ import {
   Trash2,
   Layers,
   HelpCircle,
-  FolderPlus
+  FolderPlus,
+  Key
 } from 'lucide-react';
 import { Deck, Card, AiDeckResponse, AiDeckCardItem } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
@@ -54,6 +55,19 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [generatedResult, setGeneratedResult] = useState<AiDeckResponse | null>(null);
   const [selectedIndices, setSelectedIndices] = useState<Record<number, boolean>>({});
+  const [customApiKey, setCustomApiKey] = useState<string>(() => {
+    return localStorage.getItem('ankitti_custom_deepseek_key') || '';
+  });
+  const [showKeyInput, setShowKeyInput] = useState<boolean>(false);
+
+  const handleSaveCustomKey = (val: string) => {
+    setCustomApiKey(val);
+    if (val.trim()) {
+      localStorage.setItem('ankitti_custom_deepseek_key', val.trim());
+    } else {
+      localStorage.removeItem('ankitti_custom_deepseek_key');
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -79,12 +93,16 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
     setErrorMessage(null);
     setGeneratedResult(null);
 
+    const storedCustomKey = (localStorage.getItem('ankitti_custom_deepseek_key') || '').trim();
+    const effectiveKey = customApiKey.trim() || storedCustomKey || undefined;
+
     try {
       const result = await api.generateAiDeck({
         topic: topic.trim(),
         cardCount,
         notes: notes.trim(),
         style,
+        apiKey: effectiveKey,
       });
 
       setGeneratedResult(result);
@@ -99,7 +117,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
       sounds.playRating(1);
       const msg = err instanceof Error ? err.message : 'AI Generation failed';
       if (msg === 'KEY_MISSING' || msg === 'AI_API_KEY_MISSING') {
-        setErrorMessage('AI Deck architect service is not configured or temporarily unavailable.');
+        setShowKeyInput(true);
+        setErrorMessage('DeepSeek API key is not configured in Cloudflare yet. You can provide your own API key below to generate cards immediately!');
       } else {
         setErrorMessage(msg);
       }
@@ -417,6 +436,52 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     </button>
                   </div>
                 </div>
+              </div>
+
+              {/* Custom API Key Collapsible */}
+              <div className="rounded-2xl border border-pink-200/80 bg-white/70 overflow-hidden text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowKeyInput(!showKeyInput)}
+                  className="w-full px-4 py-2.5 flex items-center justify-between text-left text-kitty-subtle hover:text-kitty-dark transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center space-x-1.5 font-bold text-[11px]">
+                    <Key size={13} className="text-pink-500" />
+                    <span>DeepSeek API Key {customApiKey ? '✓ (Custom key configured)' : '(Optional)'}</span>
+                  </span>
+                  <span className="text-[10px] text-pink-600 font-bold">
+                    {showKeyInput ? 'Hide ▲' : 'Configure ▼'}
+                  </span>
+                </button>
+                
+                {showKeyInput && (
+                  <div className="p-3.5 pt-1 space-y-2 border-t border-pink-100 bg-pink-50/30">
+                    <p className="text-[11px] text-slate-600 leading-relaxed">
+                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-pink-100 text-pink-700 px-1 py-0.5 rounded text-[10px] font-bold">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key here:
+                    </p>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="password"
+                        value={customApiKey}
+                        onChange={(e) => handleSaveCustomKey(e.target.value)}
+                        placeholder="sk-..."
+                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-pink-200 text-xs font-mono focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                      />
+                      {customApiKey && (
+                        <button
+                          type="button"
+                          onClick={() => handleSaveCustomKey('')}
+                          className="px-2.5 py-2 text-[10px] font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-[9px] text-slate-500 flex items-center space-x-1">
+                      <span>🔒 Stored only in your local browser storage. Never saved to git or server logs.</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Submit Button */}

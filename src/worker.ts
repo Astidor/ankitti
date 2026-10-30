@@ -274,10 +274,19 @@ export default {
 
     // Health check endpoint
     if (url.pathname === '/api/health') {
+      const envKeys = Object.keys(env || {}).filter(k => k !== 'DB' && k !== 'ASSETS');
+      const hasAiKey = Boolean(
+        env.DEEPSEEK_API_KEY ||
+        (env as any)?.deepseek_api_key ||
+        (env as any)?.DEEP_SEEK_API_KEY ||
+        (globalThis as any)?.DEEPSEEK_API_KEY
+      );
       return jsonResponse({
         status: 'ok',
         service: 'Ankitti Cloudflare Edge Worker API',
         databaseBound: Boolean(env.DB),
+        aiConfigured: hasAiKey,
+        detectedVars: envKeys,
         time: Date.now(),
       });
     }
@@ -292,7 +301,14 @@ export default {
           return jsonResponse({ error: 'Please provide a topic or prompt for AI deck generation.' }, 400);
         }
 
-        const apiKey = (clientKey || env.DEEPSEEK_API_KEY || '').trim();
+        const rawKey = clientKey ||
+          env.DEEPSEEK_API_KEY ||
+          (env as any)?.deepseek_api_key ||
+          (env as any)?.DEEP_SEEK_API_KEY ||
+          (globalThis as any)?.DEEPSEEK_API_KEY ||
+          '';
+
+        const apiKey = String(rawKey).replace(/^["']|["']$/g, '').trim();
 
         if (!apiKey || apiKey === 'your_deepseek_api_key_here') {
           return jsonResponse({

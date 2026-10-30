@@ -433,10 +433,10 @@ class ApiService {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({ error: 'AI generation failed' }));
-      if (err.error === 'DEEPSEEK_API_KEY_MISSING') {
+      if (err.error === 'DEEPSEEK_API_KEY_MISSING' || err.error === 'AI_API_KEY_MISSING') {
         throw new Error('KEY_MISSING');
       }
-      throw new Error(err.error || err.message || 'Failed to generate deck with DeepSeek.');
+      throw new Error(err.message || err.error || 'Failed to generate deck with DeepSeek.');
     }
 
     return await res.json();
