@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   ZoomIn,
   Sparkles,
-  Heart
+  ArrowRight
 } from 'lucide-react';
 import { Card, Deck } from '../../types/anki';
 import { answerCard, getIntervalPreviews } from '../../services/scheduler';
@@ -49,7 +49,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
   const [sessionStartTime] = useState<number>(Date.now());
   const [lightboxImage, setLightboxImage] = useState<{ src: string; title: string } | null>(null);
 
-  // Build the review queue based on filter mode
+  // Build review queue based on filter mode
   const buildQueue = useCallback((mode: StudyFilterMode) => {
     const now = Date.now();
     let selected: Card[] = [];
@@ -118,110 +118,106 @@ export const StudySession: React.FC<StudySessionProps> = ({
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isCompleted || !currentCard) return;
-
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
-        return;
-      }
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
       if (e.code === 'Space') {
         e.preventDefault();
         if (!isFlipped) {
           handleFlip();
         } else {
-          handleRating(3);
+          handleRating(3); // Default space rating = Good
         }
       } else if (isFlipped) {
         if (e.key === '1') handleRating(1);
-        if (e.key === '2') handleRating(2);
-        if (e.key === '3') handleRating(3);
-        if (e.key === '4') handleRating(4);
-      }
-
-      if (e.key.toLowerCase() === 'e' && currentCard) {
+        else if (e.key === '2') handleRating(2);
+        else if (e.key === '3') handleRating(3);
+        else if (e.key === '4') handleRating(4);
+      } else if (e.key.toLowerCase() === 'e' && currentCard) {
+        e.preventDefault();
         onEditCard(currentCard);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentCard, handleFlip, handleRating, isCompleted, isFlipped, onEditCard]);
-
-  const previews = currentCard ? getIntervalPreviews(currentCard, deck.settings) : {
-    again: '< 10m',
-    hard: '12h',
-    good: '1d',
-    easy: '4d',
-  };
+  }, [isFlipped, handleFlip, handleRating, currentCard, onEditCard]);
 
   const handleRelearn = (mode: StudyFilterMode) => {
     sounds.playClick();
     setFilterMode(mode);
     buildQueue(mode);
-    setIsCompleted(false);
   };
 
-  // Progress Percentage
-  const progressPercent = queue.length > 0 
-    ? Math.round(((currentCardIndex + 1) / queue.length) * 100) 
-    : 100;
+  const cleanDeckTitle = (name: string) => {
+    return name
+      .replace(/^(\p{Extended_Pictographic}|\p{Regional_Indicator}{2})\s*/u, '')
+      .replace(/^(JP|ES|CS:?)\s*/i, '')
+      .trim() || name;
+  };
 
-  // 🌸 COMPLETION CELEBRATION SCREEN 🌸
-  if (isCompleted || !currentCard) {
-    const elapsedMinutes = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
+  const previews = currentCard
+    ? getIntervalPreviews(currentCard, deck.settings)
+    : { again: '<10m', hard: '1d', good: '2d', easy: '4d' };
 
+  const progressPercent = queue.length > 0 ? (currentCardIndex / queue.length) * 100 : 100;
+  const elapsedMinutes = Math.max(1, Math.round((Date.now() - sessionStartTime) / 60000));
+
+  // 🌸 CELEBRATION COMPLETION VIEW 🌸
+  if (isCompleted || queue.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[500px] p-6 text-center animate-fadeIn max-w-xl mx-auto select-none">
-        {/* Mascot Celebrate Illustration */}
-        <div className="w-36 h-36 mb-4 relative flex items-center justify-center animate-bouncyPop">
-          <AestheticMascot pose="celebrate" className="w-full h-full object-contain" />
+      <div className="flex flex-col items-center justify-center py-12 px-4 max-w-lg mx-auto text-center animate-fadeIn select-none">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white border border-[#EAE4DC] p-2 mb-4 shadow-subtle flex items-center justify-center">
+          <img 
+            src="/assets/celebrate_mascot.png" 
+            alt="Celebrate" 
+            className="w-full h-full object-cover rounded-xl"
+          />
         </div>
 
-        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-matcha-50 border border-matcha-200 text-matcha-700 text-xs font-bold mb-3 shadow-2xs">
-          <CheckCircle2 size={14} className="text-matcha-600" />
-          <span>Session Completed ✨</span>
+        <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-matcha-50 text-matcha-700 text-xs font-semibold mb-2 border border-matcha-200">
+          <CheckCircle2 size={13} className="text-matcha-600" />
+          <span>Session Finished!</span>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#3E2D28] tracking-tight mb-2">
-          Otsukaresama! Great Job! 🌸
+        <h2 className="text-xl sm:text-2xl font-bold text-cocoa-900 tracking-tight">
+          Otsukaresama! 🌸
         </h2>
-        
-        <p className="text-xs sm:text-sm text-cocoa-500 max-w-md mb-6 leading-relaxed font-medium">
-          You finished all scheduled cards for <strong className="text-[#3E2D28] font-bold">{deck.name}</strong>. Your spaced repetition intervals are locked in.
+        <p className="text-xs text-cocoa-500 mt-1 max-w-sm leading-relaxed">
+          You finished studying <strong className="text-cocoa-800">{cleanDeckTitle(deck.name)}</strong>. Memory intervals updated smoothly.
         </p>
 
-        {/* Bento Recap Metrics */}
-        <div className="grid grid-cols-2 gap-3.5 w-full max-w-xs mb-6">
-          <div className="bg-white border-2 border-[#FFD1DC] p-4 rounded-3xl shadow-bento">
-            <div className="text-3xl font-extrabold text-strawberry-600">{studiedCount}</div>
-            <div className="text-[11px] font-bold text-cocoa-500 mt-0.5">Cards Reviewed</div>
+        {/* Stats Summary */}
+        <div className="grid grid-cols-2 gap-3 w-full my-5">
+          <div className="p-3.5 bg-white rounded-xl border border-[#EAE4DC] shadow-subtle text-center">
+            <div className="text-2xl font-extrabold text-cocoa-900">{studiedCount}</div>
+            <div className="text-[11px] font-medium text-cocoa-500 mt-0.5">Cards Reviewed</div>
           </div>
-          <div className="bg-white border-2 border-[#C5ECD2] p-4 rounded-3xl shadow-bento">
-            <div className="text-3xl font-extrabold text-matcha-600">{elapsedMinutes}m</div>
-            <div className="text-[11px] font-bold text-cocoa-500 mt-0.5">Focus Duration</div>
+          <div className="p-3.5 bg-white rounded-xl border border-[#EAE4DC] shadow-subtle text-center">
+            <div className="text-2xl font-extrabold text-matcha-600">{elapsedMinutes}m</div>
+            <div className="text-[11px] font-medium text-cocoa-500 mt-0.5">Focus Duration</div>
           </div>
         </div>
 
-        {/* Relearn / Continue Practice Bento Box */}
-        <div className="w-full bg-white border border-[#EFE8DE] p-5 rounded-3xl shadow-bento mb-6 space-y-3">
-          <span className="text-xs font-bold text-[#3E2D28] block text-left">
+        {/* Drill & Relearn Actions */}
+        <div className="w-full bg-white border border-[#EAE4DC] p-4 rounded-2xl shadow-subtle mb-5 space-y-2.5">
+          <span className="text-xs font-bold text-cocoa-900 block text-left">
             Drill & Relearn Anytime
           </span>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleRelearn('all')}
-              className="px-4 py-2.5 rounded-2xl bg-[#FAF7F2] hover:bg-[#EFE8DE] text-[#3E2D28] font-bold text-xs flex items-center justify-center space-x-1.5 border border-[#EFE8DE] transition-all squishy-btn cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-[#EAE4DC] transition-colors cursor-pointer"
             >
-              <RotateCcw size={13} className="text-strawberry-500" />
+              <RotateCcw size={12} className="text-strawberry-500" />
               <span>Review All ({cards.length})</span>
             </button>
 
             <button
               onClick={() => handleRelearn('highYield')}
-              className="px-4 py-2.5 rounded-2xl bg-[#FAF7F2] hover:bg-[#EFE8DE] text-[#3E2D28] font-bold text-xs flex items-center justify-center space-x-1.5 border border-[#EFE8DE] transition-all squishy-btn cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-[#EAE4DC] transition-colors cursor-pointer"
             >
-              <Zap size={13} className="text-amber-500" />
+              <Zap size={12} className="text-amber-500" />
               <span>High Yield Only</span>
             </button>
           </div>
@@ -229,10 +225,10 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
         <button
           onClick={onBack}
-          className="px-6 py-3 rounded-2xl bg-[#3E2D28] hover:bg-[#2C1F1B] text-white font-bold text-xs shadow-squishy flex items-center space-x-2 transition-all squishy-btn cursor-pointer"
+          className="w-full py-2.5 rounded-xl bg-cocoa-900 hover:bg-cocoa-800 text-white font-semibold text-xs shadow-subtle flex items-center justify-center space-x-1.5 transition-all atelier-btn cursor-pointer"
         >
-          <ChevronLeft size={16} />
-          <span>Return to Decks Shelf</span>
+          <ChevronLeft size={15} />
+          <span>Back to Decks</span>
         </button>
       </div>
     );
@@ -240,65 +236,64 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
   // 🌸 ACTIVE STUDY CARD ROOM 🌸
   return (
-    <div className="flex flex-col max-w-2xl w-full mx-auto px-4 py-2 select-none">
+    <div className="flex flex-col max-w-2xl w-full mx-auto px-2 sm:px-4 select-none">
       
-      {/* Top Navigation & Progress Bar */}
-      <div className="flex items-center justify-between py-2 mb-3 gap-2">
+      {/* Top Header & Navigation */}
+      <div className="flex items-center justify-between pb-3 mb-2 gap-2">
         <button
           onClick={onBack}
-          className="flex items-center space-x-1.5 text-xs font-bold text-cocoa-600 hover:text-[#3E2D28] transition-colors px-3 py-1.5 rounded-xl bg-white border border-[#EFE8DE] shadow-2xs squishy-btn cursor-pointer"
+          className="flex items-center space-x-1 text-xs font-semibold text-cocoa-600 hover:text-cocoa-900 px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DC] hover:border-strawberry-200 transition-colors shadow-2xs atelier-btn cursor-pointer"
         >
-          <ChevronLeft size={15} />
-          <span>Shelf</span>
+          <ChevronLeft size={14} />
+          <span>Decks</span>
         </button>
 
-        {/* Study Mode Filter */}
-        <div className="flex items-center bg-[#FAF7F2] p-1 rounded-xl border border-[#EFE8DE] text-xs font-bold shadow-2xs">
-          <button
-            onClick={() => handleRelearn('due')}
-            className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-              filterMode === 'due' ? 'bg-white text-strawberry-700 shadow-xs' : 'text-cocoa-400 hover:text-[#3E2D28]'
-            }`}
-          >
-            Due Today
-          </button>
-          <button
-            onClick={() => handleRelearn('all')}
-            className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-              filterMode === 'all' ? 'bg-white text-strawberry-700 shadow-xs' : 'text-cocoa-400 hover:text-[#3E2D28]'
-            }`}
-          >
-            All Cards
-          </button>
-          <button
-            onClick={() => handleRelearn('highYield')}
-            className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-              filterMode === 'highYield' ? 'bg-white text-strawberry-700 shadow-xs' : 'text-cocoa-400 hover:text-[#3E2D28]'
-            }`}
-          >
-            ⭐ High Yield
-          </button>
+        {/* Deck Title in Center */}
+        <div className="flex items-center space-x-1.5 text-xs font-bold text-cocoa-900 truncate">
+          <KittyBow size={14} />
+          <span className="truncate max-w-[180px] sm:max-w-xs">{cleanDeckTitle(deck.name)}</span>
         </div>
 
-        {/* Card Edit Trigger */}
-        <button
-          onClick={() => onEditCard(currentCard)}
-          className="p-2 rounded-xl bg-white border border-[#EFE8DE] text-cocoa-500 hover:text-[#3E2D28] hover:bg-[#FAF7F2] transition-colors shadow-2xs squishy-btn cursor-pointer"
-          title="Edit Card (Shortcut: E)"
-        >
-          <Edit3 size={14} />
-        </button>
+        {/* Action / Edit */}
+        <div className="flex items-center space-x-1.5">
+          <div className="hidden sm:inline-flex items-center p-0.5 bg-cocoa-100/70 rounded-lg border border-[#EAE4DC] text-[11px] font-semibold">
+            <button
+              onClick={() => handleRelearn('due')}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                filterMode === 'due' ? 'bg-white text-strawberry-700 shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
+              }`}
+            >
+              Due
+            </button>
+            <button
+              onClick={() => handleRelearn('all')}
+              className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                filterMode === 'all' ? 'bg-white text-strawberry-700 shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
+              }`}
+            >
+              All
+            </button>
+          </div>
+
+          <button
+            onClick={() => onEditCard(currentCard)}
+            className="p-1.5 rounded-xl bg-white border border-[#EAE4DC] text-cocoa-500 hover:text-cocoa-900 hover:border-strawberry-200 transition-colors shadow-2xs atelier-btn cursor-pointer"
+            title="Edit Card (E)"
+          >
+            <Edit3 size={13} />
+          </button>
+        </div>
       </div>
 
-      {/* Progress Strip */}
-      <div className="w-full bg-[#EFE8DE]/60 h-2 rounded-full overflow-hidden mb-4">
+      {/* Sleek Progress Bar */}
+      <div className="w-full bg-cocoa-100 h-1.5 rounded-full overflow-hidden mb-4">
         <div 
           className="bg-strawberry-500 h-full rounded-full transition-all duration-300"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
 
-      {/* 🌸 THE PILLOWY 3D FLASHCARD 🌸 */}
+      {/* 🌸 THE FLASHCARD 🌸 */}
       <div 
         onClick={handleFlip}
         className="w-full cursor-pointer select-none"
@@ -306,30 +301,30 @@ export const StudySession: React.FC<StudySessionProps> = ({
       >
         {!isFlipped ? (
           /* CARD FRONT FACE */
-          <div className="w-full min-h-[380px] bg-white rounded-[32px] border-2 border-[#EFE8DE] hover:border-[#FFD1DC] shadow-bento p-6 sm:p-8 flex flex-col justify-between transition-all duration-200">
+          <div className="w-full min-h-[360px] bg-white rounded-2xl border border-[#EAE4DC] hover:border-strawberry-200 shadow-card p-6 sm:p-8 flex flex-col justify-between transition-all duration-200">
             
             {/* Front Header */}
-            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EFE8DE]">
+            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-[11px] px-2.5 py-0.5 rounded-full bg-[#FFF0F5] text-strawberry-700 border border-[#FFD1DC]">
+                <span className="font-semibold text-[11px] px-2.5 py-0.5 rounded-full bg-strawberry-50 text-strawberry-700 border border-strawberry-100">
                   {currentCard.type === 'cloze' ? 'Cloze Deletion' : 'Question'}
                 </span>
                 {currentCard.state && (
-                  <span className="text-[10px] font-bold text-cocoa-400 font-mono uppercase">
+                  <span className="text-[10px] font-medium text-cocoa-400 font-mono uppercase">
                     {currentCard.state}
                   </span>
                 )}
               </div>
-              <KittyBow size={18} className="text-strawberry-400" />
+              <KittyBow size={16} />
             </div>
 
             {/* Front Content */}
             <div className="my-auto py-6 text-center">
-              <div className="text-xl sm:text-2xl text-[#3E2D28] leading-relaxed font-bold">
+              <div className="text-lg sm:text-2xl text-cocoa-900 leading-relaxed font-bold">
                 <RichCardContent
                   content={currentCard.front || (currentCard.frontImage ? '' : '*(No question provided)*')}
                   showClozeAnswers={false}
-                  className="text-xl sm:text-2xl text-[#3E2D28] leading-relaxed font-bold"
+                  className="text-lg sm:text-2xl text-cocoa-900 leading-relaxed font-bold"
                 />
               </div>
 
@@ -337,7 +332,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {currentCard.frontImage && (
                 <div className="flex justify-center pt-4">
                   <div 
-                    className="relative group cursor-zoom-in inline-block rounded-2xl overflow-hidden border border-[#EFE8DE] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
+                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-[#EAE4DC] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLightboxImage({ src: currentCard.frontImage!, title: 'Question Diagram' });
@@ -347,10 +342,10 @@ export const StudySession: React.FC<StudySessionProps> = ({
                     <img 
                       src={currentCard.frontImage} 
                       alt="Front Attachment" 
-                      className="max-h-60 sm:max-h-72 max-w-full rounded-2xl object-contain bg-[#FAF7F2]" 
+                      className="max-h-60 sm:max-h-72 max-w-full rounded-xl object-contain bg-cocoa-50" 
                     />
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="px-3 py-1 rounded-full bg-white/95 text-[#3E2D28] text-xs font-bold shadow-md flex items-center space-x-1">
+                      <span className="px-3 py-1 rounded-full bg-white/95 text-cocoa-900 text-xs font-bold shadow-md flex items-center space-x-1">
                         <ZoomIn size={13} />
                         <span>Zoom</span>
                       </span>
@@ -361,39 +356,39 @@ export const StudySession: React.FC<StudySessionProps> = ({
             </div>
 
             {/* Front Footer */}
-            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EFE8DE] pt-3.5 mt-4">
+            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EAE4DC] pt-3 mt-4">
               <span>Card {currentCardIndex + 1} of {queue.length}</span>
-              <span className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-[#FAF7F2] text-[#3E2D28] font-bold text-[11px] border border-[#EFE8DE]">
-                <span>Tap or Space to Flip 🎀</span>
+              <span className="text-[11px] text-cocoa-500 font-medium">
+                Tap card or press Space to flip
               </span>
             </div>
           </div>
         ) : (
           /* CARD BACK FACE */
-          <div className="w-full min-h-[380px] bg-white rounded-[32px] border-2 border-[#FFD1DC] shadow-bento p-6 sm:p-8 flex flex-col justify-between transition-all animate-fadeIn">
+          <div className="w-full min-h-[360px] bg-white rounded-2xl border border-strawberry-200 shadow-card p-6 sm:p-8 flex flex-col justify-between transition-all animate-fadeIn">
             
             {/* Back Header */}
-            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EFE8DE]">
-              <span className="text-strawberry-600 font-extrabold text-xs flex items-center space-x-1.5">
+            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
+              <span className="text-strawberry-600 font-bold text-xs flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-strawberry-500" />
-                <span>Answer Revealed</span>
+                <span>Answer</span>
               </span>
-              <KittyBow size={18} className="text-strawberry-500" />
+              <KittyBow size={16} />
             </div>
 
             {/* Back Body */}
-            <div className="my-auto py-5 space-y-4">
+            <div className="my-auto py-4 space-y-3">
               {/* Question prompt badge */}
               {(currentCard.front || currentCard.frontImage) && (
-                <div className="p-3 bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE] text-xs text-cocoa-600 leading-relaxed text-left">
-                  <span className="font-bold text-cocoa-400 block text-[10px] uppercase tracking-wider mb-0.5">
-                    Question Prompt
+                <div className="p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC] text-xs text-cocoa-600 leading-relaxed text-left">
+                  <span className="font-semibold text-cocoa-400 block text-[10px] uppercase tracking-wider mb-0.5">
+                    Question
                   </span>
                   {currentCard.front ? (
                     <RichCardContent
                       content={currentCard.front}
                       showClozeAnswers={true}
-                      className="line-clamp-2 text-xs sm:text-sm text-[#3E2D28] font-semibold"
+                      className="line-clamp-2 text-xs sm:text-sm text-cocoa-900 font-medium"
                     />
                   ) : (
                     <span className="text-xs text-cocoa-400 italic">[Image Card]</span>
@@ -403,11 +398,11 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
               {/* Answer Content */}
               {currentCard.back && (
-                <div className="text-lg sm:text-xl text-[#3E2D28] leading-relaxed font-bold text-left">
+                <div className="text-base sm:text-xl text-cocoa-900 leading-relaxed font-bold text-left">
                   <RichCardContent
                     content={currentCard.back}
                     showClozeAnswers={true}
-                    className="text-lg sm:text-xl text-[#3E2D28] leading-relaxed font-bold"
+                    className="text-base sm:text-xl text-cocoa-900 leading-relaxed font-bold"
                   />
                 </div>
               )}
@@ -416,7 +411,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {currentCard.backImage && (
                 <div className="flex justify-center pt-2">
                   <div 
-                    className="relative group cursor-zoom-in inline-block rounded-2xl overflow-hidden border border-[#EFE8DE] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
+                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-[#EAE4DC] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLightboxImage({ src: currentCard.backImage!, title: 'Back Diagram' });
@@ -426,10 +421,10 @@ export const StudySession: React.FC<StudySessionProps> = ({
                     <img 
                       src={currentCard.backImage} 
                       alt="Back Attachment" 
-                      className="max-h-60 sm:max-h-72 max-w-full rounded-2xl object-contain bg-[#FAF7F2]" 
+                      className="max-h-60 sm:max-h-72 max-w-full rounded-xl object-contain bg-cocoa-50" 
                     />
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <span className="px-3 py-1 rounded-full bg-white/95 text-[#3E2D28] text-xs font-bold shadow-md flex items-center space-x-1">
+                      <span className="px-3 py-1 rounded-full bg-white/95 text-cocoa-900 text-xs font-bold shadow-md flex items-center space-x-1">
                         <ZoomIn size={13} />
                         <span>Zoom</span>
                       </span>
@@ -440,11 +435,11 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
               {/* Takeaway / Concept Note Box */}
               {(currentCard.medicalMeta?.takeaway || currentCard.medicalMeta?.clinicalPearl) && (
-                <div className="p-3.5 bg-honey-50 rounded-2xl border border-honey-200 text-xs sm:text-sm text-honey-900 flex items-start space-x-2.5 shadow-2xs text-left">
-                  <Award size={16} className="text-honey-600 shrink-0 mt-0.5" />
+                <div className="p-3 bg-honey-50 rounded-xl border border-honey-200 text-xs text-honey-900 flex items-start space-x-2 text-left">
+                  <Award size={15} className="text-honey-600 shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <strong className="font-extrabold text-honey-800 block text-[10px] uppercase tracking-wider mb-0.5">
-                      Key Takeaway
+                    <strong className="font-bold text-honey-800 block text-[10px] uppercase tracking-wider mb-0.5">
+                      Key Concept
                     </strong>
                     <span className="leading-relaxed font-medium">
                       {currentCard.medicalMeta.takeaway || currentCard.medicalMeta.clinicalPearl}
@@ -455,7 +450,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
             </div>
 
             {/* Back Footer */}
-            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EFE8DE] pt-3.5 mt-4">
+            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EAE4DC] pt-3 mt-4">
               <span>Card {currentCardIndex + 1} of {queue.length}</span>
               <span>Rate recall below (Keys 1-4)</span>
             </div>
@@ -463,66 +458,58 @@ export const StudySession: React.FC<StudySessionProps> = ({
         )}
       </div>
 
-      {/* 🌸 SQUISHY TACTILE RATING CONTROLS 🌸 */}
+      {/* 🌸 RATING BAR CONTROLS 🌸 */}
       <div className="mt-4 pb-safe">
         {!isFlipped ? (
           <button
             onClick={handleFlip}
-            className="w-full h-13 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-95 text-white font-extrabold shadow-squishy-pink transition-all text-sm flex items-center justify-center space-x-2 squishy-btn cursor-pointer"
+            className="w-full py-3 rounded-xl bg-cocoa-900 hover:bg-cocoa-800 active:scale-98 text-white font-semibold text-xs shadow-subtle transition-all flex items-center justify-center space-x-2 atelier-btn cursor-pointer"
           >
-            <RotateCw size={16} />
-            <span>Show Answer (Space) 🎀</span>
+            <span>Show Answer</span>
+            <kbd className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono font-normal">Space</kbd>
           </button>
         ) : (
           <div className="space-y-2">
-            <div className="text-[11px] font-bold text-cocoa-500 text-center tracking-wider uppercase">
-              How well did you remember this?
-            </div>
-
             <div className="grid grid-cols-4 gap-2 sm:gap-3">
               
               {/* Again (1) */}
               <button
                 onClick={() => handleRating(1)}
-                className="relative py-2.5 sm:py-3 px-2 rounded-2xl bg-[#FFF0F5] hover:bg-[#FFE4EE] text-[#BE124C] border-2 border-[#FFD1DC] font-bold transition-all text-center squishy-btn shadow-squishy active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-xl bg-strawberry-50 hover:bg-strawberry-100 text-strawberry-800 border border-strawberry-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Again (Shortcut: 1)"
               >
-                <span className="hidden sm:inline-block absolute top-1.5 right-2 text-[9px] font-mono text-strawberry-600 bg-white px-1.5 py-0.2 rounded-md border border-[#FFD1DC]">1</span>
-                <div className="text-xs font-black">Again 💔</div>
-                <div className="text-[11px] font-mono font-bold text-cocoa-600 mt-0.5">{previews.again}</div>
+                <div className="text-xs font-bold">Again</div>
+                <div className="text-[11px] font-mono font-medium text-strawberry-600 mt-0.5">{previews.again}</div>
               </button>
 
               {/* Hard (2) */}
               <button
                 onClick={() => handleRating(2)}
-                className="relative py-2.5 sm:py-3 px-2 rounded-2xl bg-[#FFFDF0] hover:bg-[#FEF9D9] text-[#B45309] border-2 border-[#FEF0A3] font-bold transition-all text-center squishy-btn shadow-squishy active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-xl bg-honey-50 hover:bg-honey-100 text-honey-800 border border-honey-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Hard (Shortcut: 2)"
               >
-                <span className="hidden sm:inline-block absolute top-1.5 right-2 text-[9px] font-mono text-honey-600 bg-white px-1.5 py-0.2 rounded-md border border-[#FEF0A3]">2</span>
-                <div className="text-xs font-black">Hard 💭</div>
-                <div className="text-[11px] font-mono font-bold text-cocoa-600 mt-0.5">{previews.hard}</div>
+                <div className="text-xs font-bold">Hard</div>
+                <div className="text-[11px] font-mono font-medium text-honey-600 mt-0.5">{previews.hard}</div>
               </button>
 
               {/* Good (3) */}
               <button
                 onClick={() => handleRating(3)}
-                className="relative py-2.5 sm:py-3 px-2 rounded-2xl bg-[#F0FAF3] hover:bg-[#E2F6E8] text-[#1B652A] border-2 border-[#C5ECD2] font-bold transition-all text-center squishy-btn shadow-squishy-matcha active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-xl bg-matcha-50 hover:bg-matcha-100 text-matcha-800 border border-matcha-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Good (Shortcut: 3 or Space)"
               >
-                <span className="hidden sm:inline-block absolute top-1.5 right-2 text-[9px] font-mono text-matcha-600 bg-white px-1.5 py-0.2 rounded-md border border-[#C5ECD2]">3</span>
-                <div className="text-xs font-black">Good 🌸</div>
-                <div className="text-[11px] font-mono font-bold text-[#1B652A] mt-0.5">{previews.good}</div>
+                <div className="text-xs font-bold">Good</div>
+                <div className="text-[11px] font-mono font-medium text-matcha-600 mt-0.5">{previews.good}</div>
               </button>
 
               {/* Easy (4) */}
               <button
                 onClick={() => handleRating(4)}
-                className="relative py-2.5 sm:py-3 px-2 rounded-2xl bg-[#F0F8FF] hover:bg-[#E0F2FE] text-[#0369A1] border-2 border-[#BAE6FD] font-bold transition-all text-center squishy-btn shadow-squishy active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-xl bg-taro-50 hover:bg-taro-100 text-taro-800 border border-taro-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Easy (Shortcut: 4)"
               >
-                <span className="hidden sm:inline-block absolute top-1.5 right-2 text-[9px] font-mono text-sky-600 bg-white px-1.5 py-0.2 rounded-md border border-[#BAE6FD]">4</span>
-                <div className="text-xs font-black">Easy ✨</div>
-                <div className="text-[11px] font-mono font-bold text-cocoa-600 mt-0.5">{previews.easy}</div>
+                <div className="text-xs font-bold">Easy</div>
+                <div className="text-[11px] font-mono font-medium text-taro-600 mt-0.5">{previews.easy}</div>
               </button>
 
             </div>

@@ -4,6 +4,7 @@ import {
   Search, 
   BarChart2, 
   Timer,
+  Clock,
   Home,
   Plus,
   Volume2,
@@ -52,8 +53,16 @@ export function App() {
   const [viewMode, setViewMode] = useState<'landing' | 'app'>('app');
 
   // App Studio state
-  const [currentTab, setCurrentTab] = useState<'decks' | 'browser' | 'stats'>('decks');
-  const [activeStudyDeck, setActiveStudyDeck] = useState<Deck | null>(null);
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const [currentTab, setCurrentTab] = useState<'decks' | 'browser' | 'stats'>(
+    (searchParams.get('tab') as any) || 'decks'
+  );
+  const [activeStudyDeck, setActiveStudyDeck] = useState<Deck | null>(() => {
+    if (searchParams.get('study') === '1' && storage.getDecks().length > 0) {
+      return storage.getDecks()[0];
+    }
+    return null;
+  });
   const [studyMode, setStudyMode] = useState<StudyFilterMode>('due');
   const [isPomodoroOpen, setIsPomodoroOpen] = useState<boolean>(false);
 
@@ -586,17 +595,17 @@ export function App() {
     );
   }
 
-  // 🌸 APP STUDIO: PERSISTENT LEFT SIDEBAR CADDY + BENTO WORKSPACE 🌸
+  // 🌸 APP STUDIO: REFINED SIDEBAR CADDY + ATELIER WORKSPACE 🌸
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#3E2D28] flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#FAF8F5] text-cocoa-900 flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
       
-      {/* 🍱 PERSISTENT LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
-      <aside className="hidden md:flex flex-col w-64 lg:w-72 h-screen sticky top-0 bg-white/95 backdrop-blur-md border-r border-[#EFE8DE] p-4.5 justify-between shrink-0 shadow-xs z-30 select-none">
+      {/* 🍱 REFINED LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
+      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white border-r border-[#EAE4DC] p-4 justify-between shrink-0 shadow-xs z-30 select-none">
         
-        {/* Top Segment: Brand, Companion Greeting, Nav & Add Action */}
+        {/* Top Segment: Brand, Nav & Add Action */}
         <div className="space-y-4">
           
-          {/* Logo & About Link */}
+          {/* Brand Header */}
           <div className="flex items-center justify-between pb-1">
             <button
               onClick={() => {
@@ -605,63 +614,35 @@ export function App() {
                 setCurrentTab('decks');
               }}
               className="flex items-center space-x-2.5 text-left group cursor-pointer"
-              title="Ankitti Bento Studio"
+              title="Ankitti Studio"
             >
-              <div className="p-1.5 rounded-xl bg-[#FFF0F5] border border-[#FFD1DC] group-hover:scale-105 transition-transform shadow-2xs">
-                <KittyBow size={20} />
+              <div className="w-8 h-8 rounded-xl bg-strawberry-50 border border-strawberry-100 text-strawberry-600 flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
+                <KittyBow size={18} />
               </div>
               <div>
-                <span className="font-extrabold text-lg tracking-tight text-[#3E2D28] block leading-none">
-                  Ankitti 🎀
+                <span className="font-extrabold text-base tracking-tight text-cocoa-900 block leading-tight">
+                  Ankitti
                 </span>
-                <span className="text-[10px] font-bold text-strawberry-600 tracking-wider uppercase">
-                  Bento Studio
+                <span className="text-[10px] font-semibold text-strawberry-600 tracking-wider uppercase block">
+                  Study Studio
                 </span>
               </div>
             </button>
-
-            <button
-              onClick={() => { sounds.playClick(); setViewMode('landing'); }}
-              className="text-[10px] font-bold px-2 py-1 rounded-full text-cocoa-500 bg-[#FAF7F2] hover:bg-[#EFE8DE] border border-[#EFE8DE] transition-colors flex items-center space-x-1 cursor-pointer"
-              title="Return to Landing Page"
-            >
-              <Home size={11} />
-              <span>About</span>
-            </button>
-          </div>
-
-          {/* Cute Study Companion Status Card */}
-          <div className="p-3 bg-gradient-to-r from-[#FFF0F5] to-[#F8F4FF] rounded-2xl border border-[#FFD1DC]/80 shadow-2xs flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl bg-white border border-[#FFD1DC] p-1 shrink-0 flex items-center justify-center shadow-2xs">
-              <img 
-                src="/assets/reading_mascot.png" 
-                alt="Companion Mascot" 
-                className="w-full h-full object-cover rounded-xl"
-              />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-bold text-strawberry-700 truncate">
-                Study Buddy 🌸
-              </div>
-              <div className="text-[10px] text-cocoa-600 font-medium truncate">
-                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Ready for focus session! ✨'}
-              </div>
-            </div>
           </div>
 
           {/* Primary Action Button: Add Flashcard */}
           <button
             onClick={() => handleOpenNewCard()}
-            className="w-full py-2.5 px-4 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-95 text-white font-extrabold text-xs shadow-squishy-pink flex items-center justify-center space-x-2 transition-all squishy-btn cursor-pointer"
+            className="w-full py-2 px-3 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-98 text-white font-semibold text-xs shadow-rose-btn hover:shadow-rose-btn-hover flex items-center justify-center space-x-2 transition-all atelier-btn cursor-pointer"
             title="Create a new flashcard (Shortcut: Cmd/Ctrl+N)"
           >
-            <Plus size={15} strokeWidth={2.5} />
-            <span>+ Add Flashcard</span>
-            <kbd className="text-[9px] bg-white/25 px-1 py-0.2 rounded font-mono font-normal">⌘N</kbd>
+            <Plus size={14} strokeWidth={2.5} />
+            <span>New Flashcard</span>
+            <kbd className="text-[9px] bg-white/20 px-1 py-0.2 rounded font-mono font-normal">⌘N</kbd>
           </button>
 
           {/* Persistent Sidebar Navigation Links */}
-          <nav className="space-y-1 text-xs font-bold pt-1">
+          <nav className="space-y-1 text-xs font-medium pt-1">
             
             {/* Decks Tab */}
             <button
@@ -670,15 +651,15 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('decks');
               }}
-              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
                 currentTab === 'decks' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
-                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
               }`}
             >
-              <Layers size={16} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
-              <span className="flex-1 text-left">My Decks Shelf</span>
-              <span className="text-[10px] px-2 py-0.2 rounded-full bg-white border border-[#EFE8DE] text-cocoa-600">
+              <Layers size={15} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <span className="flex-1 text-left">My Decks</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cocoa-100/80 text-cocoa-600 font-semibold">
                 {decks.length}
               </span>
             </button>
@@ -690,15 +671,15 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('browser');
               }}
-              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
                 currentTab === 'browser' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
-                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
               }`}
             >
-              <Search size={16} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <Search size={15} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
               <span className="flex-1 text-left">Card Catalog</span>
-              <span className="text-[10px] px-2 py-0.2 rounded-full bg-white border border-[#EFE8DE] text-cocoa-600">
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-cocoa-100/80 text-cocoa-600 font-semibold">
                 {cards.length}
               </span>
             </button>
@@ -710,62 +691,102 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('stats');
               }}
-              className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-2xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
                 currentTab === 'stats' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-extrabold shadow-2xs border border-[#FFD1DC]'
-                  : 'text-cocoa-600 hover:bg-[#FAF7F2] hover:text-[#3E2D28]'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
               }`}
             >
-              <BarChart2 size={16} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
-              <span className="flex-1 text-left">Study Garden & Stats</span>
-              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-matcha-100 text-matcha-800">
+              <BarChart2 size={15} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <span className="flex-1 text-left">Garden & Stats</span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-matcha-100 text-matcha-800 font-semibold">
                 Heatmap
               </span>
             </button>
+
+            {/* Collapsible Focus Pomodoro */}
+            <button
+              onClick={() => {
+                sounds.playClick();
+                setIsPomodoroOpen(!isPomodoroOpen);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+                isPomodoroOpen
+                  ? 'bg-cocoa-100 text-cocoa-900 font-semibold border border-[#EAE4DC]'
+                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
+              }`}
+            >
+              <span className="flex items-center space-x-2.5">
+                <Clock size={15} className="text-strawberry-500" />
+                <span>Focus Timer</span>
+              </span>
+              <span className="text-[10px] font-mono text-cocoa-400 bg-cocoa-100 px-1.5 py-0.5 rounded">25m</span>
+            </button>
           </nav>
+
+          {/* Embedded Pomodoro Dropdown if Active */}
+          {isPomodoroOpen && (
+            <div className="p-3 bg-cocoa-50 rounded-2xl border border-[#EAE4DC] shadow-subtle animate-fadeIn">
+              <PomodoroWidget 
+                isOpen={true} 
+                isInline={true} 
+              />
+            </div>
+          )}
         </div>
 
-        {/* Middle: Integrated Focus Pomodoro Station in Sidebar */}
-        <div className="py-2">
-          <PomodoroWidget 
-            isOpen={true} 
-            isInline={true} 
-          />
-        </div>
-
-        {/* Bottom Segment: User Profile, Sync Badge & Utilities */}
-        <div className="space-y-2 pt-2 border-t border-[#EFE8DE]">
+        {/* Bottom Segment: Companion Mascot, User Profile & Status */}
+        <div className="space-y-2.5 pt-3 border-t border-[#EAE4DC]">
           
           {hasAnyDraft && (
             <button
               onClick={() => handleOpenNewCard()}
-              className="w-full flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-honey-100 border border-honey-300 text-honey-900 text-xs font-bold shadow-2xs cursor-pointer hover:bg-honey-200 transition-colors"
+              className="w-full flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-honey-50 border border-honey-200 text-honey-800 text-xs font-medium shadow-2xs cursor-pointer hover:bg-honey-100 transition-colors"
             >
-              <FileEdit size={13} className="text-honey-700" />
-              <span className="truncate">Draft Card Auto-Saved</span>
+              <FileEdit size={12} className="text-honey-600 shrink-0" />
+              <span className="truncate">Draft Card Saved</span>
             </button>
           )}
 
+          {/* Mascot Study Companion Mini Pill */}
+          <div className="p-2.5 rounded-xl bg-cocoa-50 border border-[#EAE4DC] flex items-center space-x-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white border border-[#EAE4DC] p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
+              <img 
+                src="/assets/reading_mascot.png" 
+                alt="Companion" 
+                className="w-full h-full object-cover rounded-md"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-cocoa-900 truncate">
+                Study Buddy 🌸
+              </div>
+              <div className="text-[10px] text-cocoa-500 truncate">
+                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Ready for focus session!'}
+              </div>
+            </div>
+          </div>
+
           {/* User Profile Pill */}
-          <div className="flex items-center justify-between p-2 rounded-2xl bg-[#FAF7F2] border border-[#EFE8DE]">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#EAE4DC]">
             <button
               onClick={() => setIsAccountModalOpen(true)}
               className="flex items-center space-x-2 min-w-0 text-left cursor-pointer group"
               title="Open Account Preferences"
             >
-              <KittyAvatar size={30} />
+              <KittyAvatar size={26} />
               <div className="min-w-0">
-                <div className="text-xs font-bold text-[#3E2D28] truncate group-hover:text-strawberry-600 transition-colors">
+                <div className="text-xs font-bold text-cocoa-900 truncate group-hover:text-strawberry-600 transition-colors">
                   {account.name}
                 </div>
                 <div className="text-[10px] text-cocoa-400 flex items-center space-x-1">
                   {account.email ? (
                     <span className="text-matcha-600 font-semibold flex items-center space-x-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-matcha-500" />
-                      <span>Cloud Synced</span>
+                      <span>Synced</span>
                     </span>
                   ) : (
-                    <span>Local Guest</span>
+                    <span>Guest</span>
                   )}
                 </div>
               </div>
@@ -779,31 +800,21 @@ export function App() {
                   sounds.enabled = next;
                   if (next) sounds.playRating(4);
                 }}
-                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-                  soundEnabled ? 'text-strawberry-500 hover:bg-white' : 'text-cocoa-400 hover:bg-white'
+                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                  soundEnabled ? 'text-strawberry-500 hover:bg-cocoa-50' : 'text-cocoa-400 hover:bg-cocoa-50'
                 }`}
                 title={soundEnabled ? 'Mute audio' : 'Unmute audio'}
               >
-                {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+                {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
               </button>
 
-              {account.email ? (
-                <button
-                  onClick={handleLogout}
-                  className="p-1.5 rounded-xl text-cocoa-400 hover:text-rose-600 hover:bg-white transition-colors cursor-pointer"
-                  title="Sign Out"
-                >
-                  <LogOut size={15} />
-                </button>
-              ) : (
-                <button
-                  onClick={() => { sounds.playClick(); setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
-                  className="p-1.5 rounded-xl text-strawberry-600 hover:bg-white transition-colors cursor-pointer"
-                  title="Enable Cloud Sync"
-                >
-                  <Cloud size={15} />
-                </button>
-              )}
+              <button
+                onClick={() => { sounds.playClick(); setViewMode('landing'); }}
+                className="p-1.5 rounded-lg hover:bg-cocoa-50 text-cocoa-400 hover:text-cocoa-700 transition-colors cursor-pointer"
+                title="Landing Page & Overview"
+              >
+                <Home size={13} />
+              </button>
             </div>
           </div>
         </div>
@@ -813,7 +824,7 @@ export function App() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Mobile Top Header (Phone Only) */}
-        <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EFE8DE] px-4 py-3 flex items-center justify-between shadow-2xs">
+        <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAE4DC] px-4 py-3 flex items-center justify-between shadow-2xs">
           <div 
             onClick={() => {
               sounds.playClick();
@@ -823,13 +834,13 @@ export function App() {
             className="flex items-center space-x-2 cursor-pointer"
           >
             <KittyBow size={20} />
-            <span className="font-extrabold text-base tracking-tight text-[#3E2D28]">Ankitti 🎀</span>
+            <span className="font-extrabold text-base tracking-tight text-cocoa-900">Ankitti 🎀</span>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsPomodoroOpen(prev => !prev)}
-              className="p-2 rounded-xl bg-[#FAF7F2] text-strawberry-600 border border-[#EFE8DE] cursor-pointer"
+              className="p-2 rounded-xl bg-cocoa-50 text-strawberry-600 border border-[#EAE4DC] cursor-pointer"
               title="Focus Timer"
             >
               <Timer size={16} />
@@ -859,28 +870,10 @@ export function App() {
           </div>
         )}
 
-        {/* Top Active Study Header Bar (When inside an active flashcard deck) */}
-        {activeStudyDeck && (
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-[#EFE8DE] px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-2xs">
-            <button
-              onClick={() => { sounds.playClick(); setActiveStudyDeck(null); }}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-[#FAF7F2] hover:bg-[#EFE8DE] text-[#3E2D28] text-xs font-bold border border-[#EFE8DE] transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={13} />
-              <span>Exit Study Mode</span>
-            </button>
 
-            <div className="flex items-center space-x-2 text-xs font-bold text-[#3E2D28]">
-              <span className="p-1 rounded-lg bg-strawberry-50 text-strawberry-600">
-                <KittyBow size={14} />
-              </span>
-              <span className="truncate max-w-xs">{activeStudyDeck.name}</span>
-            </div>
-          </div>
-        )}
 
         {/* Workspace Canvas (Natural Scroll Area) */}
-        <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 pb-24 md:pb-12">
+        <main className="flex-1 w-full max-w-6xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-7 pb-24 md:pb-12 min-w-0">
           {activeStudyDeck ? (
             <StudySession
               deck={activeStudyDeck}
