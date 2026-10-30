@@ -8,7 +8,7 @@ export const KittyBow: React.FC<{ size?: number; className?: string }> = ({ size
     viewBox="0 0 100 75" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg"
-    className={`inline-block filter drop-shadow-[0_2px_4px_rgba(244,63,122,0.25)] ${className}`}
+    className={`inline-block ${className}`}
   >
     <defs>
       <linearGradient id="bowGradClean" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -107,7 +107,7 @@ export const KittyAvatar: React.FC<{ size?: number; className?: string }> = ({
   return (
     <div 
       style={{ width: size, height: size }}
-      className={`rounded-full overflow-hidden border-2 border-strawberry-200 shadow-sm bg-strawberry-50 flex items-center justify-center ${className}`}
+      className={`rounded-full overflow-hidden border border-[#EAE6DF] bg-white flex items-center justify-center shrink-0 ${className}`}
     >
       <img 
         src="/assets/hero_mascot.png" 

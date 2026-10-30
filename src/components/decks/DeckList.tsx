@@ -15,7 +15,11 @@ import {
   CheckCircle2, 
   ArrowRight,
   Flame,
-  X
+  X,
+  Activity,
+  Code2,
+  Sun,
+  Zap
 } from 'lucide-react';
 import { Deck, DeckStats } from '../../types/anki';
 import { sounds } from '../../services/audio';
@@ -113,9 +117,17 @@ export const DeckList: React.FC<DeckListProps> = ({
 
   const cleanDeckTitle = (name: string) => {
     return name
-      .replace(/^(\p{Extended_Pictographic}|\p{Regional_Indicator}{2})\s*/u, '')
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
       .replace(/^(JP|ES|CS:?)\s*/i, '')
       .trim() || name;
+  };
+
+  const renderDeckIcon = (icon?: string) => {
+    if (icon === '⚡' || icon === 'zap' || icon === 'code') return <Code2 size={18} className="text-[#D84570]" />;
+    if (icon === '🫀' || icon === 'heart' || icon === 'activity') return <Activity size={18} className="text-[#D84570]" />;
+    if (icon === '☀️' || icon === 'sun') return <Sun size={18} className="text-[#D84570]" />;
+    if (icon === '📚' || icon === 'book') return <BookOpen size={18} className="text-[#D84570]" />;
+    return <KittyBow size={18} />;
   };
 
   const filteredDecks = decks.filter(d => {
@@ -130,72 +142,67 @@ export const DeckList: React.FC<DeckListProps> = ({
   });
 
   return (
-    <div className="space-y-5 w-full min-w-0">
+    <div className="space-y-6 w-full min-w-0">
       
-      {/* 🌸 KAWAII STUDY CAFE HERO 🌸 */}
-      <div className="bg-gradient-to-r from-pink-50/90 via-white to-rose-50/70 rounded-3xl border-1.5 border-pink-200/90 p-4 sm:p-6 shadow-[0_8px_24px_rgba(244,63,122,0.06)] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 w-full min-w-0">
-        
-        <div className="space-y-3 min-w-0 flex-1">
-          {/* Top greeting with mascot */}
-          <div className="flex items-center space-x-3.5 min-w-0">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border border-pink-200 p-1 shrink-0 flex items-center justify-center shadow-2xs">
-              <img 
-                src="/assets/hero_mascot.png" 
-                alt="Study Mascot" 
-                className="w-full h-full object-cover rounded-xl select-none"
-              />
-            </div>
+      {/* 🌸 EDITORIAL TITLE & SUMMARY 🌸 */}
+      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 pb-1">
+        <div className="flex items-center space-x-2">
+          <h1 className="text-2xl sm:text-3xl font-serif font-normal text-cocoa-900 tracking-tight">
+            Konnichiwa, Study Buddy.
+          </h1>
+          <KittyBow size={20} />
+        </div>
+        <p className="text-sm text-cocoa-600 font-medium">
+          {totalDueAllDecks > 0 
+            ? `${totalDueAllDecks} cards due across ${dueDecksCount} ${dueDecksCount === 1 ? 'deck' : 'decks'} today`
+            : 'All caught up for today'}
+        </p>
+      </div>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center space-x-1.5">
-                <h2 className="text-base sm:text-lg font-extrabold text-cocoa-900 tracking-tight truncate">
-                  Konnichiwa, Study Buddy!
-                </h2>
-                <KittyBow size={16} />
-              </div>
-
-              <div className="mt-1 text-xs text-cocoa-700 leading-snug">
-                {totalDueAllDecks > 0 ? (
-                  <span>Ready for flashcards? 🧋 You have <strong className="text-strawberry-600 font-bold">{totalDueAllDecks} cards due</strong> across {dueDecksCount} decks.</span>
-                ) : (
-                  <span>Sugoi! 🌸 All caught up for today! Your garden is blooming.</span>
-                )}
-              </div>
-            </div>
+      {/* 🌸 STUDY STUDIO HERO CARD 🌸 */}
+      <div className="bg-white rounded-2xl border border-[#EAE6DF] p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full min-w-0">
+        <div className="flex items-center space-x-4 min-w-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border border-[#EAE6DF] p-1 shrink-0 flex items-center justify-center">
+            <img 
+              src="/assets/hero_mascot.png" 
+              alt="Study Mascot" 
+              className="w-full h-full object-cover rounded-xl select-none"
+            />
           </div>
 
-          {/* Study Mood Selector */}
-          <div className="w-full min-w-0 pt-2 border-t border-pink-100/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-            <span className="text-[11px] font-bold text-cocoa-500 mr-1 shrink-0">Mood:</span>
-            {MOODS.map(m => (
-              <button
-                key={m.id}
-                onClick={() => { sounds.playClick(); setSelectedMood(m.id); }}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer bento-btn flex items-center space-x-1 shrink-0 ${
-                  selectedMood === m.id
-                    ? 'bg-strawberry-500 text-white shadow-rose-btn'
-                    : 'bg-white/80 hover:bg-white text-cocoa-600 border border-pink-100 hover:border-pink-200'
-                }`}
-              >
-                <span>{m.emoji}</span>
-                <span className="text-[11px]">{m.label}</span>
-              </button>
-            ))}
+          <div className="min-w-0">
+            <h2 className="text-base sm:text-lg font-bold text-cocoa-900 tracking-tight truncate">
+              Ready for a focus session?
+            </h2>
+            <p className="mt-0.5 text-sm text-cocoa-600 leading-relaxed">
+              {totalDueAllDecks > 0 ? (
+                <span>You have <strong className="text-strawberry-600 font-semibold">{totalDueAllDecks} cards due</strong> right now. Reviewing on time solidifies long-term retention.</span>
+              ) : (
+                <span>All caught up. Your memory garden is in full bloom.</span>
+              )}
+            </p>
           </div>
         </div>
 
         {/* Quick CTA */}
-        {firstDeckWithDue && totalDueAllDecks > 0 && (
+        {firstDeckWithDue && totalDueAllDecks > 0 ? (
           <button
             onClick={() => {
               sounds.playClick();
               onStudyDeck(firstDeckWithDue, 'due');
             }}
-            className="w-full md:w-auto px-5 py-3 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-extrabold text-xs flex items-center justify-center space-x-2 shadow-rose-btn hover:shadow-rose-btn-hover transition-all bento-btn cursor-pointer shrink-0"
+            className="w-full sm:w-auto px-5 py-2.5 bg-strawberry-500 hover:bg-strawberry-600 text-white rounded-full font-semibold text-sm shadow-rose-btn transition-all shrink-0 flex items-center justify-center space-x-2 cursor-pointer active:scale-98"
           >
-            <Play size={13} className="fill-white" />
-            <span>Study All Due ({totalDueAllDecks}) 🌸</span>
-            <ArrowRight size={13} />
+            <span>Study All Due ({totalDueAllDecks})</span>
+            <ArrowRight size={15} />
+          </button>
+        ) : (
+          <button
+            onClick={onCreateDeck}
+            className="w-full sm:w-auto px-5 py-2.5 bg-cocoa-100 hover:bg-cocoa-200 text-cocoa-800 rounded-full font-semibold text-sm transition-all shrink-0 flex items-center justify-center space-x-2 cursor-pointer"
+          >
+            <Plus size={15} />
+            <span>New Deck</span>
           </button>
         )}
       </div>
@@ -225,13 +232,13 @@ export const DeckList: React.FC<DeckListProps> = ({
           </div>
 
           {/* Clean Segmented Filter */}
-          <div className="inline-flex p-0.5 bg-cocoa-100/70 rounded-xl border border-[#EAE4DC] self-start sm:self-auto shrink-0 text-xs">
+          <div className="inline-flex p-0.5 bg-cocoa-100/70 rounded-xl border border-[#EAE6DF] self-start sm:self-auto shrink-0 text-sm">
             <button
               onClick={() => { sounds.playClick(); setDeckFilter('all'); }}
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                 deckFilter === 'all'
                   ? 'bg-white text-cocoa-900 shadow-2xs'
-                  : 'text-cocoa-500 hover:text-cocoa-800'
+                  : 'text-cocoa-600 hover:text-cocoa-900'
               }`}
             >
               All Decks ({decks.length})
@@ -241,12 +248,12 @@ export const DeckList: React.FC<DeckListProps> = ({
               className={`px-3 py-1.5 rounded-lg font-semibold transition-all flex items-center space-x-1.5 cursor-pointer ${
                 deckFilter === 'due'
                   ? 'bg-white text-strawberry-700 shadow-2xs'
-                  : 'text-cocoa-500 hover:text-cocoa-800'
+                  : 'text-cocoa-600 hover:text-cocoa-900'
               }`}
             >
               <span>Due Today</span>
               {dueDecksCount > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                <span className={`text-xs px-2 py-0.5 rounded-full font-bold tabular-nums ${
                   deckFilter === 'due' ? 'bg-strawberry-100 text-strawberry-800' : 'bg-cocoa-200 text-cocoa-700'
                 }`}>
                   {dueDecksCount}
@@ -261,9 +268,9 @@ export const DeckList: React.FC<DeckListProps> = ({
           {onOpenAiDeck && (
             <button
               onClick={() => { sounds.playClick(); onOpenAiDeck(); }}
-              className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE4DC] hover:border-strawberry-200 rounded-xl text-xs font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
+              className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE6DF] hover:border-strawberry-200 rounded-xl text-sm font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
             >
-              <Sparkles size={13} className="text-taro-500" />
+              <Sparkles size={14} className="text-taro-500" />
               <span>AI Deck</span>
             </button>
           )}
@@ -271,27 +278,27 @@ export const DeckList: React.FC<DeckListProps> = ({
           {onMergeDeck && decks.length >= 2 && (
             <button
               onClick={() => { sounds.playClick(); onMergeDeck(); }}
-              className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE4DC] hover:border-strawberry-200 rounded-xl text-xs font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
+              className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE6DF] hover:border-strawberry-200 rounded-xl text-sm font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
               title="Merge two decks into one"
             >
-              <GitMerge size={13} className="text-cocoa-500" />
+              <GitMerge size={14} className="text-cocoa-500" />
               <span>Merge</span>
             </button>
           )}
 
           <button
             onClick={() => { sounds.playClick(); onOpenImport(); }}
-            className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE4DC] hover:border-strawberry-200 rounded-xl text-xs font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
+            className="px-3 py-2 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE6DF] hover:border-strawberry-200 rounded-xl text-sm font-medium transition-all flex items-center space-x-1.5 shadow-2xs atelier-btn cursor-pointer shrink-0"
           >
-            <Download size={13} className="text-cocoa-500" />
+            <Download size={14} className="text-cocoa-500" />
             <span>Import</span>
           </button>
 
           <button
             onClick={() => { sounds.playClick(); onCreateDeck(); }}
-            className="px-3.5 py-2 bg-strawberry-500 hover:bg-strawberry-600 text-white rounded-xl text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-rose-btn hover:shadow-rose-btn-hover atelier-btn cursor-pointer shrink-0"
+            className="px-3.5 py-2 bg-strawberry-500 hover:bg-strawberry-600 text-white rounded-xl text-sm font-semibold transition-all flex items-center space-x-1.5 shadow-rose-btn hover:shadow-rose-btn-hover atelier-btn cursor-pointer shrink-0"
           >
-            <Plus size={14} />
+            <Plus size={15} />
             <span>New Deck</span>
           </button>
         </div>
@@ -299,70 +306,69 @@ export const DeckList: React.FC<DeckListProps> = ({
 
       {/* 🌸 MODULAR DECK GRID 🌸 */}
       {filteredDecks.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#EAE4DC] p-12 text-center space-y-4 shadow-subtle">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-strawberry-50 border border-strawberry-100 flex items-center justify-center text-strawberry-500">
+        <div className="bg-white rounded-2xl border border-[#EAE6DF] p-12 text-center space-y-4 shadow-subtle">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-white border border-[#EAE6DF] flex items-center justify-center text-strawberry-500">
             <BookOpen size={24} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-cocoa-900">No decks found</h3>
-            <p className="text-xs text-cocoa-500 mt-1">Create your first deck or import an Anki .apkg collection.</p>
+            <h3 className="text-base font-bold text-cocoa-900">No decks found</h3>
+            <p className="text-sm text-cocoa-600 mt-1">Create your first deck or import an Anki .apkg collection.</p>
           </div>
           <button
             onClick={onCreateDeck}
-            className="px-4 py-2 bg-strawberry-500 hover:bg-strawberry-600 text-white rounded-xl text-xs font-semibold shadow-rose-btn atelier-btn cursor-pointer"
+            className="px-4 py-2 bg-strawberry-500 hover:bg-strawberry-600 text-white rounded-xl text-sm font-semibold shadow-rose-btn atelier-btn cursor-pointer"
           >
-            Create Deck 🌸
+            Create Deck
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredDecks.map((deck, idx) => {
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filteredDecks.map((deck) => {
             const stats = getDeckStats(deck.id);
             const totalDue = stats.newCount + stats.learnCount + stats.dueCount;
             const hasDraft = hasDraftForDeck(deck.id);
-            const palette = BENTO_PALETTES[idx % BENTO_PALETTES.length];
 
             return (
               <div
                 key={deck.id}
-                className={`bento-card p-4 sm:p-5 flex flex-col justify-between group transition-all w-full min-w-0 ${palette.border}`}
+                className="bg-white rounded-2xl border border-[#EAE6DF] hover:border-strawberry-300 p-4 sm:p-5 flex flex-col justify-between group transition-colors w-full min-w-0 overflow-hidden shadow-xs"
               >
-                <div>
+                <div className="min-w-0">
                   {/* Top: Icon, Title & Options */}
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start justify-between gap-3 min-w-0">
                     <div 
                       onClick={() => {
                         sounds.playClick();
                         onStudyDeck(deck, totalDue > 0 ? 'due' : 'all');
                       }}
-                      className="flex items-start space-x-3.5 flex-1 cursor-pointer"
+                      className="flex items-start space-x-3 flex-1 min-w-0 cursor-pointer"
                     >
-                      <div className={`w-11 h-11 rounded-2xl ${palette.iconBg} border flex items-center justify-center text-xl shrink-0 select-none group-hover:scale-105 transition-transform shadow-2xs`}>
-                        {deck.icon || '🎀'}
+                      <div className="w-8 h-8 rounded-lg bg-transparent flex items-center justify-center shrink-0 select-none group-hover:scale-105 transition-transform">
+                        {renderDeckIcon(deck.icon)}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center space-x-2">
-                          <h3 className={`text-sm sm:text-base font-extrabold text-cocoa-900 ${palette.hoverText} transition-colors truncate`}>
+                        <div className="flex items-center space-x-2 min-w-0">
+                          <h3 className="text-base font-bold text-cocoa-900 group-hover:text-strawberry-600 transition-colors truncate">
                             {cleanDeckTitle(deck.name)}
                           </h3>
                           {hasDraft && (
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-honey-100 text-honey-800 border border-honey-200 flex items-center space-x-1 shrink-0">
-                              <FileEdit size={10} className="text-honey-600" />
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-honey-100 text-honey-800 border border-honey-200 flex items-center space-x-1 shrink-0">
+                              <FileEdit size={11} className="text-honey-600" />
                               <span>Draft</span>
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-cocoa-500 font-normal line-clamp-2 mt-1 leading-relaxed">
+                        <p className="text-sm text-cocoa-600 font-normal line-clamp-2 mt-1 leading-relaxed">
                           {deck.description || 'Master this collection with spaced repetition.'}
                         </p>
                       </div>
                     </div>
 
                     {/* Options Menu */}
-                    <div className="relative">
+                    <div className="relative shrink-0">
                       <button
                         onClick={() => setActiveMenuId(activeMenuId === deck.id ? null : deck.id)}
-                        className="p-1.5 text-cocoa-400 hover:text-cocoa-700 hover:bg-pink-50/50 rounded-xl transition-colors cursor-pointer"
+                        className="p-1.5 text-cocoa-400 hover:text-cocoa-700 hover:bg-cocoa-50 rounded-xl transition-colors cursor-pointer"
                         title="Deck Options"
                       >
                         <MoreVertical size={15} />
@@ -370,12 +376,12 @@ export const DeckList: React.FC<DeckListProps> = ({
 
                       {activeMenuId === deck.id && (
                         <div 
-                          className="absolute right-0 top-7 z-30 w-44 bg-white rounded-2xl shadow-card-hover border border-pink-100 p-1.5 text-xs font-semibold text-cocoa-800 space-y-0.5 animate-fadeIn"
+                          className="absolute right-0 top-7 z-30 w-44 bg-white rounded-2xl shadow-card-hover border border-[#EAE6DF] p-1.5 text-xs font-semibold text-cocoa-800 space-y-0.5 animate-fadeIn"
                           onMouseLeave={() => setActiveMenuId(null)}
                         >
                           <button
                             onClick={() => { onAddCardToDeck(deck); setActiveMenuId(null); }}
-                            className="w-full px-2.5 py-1.5 text-left rounded-xl hover:bg-pink-50 flex items-center space-x-2 cursor-pointer"
+                            className="w-full px-2.5 py-1.5 text-left rounded-xl hover:bg-cocoa-50 flex items-center space-x-2 cursor-pointer"
                           >
                             <Plus size={13} className="text-strawberry-500" />
                             <span>Add Card</span>
@@ -383,7 +389,7 @@ export const DeckList: React.FC<DeckListProps> = ({
                           {onOpenAiDeck && (
                             <button
                               onClick={() => { onOpenAiDeck(deck); setActiveMenuId(null); }}
-                              className="w-full px-2.5 py-1.5 text-left rounded-xl hover:bg-purple-50 flex items-center space-x-2 cursor-pointer"
+                              className="w-full px-2.5 py-1.5 text-left rounded-xl hover:bg-cocoa-50 flex items-center space-x-2 cursor-pointer"
                             >
                               <Sparkles size={13} className="text-taro-500" />
                               <span>AI Architect</span>
@@ -412,7 +418,7 @@ export const DeckList: React.FC<DeckListProps> = ({
                               <span>Merge</span>
                             </button>
                           )}
-                          <div className="border-t border-pink-100 my-1"></div>
+                          <div className="border-t border-[#EAE6DF] my-1"></div>
                           <button
                             onClick={() => { onDeleteDeck(deck.id); setActiveMenuId(null); }}
                             className="w-full px-2.5 py-1.5 text-left rounded-xl hover:bg-rose-50 text-rose-600 flex items-center space-x-2 cursor-pointer"
@@ -426,39 +432,39 @@ export const DeckList: React.FC<DeckListProps> = ({
                   </div>
 
                   {/* Status Pills */}
-                  <div className="flex items-center flex-wrap gap-2 mt-4 pt-3 border-t border-pink-100/80 text-xs">
+                  <div className="flex items-center flex-wrap gap-2 mt-4 pt-3 border-t border-[#EAE6DF] text-sm">
                     {totalDue > 0 ? (
-                      <span className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-full border text-[11px] font-bold shadow-2xs ${palette.pillDue}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-strawberry-500 animate-pulse" />
-                        <span>{totalDue} due today</span>
+                      <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full border text-xs font-semibold bg-strawberry-50 text-strawberry-800 border-strawberry-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-strawberry-500" />
+                        <span className="tabular-nums">{totalDue} due today</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-matcha-50 text-matcha-700 border border-matcha-200 text-[11px] font-bold shadow-2xs">
+                      <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-matcha-50 text-matcha-800 border border-matcha-200 text-xs font-semibold">
                         <CheckCircle2 size={12} className="text-matcha-600" />
-                        <span>Completed 🌸</span>
+                        <span>Completed</span>
                       </span>
                     )}
 
                     {stats.newCount > 0 && (
-                      <span className="text-[11px] text-cocoa-500 font-medium">
+                      <span className="text-sm text-cocoa-600 font-medium tabular-nums">
                         {stats.newCount} new
                       </span>
                     )}
 
-                    <div className="ml-auto text-xs text-cocoa-400 font-medium">
+                    <div className="ml-auto text-sm text-cocoa-600 font-medium tabular-nums">
                       {stats.total} {stats.total === 1 ? 'card' : 'cards'}
                     </div>
                   </div>
                 </div>
 
                 {/* Bottom Action Area */}
-                <div className="pt-3 mt-3 flex items-center justify-between gap-2 border-t border-pink-100/80">
+                <div className="pt-3 mt-3 flex items-center justify-between gap-2 border-t border-[#EAE6DF]">
                   <button
                     onClick={() => { sounds.playClick(); onAddCardToDeck(deck); }}
-                    className="py-1.5 px-3 rounded-xl border border-pink-200/80 bg-white hover:bg-pink-50/50 text-cocoa-600 hover:text-strawberry-600 transition-colors flex items-center space-x-1 text-xs font-bold cursor-pointer bento-btn"
+                    className="py-1.5 px-3.5 rounded-full border border-[#EAE6DF] bg-white hover:bg-cocoa-50 text-cocoa-700 hover:text-strawberry-600 hover:border-strawberry-200 transition-colors flex items-center space-x-1 text-sm font-semibold cursor-pointer"
                     title="Add flashcard to this deck"
                   >
-                    <Plus size={13} strokeWidth={2.5} />
+                    <Plus size={14} strokeWidth={2} />
                     <span>Add Card</span>
                   </button>
 
@@ -469,10 +475,10 @@ export const DeckList: React.FC<DeckListProps> = ({
                           sounds.playClick();
                           onStudyDeck(deck, 'all');
                         }}
-                        className="px-3 py-1.5 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-cocoa-200 rounded-xl text-xs font-semibold transition-colors flex items-center space-x-1.5 cursor-pointer bento-btn"
+                        className="px-3.5 py-1.5 bg-white hover:bg-cocoa-50 text-cocoa-700 border border-[#EAE6DF] rounded-full text-sm font-semibold transition-colors flex items-center space-x-1.5 cursor-pointer"
                         title="Review all cards in this deck anytime"
                       >
-                        <RotateCcw size={12} className="text-cocoa-400" />
+                        <RotateCcw size={13} className="text-cocoa-400" />
                         <span>Practice</span>
                       </button>
                     )}
@@ -482,18 +488,17 @@ export const DeckList: React.FC<DeckListProps> = ({
                         sounds.playClick();
                         onStudyDeck(deck, totalDue > 0 ? 'due' : 'all');
                       }}
-                      className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer bento-btn ${
+                      className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors flex items-center space-x-1.5 cursor-pointer ${
                         totalDue > 0
-                          ? palette.btnBg
+                          ? 'bg-strawberry-500 hover:bg-strawberry-600 text-white shadow-xs'
                           : 'bg-cocoa-100 hover:bg-cocoa-200 text-cocoa-800'
                       }`}
                     >
-                      <Play size={11} className={totalDue > 0 ? 'fill-white' : 'fill-cocoa-700'} />
-                      <span>{totalDue > 0 ? `Study (${totalDue}) 🌸` : 'Review All'}</span>
+                      <span>{totalDue > 0 ? `Study (${totalDue})` : 'Study'}</span>
+                      <ArrowRight size={13} />
                     </button>
                   </div>
                 </div>
-
               </div>
             );
           })}

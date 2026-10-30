@@ -5,7 +5,7 @@ const STORAGE_PREFIX = 'ankitti_';
 
 export const DEFAULT_GUEST_ACCOUNT: UserAccount = {
   id: 'guest',
-  name: 'Learner 🎀',
+  name: 'Learner',
   role: 'General Studies',
   avatar: 'kitty',
   targetExam: 'Daily Retention',
@@ -19,10 +19,10 @@ export const INITIAL_DECKS: Deck[] = [
   // 1. Japanese Deck
   {
     id: 'deck_japanese',
-    name: '🇯🇵 Japanese: Core Words & Essential Kanji',
+    name: 'Japanese: Core Words & Essential Kanji',
     description: 'High-frequency vocabulary, hiragana, katakana, and everyday conversation (JLPT N5)',
-    icon: '🌸',
-    color: '#ff4d88',
+    icon: 'book',
+    color: '#D84570',
     settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 20, reviewsPerDay: 150 },
     createdAt: Date.now() - 15 * 86400000,
     updatedAt: Date.now(),
@@ -30,10 +30,10 @@ export const INITIAL_DECKS: Deck[] = [
   // 2. Computer Science Deck
   {
     id: 'deck_cs',
-    name: '💻 CS: Algorithms, Big-O & Data Structures',
+    name: 'Computer Science: Algorithms & Data Structures',
     description: 'Hash maps, binary trees, dynamic programming, time complexities, and system design patterns',
-    icon: '⚡',
-    color: '#8b5cf6',
+    icon: 'code',
+    color: '#D84570',
     settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 15, reviewsPerDay: 100 },
     createdAt: Date.now() - 10 * 86400000,
     updatedAt: Date.now(),
@@ -41,10 +41,10 @@ export const INITIAL_DECKS: Deck[] = [
   // 3. Human Biology & Health
   {
     id: 'deck_bio',
-    name: '🫀 Human Biology: Physiology & Anatomy',
+    name: 'Human Biology: Physiology & Anatomy',
     description: 'Cardiovascular system, neurotransmitters, cranial nerves, and organ functions',
-    icon: '🫀',
-    color: '#ec4899',
+    icon: 'activity',
+    color: '#D84570',
     settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 20, reviewsPerDay: 120 },
     createdAt: Date.now() - 8 * 86400000,
     updatedAt: Date.now(),
@@ -52,10 +52,10 @@ export const INITIAL_DECKS: Deck[] = [
   // 4. Spanish Deck
   {
     id: 'deck_spanish',
-    name: '🇪🇸 Spanish: Conversational Phrases & Travel',
+    name: 'Spanish: Conversational Phrases & Travel',
     description: 'Essential phrases, common verbs, greetings, questions, and restaurant dining',
-    icon: '☀️',
-    color: '#f59e0b',
+    icon: 'sun',
+    color: '#D84570',
     settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 15, reviewsPerDay: 80 },
     createdAt: Date.now() - 5 * 86400000,
     updatedAt: Date.now(),

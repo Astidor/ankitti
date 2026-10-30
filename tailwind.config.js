@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Instrument Sans"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+      },
       colors: {
         // Deep Warm Espresso & Cocoa neutrals (refined, high contrast, readable)
         cocoa: {
@@ -26,12 +30,12 @@ export default {
           100: '#FFEBF0',
           200: '#FED7E2',
           300: '#FBB6CE',
-          400: '#F687B3',
-          500: '#ED648C', // Primary sweet rose
-          600: '#D84570',
-          700: '#B83256',
-          800: '#942644',
-          900: '#751E35',
+          400: '#E25580',
+          500: '#C73863', // Signature deep rose (passes WCAG AA 5.05:1 contrast with white)
+          600: '#B83256',
+          700: '#942644',
+          800: '#751E35',
+          900: '#561324',
         },
         // Soft Matcha Green (progress, completed, calm)
         matcha: {
