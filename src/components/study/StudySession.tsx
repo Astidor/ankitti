@@ -301,7 +301,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
       >
         {!isFlipped ? (
           /* CARD FRONT FACE */
-          <div className="w-full min-h-[360px] bg-white rounded-2xl border border-[#EAE4DC] hover:border-strawberry-200 shadow-card p-6 sm:p-8 flex flex-col justify-between transition-all duration-200">
+          <div className="w-full min-h-[360px] bg-white rounded-3xl border-1.5 border-pink-200/90 shadow-[0_8px_24px_rgba(244,63,122,0.08)] hover:shadow-[0_12px_32px_rgba(244,63,122,0.12)] p-6 sm:p-8 flex flex-col justify-between transition-all duration-200">
             
             {/* Front Header */}
             <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
@@ -365,7 +365,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           </div>
         ) : (
           /* CARD BACK FACE */
-          <div className="w-full min-h-[360px] bg-white rounded-2xl border border-strawberry-200 shadow-card p-6 sm:p-8 flex flex-col justify-between transition-all animate-fadeIn">
+          <div className="w-full min-h-[360px] bg-white rounded-3xl border-1.5 border-pink-300 shadow-[0_8px_24px_rgba(244,63,122,0.12)] p-6 sm:p-8 flex flex-col justify-between transition-all animate-fadeIn">
             
             {/* Back Header */}
             <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
@@ -475,41 +475,53 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {/* Again (1) */}
               <button
                 onClick={() => handleRating(1)}
-                className="py-2.5 sm:py-3 px-2 rounded-xl bg-strawberry-50 hover:bg-strawberry-100 text-strawberry-800 border border-strawberry-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-2xl bg-strawberry-50 hover:bg-strawberry-100 text-strawberry-800 border-1.5 border-strawberry-200 font-bold transition-all text-center bento-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Again (Shortcut: 1)"
               >
-                <div className="text-xs font-bold">Again</div>
-                <div className="text-[11px] font-mono font-medium text-strawberry-600 mt-0.5">{previews.again}</div>
+                <div className="text-xs font-bold flex items-center space-x-1">
+                  <span>🍰</span>
+                  <span>Again</span>
+                </div>
+                <div className="text-[11px] font-mono font-semibold text-strawberry-600 mt-0.5">{previews.again}</div>
               </button>
 
               {/* Hard (2) */}
               <button
                 onClick={() => handleRating(2)}
-                className="py-2.5 sm:py-3 px-2 rounded-xl bg-honey-50 hover:bg-honey-100 text-honey-800 border border-honey-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-2xl bg-honey-50 hover:bg-honey-100 text-honey-800 border-1.5 border-honey-200 font-bold transition-all text-center bento-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Hard (Shortcut: 2)"
               >
-                <div className="text-xs font-bold">Hard</div>
-                <div className="text-[11px] font-mono font-medium text-honey-600 mt-0.5">{previews.hard}</div>
+                <div className="text-xs font-bold flex items-center space-x-1">
+                  <span>🍵</span>
+                  <span>Hard</span>
+                </div>
+                <div className="text-[11px] font-mono font-semibold text-honey-600 mt-0.5">{previews.hard}</div>
               </button>
 
               {/* Good (3) */}
               <button
                 onClick={() => handleRating(3)}
-                className="py-2.5 sm:py-3 px-2 rounded-xl bg-matcha-50 hover:bg-matcha-100 text-matcha-800 border border-matcha-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-2xl bg-matcha-50 hover:bg-matcha-100 text-matcha-800 border-1.5 border-matcha-200 font-bold transition-all text-center bento-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Good (Shortcut: 3 or Space)"
               >
-                <div className="text-xs font-bold">Good</div>
-                <div className="text-[11px] font-mono font-medium text-matcha-600 mt-0.5">{previews.good}</div>
+                <div className="text-xs font-bold flex items-center space-x-1">
+                  <span>🌸</span>
+                  <span>Good</span>
+                </div>
+                <div className="text-[11px] font-mono font-semibold text-matcha-600 mt-0.5">{previews.good}</div>
               </button>
 
               {/* Easy (4) */}
               <button
                 onClick={() => handleRating(4)}
-                className="py-2.5 sm:py-3 px-2 rounded-xl bg-taro-50 hover:bg-taro-100 text-taro-800 border border-taro-200 font-semibold transition-all text-center atelier-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
+                className="py-2.5 sm:py-3 px-2 rounded-2xl bg-taro-50 hover:bg-taro-100 text-taro-800 border-1.5 border-taro-200 font-bold transition-all text-center bento-btn shadow-2xs active:scale-95 cursor-pointer flex flex-col items-center justify-center"
                 title="Rating: Easy (Shortcut: 4)"
               >
-                <div className="text-xs font-bold">Easy</div>
-                <div className="text-[11px] font-mono font-medium text-taro-600 mt-0.5">{previews.easy}</div>
+                <div className="text-xs font-bold flex items-center space-x-1">
+                  <span>✨</span>
+                  <span>Easy</span>
+                </div>
+                <div className="text-[11px] font-mono font-semibold text-taro-600 mt-0.5">{previews.easy}</div>
               </button>
 
             </div>

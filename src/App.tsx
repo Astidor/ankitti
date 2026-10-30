@@ -41,6 +41,7 @@ import { CardBrowser } from './components/browser/CardBrowser';
 import { PomodoroWidget } from './components/common/PomodoroWidget';
 import { KittyBow, KittyAvatar, AestheticMascot } from './components/common/KittyIllustrations';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
+import { FloatingPetals } from './components/common/FloatingPetals';
 
 export function App() {
   const [account, setAccount] = useState<UserAccount>(storage.getActiveAccount());
@@ -595,12 +596,13 @@ export function App() {
     );
   }
 
-  // 🌸 APP STUDIO: REFINED SIDEBAR CADDY + ATELIER WORKSPACE 🌸
+  // 🌸 APP STUDIO: REFINED SIDEBAR CADDY + KAWAII WORKSPACE 🌸
   return (
-    <div className="min-h-screen bg-[#FAF8F5] text-cocoa-900 flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
+    <div className="min-h-screen kawaii-grid-bg text-cocoa-900 flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
+      <FloatingPetals />
       
       {/* 🍱 REFINED LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
-      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white border-r border-[#EAE4DC] p-4 justify-between shrink-0 shadow-xs z-30 select-none">
+      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white/95 backdrop-blur-md border-r border-pink-100 p-4 justify-between shrink-0 shadow-xs z-30 select-none">
         
         {/* Top Segment: Brand, Nav & Add Action */}
         <div className="space-y-4">
@@ -749,20 +751,21 @@ export function App() {
           )}
 
           {/* Mascot Study Companion Mini Pill */}
-          <div className="p-2.5 rounded-xl bg-cocoa-50 border border-[#EAE4DC] flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white border border-[#EAE4DC] p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-r from-pink-50/90 to-rose-50/70 border border-pink-200/90 flex items-center space-x-2.5 shadow-2xs">
+            <div className="w-9 h-9 rounded-xl bg-white border border-pink-200 p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
               <img 
                 src="/assets/reading_mascot.png" 
                 alt="Companion" 
-                className="w-full h-full object-cover rounded-md"
+                className="w-full h-full object-cover rounded-lg"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-bold text-cocoa-900 truncate">
-                Study Buddy 🌸
+              <div className="text-[11px] font-extrabold text-cocoa-900 truncate flex items-center space-x-1">
+                <span>Study Buddy</span>
+                <span className="text-[10px]">🌸</span>
               </div>
-              <div className="text-[10px] text-cocoa-500 truncate">
-                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Ready for focus session!'}
+              <div className="text-[10px] text-strawberry-700 font-semibold truncate">
+                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Cheering for you! 🧋'}
               </div>
             </div>
           </div>

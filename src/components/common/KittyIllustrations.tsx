@@ -107,7 +107,7 @@ export const KittyAvatar: React.FC<{ size?: number; className?: string }> = ({
   return (
     <div 
       style={{ width: size, height: size }}
-      className={`rounded-full overflow-hidden border-2 border-indigo-200/90 shadow-sm bg-[#faf8f5] flex items-center justify-center ${className}`}
+      className={`rounded-full overflow-hidden border-2 border-strawberry-200 shadow-sm bg-strawberry-50 flex items-center justify-center ${className}`}
     >
       <img 
         src="/assets/hero_mascot.png" 
@@ -115,5 +115,42 @@ export const KittyAvatar: React.FC<{ size?: number; className?: string }> = ({
         className="w-full h-full object-cover scale-125 translate-y-1"
       />
     </div>
+  );
+};
+
+// Cute Speech Bubble for Mascot Dialogue
+export const CuteSpeechBubble: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+}> = ({ children, className = '' }) => {
+  return (
+    <div className={`relative bg-white rounded-2xl px-4 py-2.5 border border-strawberry-200 shadow-sm text-xs font-semibold text-cocoa-800 ${className}`}>
+      {children}
+      {/* Speech bubble pointer arrow */}
+      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-r-[8px] border-r-white border-b-[6px] border-b-transparent" />
+      <div className="absolute -left-[9px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-r-[9px] border-r-strawberry-200 border-b-[7px] border-b-transparent -z-10" />
+    </div>
+  );
+};
+
+// Kawaii Sticker Pill Badge
+export const KawaiiBadge: React.FC<{
+  emoji?: string;
+  label: string;
+  color?: 'strawberry' | 'taro' | 'matcha' | 'honey';
+  className?: string;
+}> = ({ emoji, label, color = 'strawberry', className = '' }) => {
+  const styles = {
+    strawberry: 'bg-strawberry-50 text-strawberry-700 border-strawberry-200',
+    taro: 'bg-taro-50 text-taro-700 border-taro-200',
+    matcha: 'bg-matcha-50 text-matcha-700 border-matcha-200',
+    honey: 'bg-honey-50 text-honey-800 border-honey-200',
+  }[color];
+
+  return (
+    <span className={`inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full border text-[11px] font-bold shadow-2xs ${styles} ${className}`}>
+      {emoji && <span className="text-xs">{emoji}</span>}
+      <span>{label}</span>
+    </span>
   );
 };
