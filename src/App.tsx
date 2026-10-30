@@ -615,41 +615,38 @@ export function App() {
 
   // App Studio Mode (Operate Mode) with Natural, Responsive Page Scrolling
   return (
-    <div className="min-h-screen bg-transparent text-[#2e1065] flex flex-col font-sans select-auto relative overflow-x-hidden">
+    <div className="min-h-screen bg-transparent text-slate-900 flex flex-col font-sans select-auto relative overflow-x-hidden">
       
-      {/* Falling Sakura Cherry Blossoms in App Studio */}
-      <FloatingPetals enabled={true} />
-
       {/* Focus Pomodoro Timer Overlay */}
       <PomodoroWidget 
         isOpen={isPomodoroOpen} 
         onClose={() => setIsPomodoroOpen(false)} 
       />
 
-      {/* iOS Frosted Glass App Header */}
-      <header className="sticky top-0 z-40 ios-glass border-b border-pink-200/80 shadow-xs pt-safe">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
+      {/* Modern Frosted App Header */}
+      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 shadow-xs pt-safe">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 sm:gap-4">
           
           {/* Brand & Home Navigation */}
-          <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
+          <div className="flex items-center space-x-3 shrink-0">
             <button
               onClick={() => {
                 sounds.playClick();
                 setActiveStudyDeck(null);
                 setCurrentTab('decks');
               }}
-              className="flex items-center space-x-2 text-slate-700 hover:text-pink-600 transition-colors group ios-btn cursor-pointer"
+              className="flex items-center space-x-2 text-slate-900 hover:text-rose-600 transition-colors group ios-btn cursor-pointer"
               title="Ankitti Dashboard"
             >
-              <KittyBow size={24} className="group-hover:scale-110 transition-transform" />
-              <span className="font-black text-xl tracking-tight text-[#be123c]">
+              <KittyBow size={24} className="text-rose-500 group-hover:scale-105 transition-transform" />
+              <span className="font-extrabold text-xl tracking-tight text-slate-900">
                 Ankitti
               </span>
             </button>
 
             <button
               onClick={() => { sounds.playClick(); setViewMode('landing'); }}
-              className="text-xs font-bold px-3 py-1 rounded-full text-pink-700 bg-pink-100/70 hover:bg-pink-100 border border-pink-200/80 transition-colors hidden sm:flex items-center space-x-1.5 ios-btn cursor-pointer shrink-0"
+              className="text-xs font-semibold px-2.5 py-1 rounded-full text-slate-600 bg-slate-100 hover:bg-slate-200/80 border border-slate-200 transition-colors hidden sm:flex items-center space-x-1.5 ios-btn cursor-pointer shrink-0"
               title="About Ankitti"
             >
               <Home size={12} />
@@ -657,37 +654,37 @@ export function App() {
             </button>
           </div>
 
-          {/* iOS Segmented Controller: Decks | Card Browser | Spaced Heatmap (Desktop/Tablet) */}
+          {/* Segmented Controller: Decks | Card Browser | Spaced Heatmap (Desktop/Tablet) */}
           {!activeStudyDeck && (
-            <div className="hidden md:flex items-center bg-pink-100/70 p-1 rounded-full border border-pink-200/80 text-xs font-bold shadow-xs shrink-0">
+            <div className="hidden md:flex items-center bg-slate-100/90 p-1 rounded-full border border-slate-200/80 text-xs font-medium shadow-xs shrink-0">
               <button
                 onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'decks' ? 'bg-white text-pink-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
+                  currentTab === 'decks' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Layers size={13} />
+                <Layers size={13} className={currentTab === 'decks' ? 'text-rose-500' : 'text-slate-400'} />
                 <span>Decks</span>
               </button>
 
               <button
                 onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'browser' ? 'bg-white text-pink-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
+                  currentTab === 'browser' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <Search size={13} />
+                <Search size={13} className={currentTab === 'browser' ? 'text-rose-500' : 'text-slate-400'} />
                 <span>Card Browser</span>
               </button>
 
               <button
                 onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
-                  currentTab === 'stats' ? 'bg-white text-pink-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                className={`flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full transition-all ios-btn whitespace-nowrap cursor-pointer ${
+                  currentTab === 'stats' ? 'bg-white text-slate-900 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <BarChart2 size={13} />
-                <span>Spaced Heatmap</span>
+                <BarChart2 size={13} className={currentTab === 'stats' ? 'text-rose-500' : 'text-slate-400'} />
+                <span>Stats & Heatmap</span>
               </button>
             </div>
           )}
@@ -696,24 +693,24 @@ export function App() {
             <div className="flex items-center space-x-2 shrink-0">
               <button
                 onClick={() => { sounds.playClick(); setActiveStudyDeck(null); }}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-pink-50 text-slate-700 border border-pink-200 text-xs font-bold transition-colors ios-btn cursor-pointer whitespace-nowrap"
+                className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold transition-colors ios-btn cursor-pointer whitespace-nowrap shadow-xs"
               >
                 <ArrowLeft size={13} />
-                <span>Exit Study Session</span>
+                <span>Exit Session</span>
               </button>
-              <span className="text-xs font-bold text-pink-800 hidden md:inline truncate max-w-xs">
+              <span className="text-xs font-bold text-slate-800 hidden md:inline truncate max-w-xs">
                 Studying: {activeStudyDeck.name}
               </span>
             </div>
           )}
 
           {/* Right Action Tools */}
-          <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <div className="flex items-center space-x-2 shrink-0">
             
             {hasAnyDraft && (
               <button 
                 onClick={() => handleOpenNewCard()}
-                className="cursor-pointer hidden sm:flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shadow-xs hover:bg-amber-100 transition-colors ios-btn shrink-0 whitespace-nowrap"
+                className="cursor-pointer hidden sm:flex items-center space-x-1 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold shadow-xs hover:bg-amber-100 transition-colors ios-btn shrink-0 whitespace-nowrap"
                 title="Unfinished card draft saved in browser"
               >
                 <FileEdit size={12} className="text-amber-600" />
@@ -722,13 +719,13 @@ export function App() {
             )}
 
             {/* Utility Controls (Pomodoro + Sound Toggle) */}
-            <div className="flex items-center bg-pink-100/60 p-0.5 rounded-full border border-pink-200/80 shrink-0">
+            <div className="flex items-center bg-slate-100/90 p-0.5 rounded-full border border-slate-200/80 shrink-0">
               <button
                 onClick={() => setIsPomodoroOpen(prev => !prev)}
                 className={`p-1.5 rounded-full transition-all ios-btn cursor-pointer ${
                   isPomodoroOpen 
-                    ? 'bg-[#ff3366] text-white shadow-xs' 
-                    : 'text-slate-600 hover:text-pink-600 hover:bg-white/80'
+                    ? 'bg-rose-500 text-white shadow-xs' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
                 }`}
                 title="Focus Pomodoro Timer"
               >
@@ -744,7 +741,7 @@ export function App() {
                 }}
                 className={`p-1.5 rounded-full transition-all ios-btn cursor-pointer ${
                   soundEnabled 
-                    ? 'text-pink-600 hover:bg-white/80' 
+                    ? 'text-rose-600 hover:bg-white/80' 
                     : 'text-slate-400 hover:bg-white/80'
                 }`}
                 title={soundEnabled ? 'Mute Sounds' : 'Unmute Sounds'}
@@ -757,29 +754,28 @@ export function App() {
             {!isStandalone && (
               <button
                 onClick={() => { sounds.playClick(); setIsInstallModalOpen(true); }}
-                className="flex px-2.5 sm:px-3 py-1 bg-pink-100 hover:bg-pink-200 text-pink-700 rounded-full text-xs font-extrabold transition-all items-center space-x-1 border border-pink-300 shadow-2xs ios-btn cursor-pointer shrink-0"
+                className="hidden sm:flex px-3 py-1 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-full text-xs font-semibold transition-all items-center space-x-1.5 border border-slate-200 shadow-xs ios-btn cursor-pointer shrink-0"
                 title="Install Ankitti to your phone home screen for offline study"
               >
-                <Smartphone size={13} className="text-pink-600 shrink-0" />
-                <span className="hidden sm:inline">Install App</span>
-                <span className="sm:hidden">App</span>
+                <Smartphone size={13} className="text-slate-600 shrink-0" />
+                <span>Install</span>
               </button>
             )}
 
             {/* AI Deck Architect Action Button (Desktop/Tablet) */}
             <button
               onClick={() => handleOpenAiDeck()}
-              className="hidden md:flex px-3.5 py-1.5 bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 hover:from-purple-700 hover:to-rose-600 text-white rounded-full text-xs font-extrabold transition-all items-center space-x-1.5 shadow-sm hover:shadow-md ios-btn cursor-pointer shrink-0 whitespace-nowrap"
+              className="hidden md:flex px-3.5 py-1.5 bg-gradient-to-r from-purple-600 via-pink-600 to-rose-500 hover:opacity-95 text-white rounded-full text-xs font-semibold transition-all items-center space-x-1.5 shadow-xs ios-btn cursor-pointer shrink-0 whitespace-nowrap"
               title="Generate flashcards with AI Deck Architect"
             >
-              <Sparkles size={13} className="text-yellow-200 animate-pulse shrink-0" />
-              <span>AI Deck 🪄</span>
+              <Sparkles size={13} className="text-amber-200 shrink-0" />
+              <span>AI Deck</span>
             </button>
 
             {/* Add Card Primary Button (Desktop/Tablet) */}
             <button
               onClick={() => handleOpenNewCard()}
-              className="hidden md:flex px-3.5 py-1.5 bg-[#ff3366] hover:bg-[#e11d48] text-white rounded-full text-xs font-bold transition-all items-center space-x-1.5 shadow-sm hover:shadow-md ios-btn cursor-pointer shrink-0 whitespace-nowrap"
+              className="hidden md:flex px-3.5 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-full text-xs font-semibold transition-all items-center space-x-1.5 shadow-xs ios-btn cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Plus size={14} />
               <span>Add Card</span>
@@ -790,15 +786,15 @@ export function App() {
               <div className="flex items-center space-x-1 shrink-0">
                 <button
                   onClick={() => setIsAccountModalOpen(true)}
-                  className="flex items-center space-x-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-white hover:bg-pink-50 border border-pink-200 text-slate-700 text-xs font-semibold transition-colors ios-btn cursor-pointer"
+                  className="flex items-center space-x-1.5 pl-1.5 pr-2.5 py-1 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-medium transition-colors ios-btn cursor-pointer shadow-xs"
                   title={`Logged in as ${account.email}`}
                 >
                   <KittyAvatar size={20} />
-                  <span className="max-w-[75px] truncate hidden md:inline font-bold text-slate-800">{account.name}</span>
+                  <span className="max-w-[75px] truncate hidden md:inline font-semibold text-slate-900">{account.name}</span>
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-pink-50 rounded-full transition-colors ios-btn cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-colors ios-btn cursor-pointer"
                   title="Sign Out"
                 >
                   <LogOut size={15} />
@@ -807,11 +803,11 @@ export function App() {
             ) : (
               <button
                 onClick={() => { sounds.playClick(); setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
-                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-[#ff3366] hover:bg-[#e11d48] text-white text-xs font-bold transition-all ios-btn shadow-xs cursor-pointer shrink-0"
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-all ios-btn shadow-xs cursor-pointer shrink-0"
                 title="Create an account to enable cloud storage and sync across devices"
               >
                 <Cloud size={13} />
-                <span>Cloud Sync</span>
+                <span>Sync</span>
               </button>
             )}
           </div>
@@ -820,16 +816,16 @@ export function App() {
 
       {/* Offline Status Alert Banner */}
       {!isOnline && (
-        <div className="bg-gradient-to-r from-amber-500 via-rose-500 to-pink-500 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-sm animate-fadeIn">
-          <WifiOff size={14} className="shrink-0 animate-pulse" />
-          <span>📡 Offline Mode Active — Studying, reviewing, and creating cards works completely offline without internet!</span>
+        <div className="bg-amber-600 text-white text-xs font-semibold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
+          <WifiOff size={14} className="shrink-0" />
+          <span>Offline Mode Active — Studying and reviewing works completely offline without internet.</span>
         </div>
       )}
 
       {/* Online Restored Toast */}
       {showOnlineToast && (
-        <div className="bg-emerald-600 text-white text-xs font-extrabold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-sm animate-fadeIn">
-          <span>✨ Back online! Synced smoothly with cloud.</span>
+        <div className="bg-emerald-600 text-white text-xs font-semibold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
+          <span>Back online! Synced smoothly with cloud.</span>
         </div>
       )}
 
@@ -965,65 +961,65 @@ export function App() {
         onDeckCreated={handleAiDeckCreated}
       />
 
-      {/* iOS Mobile Bottom Navigation Bar (Phone Only) */}
+      {/* Mobile Bottom Navigation Bar (Phone Only) */}
       {!activeStudyDeck && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-2xl border-t border-pink-200/90 px-3 pt-1.5 pb-safe shadow-[0_-8px_30px_rgba(255,105,180,0.12)] flex items-center justify-around select-none">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/80 px-4 pt-1 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center justify-around select-none">
           {/* Decks Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
               currentTab === 'decks' 
-                ? 'text-[#ff3366] font-black scale-105' 
-                : 'text-slate-500 font-semibold hover:text-slate-800'
+                ? 'text-rose-600 font-bold' 
+                : 'text-slate-500 font-medium hover:text-slate-900'
             }`}
           >
-            <Layers size={22} className={currentTab === 'decks' ? 'text-[#ff3366]' : 'text-slate-400'} />
-            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Decks</span>
+            <Layers size={20} className={currentTab === 'decks' ? 'text-rose-500' : 'text-slate-400'} />
+            <span className="text-[11px] mt-0.5 tracking-tight">Decks</span>
           </button>
 
           {/* Card Browser Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
               currentTab === 'browser' 
-                ? 'text-[#ff3366] font-black scale-105' 
-                : 'text-slate-500 font-semibold hover:text-slate-800'
+                ? 'text-rose-600 font-bold' 
+                : 'text-slate-500 font-medium hover:text-slate-900'
             }`}
           >
-            <Search size={22} className={currentTab === 'browser' ? 'text-[#ff3366]' : 'text-slate-400'} />
-            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Cards</span>
+            <Search size={20} className={currentTab === 'browser' ? 'text-rose-500' : 'text-slate-400'} />
+            <span className="text-[11px] mt-0.5 tracking-tight">Cards</span>
           </button>
 
           {/* Quick Floating Add Card Button */}
           <button
             onClick={() => handleOpenNewCard()}
-            className="w-13 h-13 -mt-6 rounded-full bg-gradient-to-tr from-[#ff3366] to-[#ff5c8a] text-white flex items-center justify-center shadow-lg shadow-pink-400/50 border-3 border-white transition-transform active:scale-90 cursor-pointer"
+            className="w-12 h-12 -mt-5 rounded-full bg-rose-500 active:bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-500/30 border-2 border-white transition-transform active:scale-95 cursor-pointer"
             title="Create New Card"
           >
-            <Plus size={26} strokeWidth={2.5} />
+            <Plus size={24} strokeWidth={2.5} />
           </button>
 
           {/* Stats Tab */}
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all cursor-pointer ${
+            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
               currentTab === 'stats' 
-                ? 'text-[#ff3366] font-black scale-105' 
-                : 'text-slate-500 font-semibold hover:text-slate-800'
+                ? 'text-rose-600 font-bold' 
+                : 'text-slate-500 font-medium hover:text-slate-900'
             }`}
           >
-            <BarChart2 size={22} className={currentTab === 'stats' ? 'text-[#ff3366]' : 'text-slate-400'} />
-            <span className="text-[10px] mt-0.5 tracking-tight font-bold">Heatmap</span>
+            <BarChart2 size={20} className={currentTab === 'stats' ? 'text-rose-500' : 'text-slate-400'} />
+            <span className="text-[11px] mt-0.5 tracking-tight">Stats</span>
           </button>
 
           {/* AI Deck Architect Modal Trigger */}
           <button
             onClick={() => handleOpenAiDeck()}
-            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-2xl transition-all text-purple-600 font-semibold cursor-pointer active:scale-95"
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-purple-600 font-medium cursor-pointer active:scale-95"
             title="AI Deck Architect"
           >
-            <Sparkles size={22} className="text-purple-500 animate-pulse" />
-            <span className="text-[10px] mt-0.5 tracking-tight font-bold text-purple-600">AI Deck</span>
+            <Sparkles size={20} className="text-purple-500" />
+            <span className="text-[11px] mt-0.5 tracking-tight text-purple-600 font-semibold">AI Deck</span>
           </button>
         </nav>
       )}

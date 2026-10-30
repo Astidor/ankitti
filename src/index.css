@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Quicksand:wght@600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,16 +24,13 @@
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "SF Pro Display", "Outfit", "Quicksand", sans-serif;
-    color: #1e1b4b;
-    background-color: #fff8fa;
-    background-image: 
-      url('/assets/study_background.jpg'),
-      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255, 214, 230, 0.4), transparent 70%);
+    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #0f172a;
+    background-color: #faf9fb;
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(244, 63, 94, 0.05), transparent 70%);
     background-size: cover;
     background-position: center top;
     background-repeat: no-repeat;
-    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -44,166 +39,94 @@
   }
 
   ::selection {
-    background-color: #fbcfe8;
-    color: #831843;
+    background-color: #ffe4e6;
+    color: #9f1239;
   }
 }
 
-/* iOS Frosted Glass & Inset Card Styles */
+/* Modern Frosted Glass Header & Surfaces */
 .ios-glass {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 182, 193, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .ios-card {
   background: #ffffff;
-  border-radius: 1.6rem;
-  border: 1px solid #ffe4e9;
-  box-shadow: 0 4px 20px -2px rgba(255, 105, 180, 0.06);
-  transition: all 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  border-radius: 1.25rem;
+  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ios-card:hover {
   transform: translateY(-2px);
-  border-color: #fbcfe8;
-  box-shadow: 0 10px 30px -4px rgba(255, 105, 180, 0.12);
+  border-color: #fecdd3;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
 .ios-card:active {
-  transform: scale(0.985);
+  transform: scale(0.99);
 }
 
-/* iOS Spring Button Press */
+/* Subtle Spring Button Feedback */
 .ios-btn {
-  transition: transform 0.16s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .ios-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
-/* 3D Perspective Flashcard Flip */
-.perspective-1000 {
-  perspective: 1000px;
-}
-
-.transform-style-3d {
-  transform-style: preserve-3d;
-}
-
-.backface-hidden {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.rotate-y-180 {
-  transform: rotateY(180deg);
-}
-
-/* Falling Sakura Blossom Drift Animation */
-@keyframes sakuraDrift {
-  0% {
-    transform: translateY(-40px) rotate(0deg) translateX(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.85;
-  }
-  50% {
-    transform: translateY(50vh) rotate(180deg) translateX(40px);
-  }
-  90% {
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateY(105vh) rotate(360deg) translateX(-30px);
-    opacity: 0;
-  }
-}
-
-.petal {
-  position: absolute;
-  pointer-events: none;
-  animation-name: sakuraDrift;
-  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-}
-
-/* Cute Mascot Floating Animation */
-@keyframes kittyFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-6px) rotate(1deg);
-  }
-}
-
-.mascot-float {
-  animation: kittyFloat 3.5s ease-in-out infinite;
-}
-
-/* Cute Twinkle Animation */
-@keyframes cuteTwinkle {
-  0%, 100% {
-    transform: scale(0.9) rotate(0deg);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.15) rotate(15deg);
-    opacity: 1;
-  }
-}
-
-.cute-twinkle {
-  animation: cuteTwinkle 2.5s ease-in-out infinite;
-}
-
-/* iOS Custom Scrollbars */
+/* Modern Scrollbars */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #fff0f3;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #fbcfe8;
+  background: #e2e8f0;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #f472b6;
+  background: #cbd5e1;
 }
 
 /* Cloze Deletion Badges */
 .cloze-badge {
-  background-color: #ffe4e9;
+  background-color: #fff1f2;
   color: #be123c;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 8px;
-  border-radius: 8px;
-  border: 1.5px dashed #fb7185;
+  border-radius: 6px;
+  border: 1px dashed #fda4af;
   display: inline-block;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cloze-badge:hover {
+  background-color: #ffe4e6;
+  border-color: #fb7185;
 }
 
 .cloze-active {
-  background-color: #ff3366;
+  background-color: #f43f5e;
   color: #ffffff;
-  font-weight: 700;
+  font-weight: 600;
   padding: 2px 10px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(255, 51, 102, 0.35);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.3);
   display: inline-block;
 }
 
-/* iOS Safe Areas & Native App Polish */
+/* iOS Safe Areas */
 .pt-safe {
   padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
 }
@@ -228,78 +151,77 @@
 }
 
 .ios-bottom-sheet {
-  animation: iosSlideUp 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: iosSlideUp 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Rich Flashcard Typography & Formatting (Anki HTML & Markdown) */
+/* Rich Flashcard Typography & Markdown Presentation */
 .card-rich-content {
   font-family: inherit;
   color: inherit;
   word-break: break-word;
+  line-height: 1.6;
 }
 
 .card-rich-content h1 {
-  font-size: 1.35rem;
-  font-weight: 900;
-  color: #1e1b4b;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
   margin-top: 0.75rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.3;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
 }
 
 .card-rich-content h2 {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #be123c;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
   margin-top: 0.65rem;
-  margin-bottom: 0.35rem;
-  line-height: 1.35;
-  border-bottom: 1px solid rgba(255, 182, 193, 0.4);
-  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
 }
 
 .card-rich-content h3 {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #881337;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
 }
 
 .card-rich-content b,
 .card-rich-content strong {
-  font-weight: 800;
+  font-weight: 700;
   color: #0f172a;
 }
 
 .card-rich-content u {
   text-decoration: underline;
   text-decoration-color: #f43f5e;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
 }
 
 .card-rich-content i,
 .card-rich-content em {
   font-style: italic;
-  color: #334155;
+  color: #475569;
 }
 
 .card-rich-content s,
 .card-rich-content strike,
 .card-rich-content del {
   text-decoration: line-through;
-  opacity: 0.7;
+  opacity: 0.65;
 }
 
 .card-rich-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.88em;
-  background-color: rgba(255, 228, 233, 0.75);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86em;
+  background-color: #f1f5f9;
   color: #be123c;
-  padding: 0.15rem 0.45rem;
-  border-radius: 0.45rem;
-  border: 1px solid rgba(254, 205, 211, 0.8);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.35rem;
+  border: 1px solid #e2e8f0;
 }
 
 .card-rich-content ul,
@@ -321,16 +243,9 @@
   line-height: 1.5;
 }
 
-.card-rich-content .rich-list-item {
-  padding-left: 0.25rem;
-  margin: 0.2rem 0;
-  line-height: 1.5;
-}
-
 .card-rich-content mark {
   background-color: #fef08a;
-  color: #854d0e;
+  color: #713f12;
   padding: 0.1rem 0.35rem;
-  border-radius: 0.3rem;
+  border-radius: 0.25rem;
 }
-

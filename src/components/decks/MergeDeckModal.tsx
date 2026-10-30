@@ -35,12 +35,13 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
   // New deck fields
   const [newDeckName, setNewDeckName] = useState<string>('');
   const [newDeckIcon, setNewDeckIcon] = useState<string>('🎀');
-  const [newDeckColor, setNewDeckColor] = useState<string>('#ff4d88');
+  const [newDeckColor, setNewDeckColor] = useState<string>('#f43f5e');
 
   // Options
   const [deleteSourceDeck, setDeleteSourceDeck] = useState<boolean>(true);
   const [tagMergedCards, setTagMergedCards] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -61,12 +62,13 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
     if (source) {
       setNewDeckName(`${source.name} (Combined)`);
     } else {
-      setNewDeckName('Merged Deck 🎀');
+      setNewDeckName('Merged Deck');
     }
 
     setDeleteSourceDeck(true);
     setTagMergedCards(true);
     setIsSubmitting(false);
+    setErrorMessage(null);
   }, [isOpen, initialSourceDeck, decks]);
 
   if (!isOpen) return null;
@@ -103,6 +105,7 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
     if (targetMode === 'new' && !newDeckName.trim()) return;
 
     setIsSubmitting(true);
+    setErrorMessage(null);
     try {
       await onMergeDecks(
         sourceDeckId,
@@ -114,68 +117,75 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
       onClose();
     } catch (err) {
       console.error('Merge decks failed:', err);
-      alert('Failed to merge decks. Please try again.');
+      setErrorMessage('Failed to merge decks. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/45 backdrop-blur-xs animate-fadeIn">
-      <div className="bg-white rounded-t-[32px] sm:rounded-[28px] w-full max-w-lg shadow-2xl overflow-hidden border border-pink-200/90 ios-bottom-sheet sm:animate-none flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white rounded-t-[28px] sm:rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-200 ios-bottom-sheet sm:animate-none flex flex-col max-h-[92vh]">
         
-        {/* iOS Grabber & Header */}
-        <div className="pt-2 pb-1 px-4 flex justify-center bg-white/70">
-          <div className="w-10 h-1 bg-pink-200 rounded-full" />
+        {/* iOS Grabber */}
+        <div className="pt-2 pb-1 px-4 flex justify-center bg-slate-50 sm:hidden">
+          <div className="w-10 h-1 bg-slate-300 rounded-full" />
         </div>
 
-        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-pink-100 select-none">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-slate-100 select-none">
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 bg-pink-50 rounded-xl border border-pink-200/60 shadow-xs flex items-center justify-center">
+            <span className="p-1.5 bg-rose-50 rounded-lg text-rose-500 border border-rose-100 flex items-center justify-center">
               <KittyBow size={16} />
             </span>
             <div>
-              <div className="text-xs font-black text-slate-800 tracking-tight flex items-center space-x-1.5">
-                <span>Merge Flashcard Decks</span>
-                <span className="text-[10px] px-2 py-0.2 rounded-full bg-pink-100 text-pink-700 font-bold">
+              <div className="text-xs font-bold text-slate-900 tracking-tight flex items-center space-x-1.5">
+                <span>Merge Decks</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium">
                   2 Decks → 1
                 </span>
               </div>
-              <div className="text-[10px] text-slate-500 font-medium">Transfer all cards safely into one unified deck</div>
+              <div className="text-[10px] text-slate-500 font-normal">Transfer all cards safely into one unified deck</div>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-colors"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
           >
             <X size={14} />
           </button>
         </div>
 
+        {errorMessage && (
+          <div className="mx-5 mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-center space-x-2">
+            <AlertCircle size={15} className="text-rose-600 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto">
           
           {/* STEP 1: SOURCE DECK */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-black uppercase tracking-wider text-slate-600 block">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block">
               1. Source Deck (Move cards from)
             </label>
-            <div className="p-3 bg-rose-50/50 rounded-2xl border border-rose-200/80">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
               <select
                 value={sourceDeckId}
                 onChange={(e) => handleSourceChange(e.target.value)}
-                className="w-full text-xs font-bold text-slate-800 bg-white border border-rose-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
               >
                 {decks.map((deck) => (
                   <option key={deck.id} value={deck.id}>
-                    {deck.icon || '🎀'} {deck.name} ({getDeckCardCount(deck.id)} cards)
+                    {deck.icon || '📁'} {deck.name} ({getDeckCardCount(deck.id)} cards)
                   </option>
                 ))}
               </select>
 
-              <div className="mt-2 flex items-center justify-between text-[11px] text-rose-700 font-medium px-1">
+              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-600 font-medium px-1">
                 <span>Selected to move:</span>
-                <span className="font-extrabold font-mono bg-rose-100 px-2 py-0.5 rounded-full text-rose-800">
+                <span className="font-semibold font-mono bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-800">
                   {sourceCardCount} cards
                 </span>
               </div>
@@ -184,25 +194,25 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
 
           {/* CONNECTOR ICON */}
           <div className="flex items-center justify-center -my-1">
-            <div className="w-8 h-8 rounded-full bg-pink-100 border border-pink-300 text-pink-600 flex items-center justify-center shadow-xs">
-              <ArrowDown size={16} className="animate-bounce" />
+            <div className="w-7 h-7 rounded-full bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center shadow-2xs">
+              <ArrowDown size={14} />
             </div>
           </div>
 
           {/* STEP 2: DESTINATION DECK */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[11px] font-black uppercase tracking-wider text-slate-600">
+              <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 2. Destination Deck (Merge cards into)
               </label>
 
               {/* Toggle: Existing vs New */}
-              <div className="inline-flex p-0.5 bg-slate-100 rounded-lg text-[10px] font-bold">
+              <div className="inline-flex p-0.5 bg-slate-100 rounded-lg text-[10px] font-semibold">
                 <button
                   type="button"
                   onClick={() => setTargetMode('existing')}
                   disabled={availableTargetDecks.length === 0}
-                  className={`px-2 py-1 rounded-md transition-all ${
+                  className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
                     targetMode === 'existing'
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800 disabled:opacity-40'
@@ -213,9 +223,9 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setTargetMode('new')}
-                  className={`px-2 py-1 rounded-md transition-all ${
+                  className={`px-2 py-1 rounded-md transition-all cursor-pointer ${
                     targetMode === 'new'
-                      ? 'bg-white text-pink-700 shadow-2xs font-extrabold'
+                      ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
@@ -224,25 +234,25 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
               </div>
             </div>
 
-            <div className="p-3 bg-emerald-50/50 rounded-2xl border border-emerald-200/80 space-y-2">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
               {targetMode === 'existing' ? (
                 availableTargetDecks.length > 0 ? (
                   <>
                     <select
                       value={targetDeckId}
                       onChange={(e) => setTargetDeckId(e.target.value)}
-                      className="w-full text-xs font-bold text-slate-800 bg-white border border-emerald-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
                     >
                       {availableTargetDecks.map((deck) => (
                         <option key={deck.id} value={deck.id}>
-                          {deck.icon || '🎀'} {deck.name} (currently {getDeckCardCount(deck.id)} cards)
+                          {deck.icon || '📁'} {deck.name} (currently {getDeckCardCount(deck.id)} cards)
                         </option>
                       ))}
                     </select>
 
-                    <div className="flex items-center justify-between text-[11px] text-emerald-800 font-medium px-1">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 font-medium px-1">
                       <span>Resulting total:</span>
-                      <span className="font-extrabold font-mono bg-emerald-100 px-2 py-0.5 rounded-full text-emerald-900">
+                      <span className="font-semibold font-mono bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-800">
                         {totalCombinedCount} cards ({targetCurrentCount} + {sourceCardCount})
                       </span>
                     </div>
@@ -260,7 +270,7 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
                     <select
                       value={newDeckIcon}
                       onChange={(e) => setNewDeckIcon(e.target.value)}
-                      className="text-base p-2 bg-white border border-emerald-200 rounded-xl focus:outline-none shrink-0"
+                      className="text-base p-1.5 bg-white border border-slate-200 rounded-lg focus:outline-none shrink-0"
                     >
                       {DECK_ICONS.map((ic) => (
                         <option key={ic} value={ic}>{ic}</option>
@@ -272,13 +282,13 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
                       value={newDeckName}
                       onChange={(e) => setNewDeckName(e.target.value)}
                       placeholder="Name for new merged deck..."
-                      className="flex-1 text-xs font-bold text-slate-800 bg-white border border-emerald-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      className="flex-1 text-xs font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
                     />
                   </div>
 
-                  <div className="text-[11px] text-emerald-800 font-medium px-1 flex items-center justify-between">
+                  <div className="text-[11px] text-slate-600 font-medium px-1 flex items-center justify-between">
                     <span>New deck will contain:</span>
-                    <span className="font-extrabold font-mono bg-emerald-100 px-2 py-0.5 rounded-full text-emerald-900">
+                    <span className="font-semibold font-mono bg-white border border-slate-200 px-2 py-0.5 rounded-md text-slate-800">
                       {sourceCardCount} cards
                     </span>
                   </div>
@@ -288,8 +298,8 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
           </div>
 
           {/* STEP 3: MERGE OPTIONS */}
-          <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
+          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block">
               Merge Preferences
             </span>
 
@@ -299,13 +309,13 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
                 type="checkbox"
                 checked={deleteSourceDeck}
                 onChange={(e) => setDeleteSourceDeck(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded text-pink-600 focus:ring-pink-500 border-slate-300"
+                className="mt-0.5 w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-800 block">Delete empty source deck after merge</span>
+                <span className="font-semibold text-slate-800 block">Delete empty source deck after merge</span>
                 <span className="text-[11px] text-slate-500">
                   {deleteSourceDeck 
-                    ? `"${sourceDeck?.name || 'Source'}" will be safely deleted once cards are moved.` 
+                    ? `"${sourceDeck?.name || 'Source'}" will be deleted once cards are moved.` 
                     : `"${sourceDeck?.name || 'Source'}" will remain in your list with 0 cards.`}
                 </span>
               </div>
@@ -317,12 +327,12 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
                 type="checkbox"
                 checked={tagMergedCards}
                 onChange={(e) => setTagMergedCards(e.target.checked)}
-                className="mt-0.5 w-4 h-4 rounded text-pink-600 focus:ring-pink-500 border-slate-300"
+                className="mt-0.5 w-4 h-4 rounded text-rose-600 focus:ring-rose-500 border-slate-300"
               />
               <div className="text-xs">
-                <span className="font-bold text-slate-800 block">Tag cards with source deck name</span>
+                <span className="font-semibold text-slate-800 block">Tag cards with source deck name</span>
                 <span className="text-[11px] text-slate-500">
-                  Adds tag <code className="bg-pink-100 text-pink-800 px-1 rounded font-mono text-[10px]">#from-{(sourceDeck?.name || 'deck').slice(0, 15)}</code> so you can track or filter them later.
+                  Adds tag <code className="bg-slate-200 text-slate-800 px-1 rounded font-mono text-[10px]">#from-{(sourceDeck?.name || 'deck').slice(0, 15)}</code> for filtering.
                 </span>
               </div>
             </label>
@@ -330,8 +340,8 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
 
           {/* REASSURANCE NOTICE */}
           <div className="flex items-center space-x-2 text-[11px] text-slate-500 px-1">
-            <Sparkles size={14} className="text-pink-500 shrink-0" />
-            <span>All card review history, learning intervals, and scheduling stats are 100% preserved.</span>
+            <Sparkles size={14} className="text-rose-500 shrink-0" />
+            <span>Card review history, intervals, and scheduling stats are fully preserved.</span>
           </div>
 
           {/* FOOTER BUTTONS */}
@@ -339,17 +349,17 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting || sourceCardCount === 0 || (targetMode === 'existing' && !targetDeckId) || (targetMode === 'new' && !newDeckName.trim())}
-              className="px-5 py-2.5 rounded-2xl bg-[#ff3366] hover:bg-[#e11d48] text-white text-xs font-extrabold shadow-md shadow-pink-200 transition-all flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-semibold shadow-xs transition-all flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <GitMerge size={15} />
-              <span>{isSubmitting ? 'Merging Cards...' : `Merge ${sourceCardCount} Cards 🎀`}</span>
+              <span>{isSubmitting ? 'Merging Cards...' : `Merge ${sourceCardCount} Cards`}</span>
             </button>
           </div>
         </form>

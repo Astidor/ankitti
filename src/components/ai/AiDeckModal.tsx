@@ -3,24 +3,17 @@ import {
   X, 
   Sparkles, 
   Bot, 
-  BookOpen, 
-  Sliders, 
-  Check, 
+  Layers, 
   AlertCircle, 
   ArrowRight, 
-  Plus, 
   CheckCircle2,
-  Trash2,
-  Layers,
-  HelpCircle,
-  FolderPlus,
   Key
 } from 'lucide-react';
-import { Deck, Card, AiDeckResponse, AiDeckCardItem } from '../../types/anki';
+import { Deck, Card, AiDeckResponse } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
 import { api } from '../../services/api';
 import { sounds } from '../../services/audio';
-import { KittyBow, AestheticMascot } from '../common/KittyIllustrations';
+import { KittyBow } from '../common/KittyIllustrations';
 
 interface AiDeckModalProps {
   isOpen: boolean;
@@ -31,11 +24,11 @@ interface AiDeckModalProps {
 }
 
 const PRESET_TOPICS = [
-  { label: '🌸 Japanese JLPT N5 Core Verbs', topic: 'Japanese JLPT N5 essential verbs, polite forms (masu), and example sentences' },
-  { label: '🩺 Pharmacology: Antibiotics', topic: 'High-yield antibiotics mechanisms, bacterial coverage, and classic side effects' },
-  { label: '💻 React 19 & Next.js Core Concepts', topic: 'Modern React server components, hooks, concurrent rendering, and performance' },
-  { label: '🧠 Neuroscience & Brain Anatomy', topic: 'Brain lobes, cranial nerves, functions, and clinical lesions' },
-  { label: '⚖️ Constitutional Law Amendments', topic: 'US Constitutional Amendments 1 to 14, historic court cases, and key rights' },
+  { label: 'Japanese N5 Verbs', topic: 'Japanese JLPT N5 essential verbs, polite forms (masu), and example sentences' },
+  { label: 'Pharmacology: Antibiotics', topic: 'High-yield antibiotics mechanisms, bacterial coverage, and classic side effects' },
+  { label: 'React 19 & Next.js', topic: 'Modern React server components, hooks, concurrent rendering, and performance' },
+  { label: 'Neuroscience Basics', topic: 'Brain lobes, cranial nerves, functions, and clinical lesions' },
+  { label: 'Constitutional Law', topic: 'US Constitutional Amendments 1 to 14, historic court cases, and key rights' },
 ];
 
 export const AiDeckModal: React.FC<AiDeckModalProps> = ({
@@ -106,7 +99,6 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
       });
 
       setGeneratedResult(result);
-      // Select all cards by default
       const initialSelected: Record<number, boolean> = {};
       result.cards.forEach((_, idx) => {
         initialSelected[idx] = true;
@@ -152,7 +144,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           name: generatedResult.deck.name,
           description: generatedResult.deck.description,
           icon: generatedResult.deck.icon || '🤖',
-          color: generatedResult.deck.color || '#ff4d88',
+          color: generatedResult.deck.color || '#f43f5e',
           settings: {
             ...DEFAULT_DECK_SETTINGS,
             newCardsPerDay: 20,
@@ -164,7 +156,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
         await api.createDeck(targetDeck);
       }
 
-      // 2. Create Selected Cards
+      // Create Selected Cards
       const createdCards: Card[] = [];
       const cardsToCreate = generatedResult.cards.filter((_, idx) => selectedIndices[idx] !== false);
 
@@ -176,7 +168,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           type: item.type,
           front: item.front,
           back: item.back,
-          tags: item.tags || ['DeepSeek-AI'],
+          tags: item.tags || ['AI-Generated'],
           createdAt: now,
           due: now,
           interval: 0,
@@ -216,32 +208,32 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/40 backdrop-blur-xs sm:backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white/95 backdrop-blur-xl rounded-t-[32px] sm:rounded-[32px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border-t sm:border border-pink-200/80 flex flex-col ios-bottom-sheet sm:animate-none">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white rounded-t-[28px] sm:rounded-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border border-slate-200 flex flex-col ios-bottom-sheet sm:animate-none">
         
         {/* iOS Grabber */}
-        <div className="pt-2.5 pb-1 flex justify-center bg-white/70">
-          <div className="w-10 h-1 bg-pink-200 rounded-full" />
+        <div className="pt-2 pb-1 flex justify-center bg-slate-50 sm:hidden">
+          <div className="w-10 h-1 bg-slate-300 rounded-full" />
         </div>
 
         {/* Modal Header */}
-        <div className="px-6 py-3.5 flex items-center justify-between border-b border-pink-100 bg-white/80">
+        <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100 bg-white">
           <div className="flex items-center space-x-2.5">
-            <span className="p-2 bg-linear-to-tr from-pink-100 to-rose-50 rounded-2xl border border-pink-200/80 shadow-xs flex items-center justify-center text-pink-600">
-              <Bot size={20} />
+            <span className="p-1.5 bg-rose-50 rounded-lg text-rose-500 border border-rose-100 flex items-center justify-center">
+              <Bot size={18} />
             </span>
             <div>
-              <div className="text-sm font-black text-kitty-dark tracking-tight flex items-center space-x-1.5">
+              <div className="text-sm font-bold text-slate-900 tracking-tight flex items-center space-x-1.5">
                 <span>AI Deck Architect</span>
-                <KittyBow size={16} />
+                <KittyBow size={15} />
               </div>
-              <div className="text-[10px] text-kitty-subtle">Instant flashcards with mnemonics & clozes via Ankitti AI</div>
+              <div className="text-[11px] text-slate-500">Generate high-yield flashcards with clozes and mnemonics</div>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-pink-100/70 hover:bg-pink-200/70 text-kitty-subtle hover:text-kitty-dark flex items-center justify-center transition-colors ios-btn"
+            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
             title="Close"
           >
             <X size={15} />
@@ -253,10 +245,10 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           
           {/* Error Notice */}
           {errorMessage && (
-            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs flex items-start space-x-2.5">
+            <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs flex items-start space-x-2.5">
               <AlertCircle size={16} className="text-rose-600 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <strong className="block font-bold">Generation Notice</strong>
+                <strong className="block font-bold">Notice</strong>
                 <span>{errorMessage}</span>
               </div>
             </div>
@@ -266,21 +258,21 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
             <form onSubmit={handleGenerate} className="space-y-4">
               
               {/* Destination Selector: Add to Existing Deck vs Create New Deck */}
-              <div className="p-3 bg-pink-50/60 rounded-2xl border border-pink-200/80 space-y-2">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-700 flex items-center space-x-1.5">
-                    <Layers size={13} className="text-pink-600" />
-                    <span>Destination Deck</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 flex items-center space-x-1.5">
+                    <Layers size={13} className="text-slate-500" />
+                    <span>Destination</span>
                   </span>
 
                   {decks.length > 0 && (
-                    <div className="inline-flex p-0.5 bg-white rounded-xl border border-pink-200 text-[10px] font-bold shadow-2xs">
+                    <div className="inline-flex p-0.5 bg-white rounded-lg border border-slate-200 text-[10px] font-semibold shadow-2xs">
                       <button
                         type="button"
                         onClick={() => { sounds.playClick(); setDestinationMode('existing'); }}
-                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                           destinationMode === 'existing'
-                            ? 'bg-[#FF4D80] text-white shadow-xs font-black'
+                            ? 'bg-rose-500 text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-800'
                         }`}
                       >
@@ -289,9 +281,9 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                       <button
                         type="button"
                         onClick={() => { sounds.playClick(); setDestinationMode('new'); }}
-                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-md transition-all cursor-pointer ${
                           destinationMode === 'new'
-                            ? 'bg-[#FF4D80] text-white shadow-xs font-black'
+                            ? 'bg-rose-500 text-white shadow-xs'
                             : 'text-slate-500 hover:text-slate-800'
                         }`}
                       >
@@ -306,31 +298,31 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <select
                       value={targetDeckId}
                       onChange={(e) => setTargetDeckId(e.target.value)}
-                      className="w-full text-xs font-bold text-slate-800 bg-white border border-pink-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                      className="w-full text-xs font-semibold text-slate-900 bg-white border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
                     >
                       {decks.map(d => (
                         <option key={d.id} value={d.id}>
-                          {d.icon || '🎀'} {d.name}
+                          {d.icon || '📁'} {d.name}
                         </option>
                       ))}
                     </select>
-                    <div className="text-[10px] text-pink-700 font-medium px-1 flex items-center space-x-1">
-                      <span>✓ AI cards will be added directly into</span>
-                      <strong className="font-bold underline">{selectedDeck?.name || 'this deck'}</strong>
+                    <div className="text-[10px] text-slate-500 font-medium px-1 flex items-center space-x-1">
+                      <span>✓ Cards will be added into</span>
+                      <strong className="font-semibold text-slate-800">{selectedDeck?.name || 'this deck'}</strong>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-slate-500 font-medium px-1">
-                    AI will automatically title, style, and create a brand new deck in your collection.
+                  <div className="text-[10px] text-slate-500 font-normal px-1">
+                    AI will automatically title and create a brand new deck in your collection.
                   </div>
                 )}
               </div>
 
               {/* Presets */}
               <div>
-                <label className="block font-bold text-kitty-dark mb-1.5 text-[11px] flex items-center justify-between">
-                  <span>✨ Quick Inspiration Topics</span>
-                  <span className="text-[10px] text-kitty-subtle font-normal">Click to fill</span>
+                <label className="block font-semibold text-slate-700 mb-1.5 text-[11px] flex items-center justify-between">
+                  <span>Quick Presets</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Click to fill</span>
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESET_TOPICS.map((p, idx) => (
@@ -338,7 +330,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                       type="button"
                       key={idx}
                       onClick={() => setTopic(p.topic)}
-                      className="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100/80 text-pink-700 border border-pink-200/80 text-[11px] font-semibold transition-all ios-btn"
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200/80 text-slate-700 border border-slate-200 text-[11px] font-medium transition-all cursor-pointer"
                     >
                       {p.label}
                     </button>
@@ -348,42 +340,42 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
 
               {/* Topic Input */}
               <div className="space-y-1">
-                <label className="block font-bold text-kitty-dark text-xs">
-                  Target Topic / Syllabus Concept <span className="text-pink-500 font-extrabold">*</span>
+                <label className="block font-semibold text-slate-700 text-xs">
+                  Topic or Concept <span className="text-rose-500 font-bold">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. Japanese JLPT N5 Essential Verbs, or Cardiology Myocardial Infarction..."
-                  className="w-full px-4 py-3 rounded-2xl bg-white border border-pink-200 text-xs focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-xs font-medium"
+                  placeholder="e.g. Japanese JLPT N5 Verbs, or Cardiac Arrhythmias..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs"
                 />
               </div>
 
               {/* Source Notes Paste Area */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="block font-bold text-kitty-dark text-xs">
-                    Paste Lecture Notes, Textbook Excerpt, or Summary (Optional)
+                  <label className="block font-semibold text-slate-700 text-xs">
+                    Paste Lecture Notes or Text (Optional)
                   </label>
-                  <span className="text-[10px] text-kitty-subtle">AI extracts the highest-yield cards</span>
+                  <span className="text-[10px] text-slate-400">Extract high-yield cards</span>
                 </div>
                 <textarea
                   rows={4}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Paste your raw notes, study guides, or syllabus here. The AI architect will distill them into optimal spaced repetition cards with clozes and mnemonics..."
-                  className="w-full px-4 py-3 rounded-2xl bg-white border border-pink-200 text-xs focus:ring-2 focus:ring-pink-400 focus:outline-none shadow-xs resize-y"
+                  placeholder="Paste your raw notes, study guides, or syllabus here. The AI will distill them into optimal flashcards with clozes and mnemonics..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 font-normal focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-2xs resize-y"
                 />
               </div>
 
               {/* Generation Controls: Card count & Card Style */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-pink-50/50 p-4 rounded-2xl border border-pink-200/70">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="font-bold text-kitty-dark text-[11px]">
-                      Cards to Generate: <strong className="text-pink-600">{cardCount}</strong>
+                    <label className="font-semibold text-slate-700 text-[11px]">
+                      Cards to Generate: <strong className="text-rose-600">{cardCount}</strong>
                     </label>
                   </div>
                   <input
@@ -393,9 +385,9 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     step="1"
                     value={cardCount}
                     onChange={(e) => setCardCount(parseInt(e.target.value))}
-                    className="w-full accent-pink-500 cursor-pointer"
+                    className="w-full accent-rose-500 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[10px] text-kitty-subtle mt-0.5">
+                  <div className="flex justify-between text-[10px] text-slate-400 mt-0.5">
                     <span>3 Quick</span>
                     <span>8 Standard</span>
                     <span>15 Deep</span>
@@ -403,15 +395,15 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="font-bold text-kitty-dark text-[11px] block mb-1.5">
+                  <label className="font-semibold text-slate-700 text-[11px] block mb-1.5">
                     Flashcard Style
                   </label>
-                  <div className="inline-flex p-1 bg-white rounded-xl border border-pink-200 shadow-xs w-full">
+                  <div className="inline-flex p-0.5 bg-white rounded-lg border border-slate-200 shadow-2xs w-full">
                     <button
                       type="button"
                       onClick={() => setStyle('mixed')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all ${
-                        style === 'mixed' ? 'bg-pink-500 text-white' : 'text-kitty-subtle hover:text-kitty-dark'
+                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
+                        style === 'mixed' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
                       Mixed
@@ -419,8 +411,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setStyle('basic')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all ${
-                        style === 'basic' ? 'bg-pink-500 text-white' : 'text-kitty-subtle hover:text-kitty-dark'
+                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
+                        style === 'basic' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
                       Q&A
@@ -428,8 +420,8 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setStyle('cloze')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all ${
-                        style === 'cloze' ? 'bg-pink-500 text-white' : 'text-kitty-subtle hover:text-kitty-dark'
+                      className={`flex-1 py-1 rounded-md font-semibold text-[11px] transition-all cursor-pointer ${
+                        style === 'cloze' ? 'bg-rose-500 text-white' : 'text-slate-500 hover:text-slate-800'
                       }`}
                     >
                       Cloze
@@ -439,25 +431,25 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Custom API Key Collapsible */}
-              <div className="rounded-2xl border border-pink-200/80 bg-white/70 overflow-hidden text-xs">
+              <div className="rounded-xl border border-slate-200 bg-white overflow-hidden text-xs">
                 <button
                   type="button"
                   onClick={() => setShowKeyInput(!showKeyInput)}
-                  className="w-full px-4 py-2.5 flex items-center justify-between text-left text-kitty-subtle hover:text-kitty-dark transition-colors cursor-pointer"
+                  className="w-full px-3.5 py-2 flex items-center justify-between text-left text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center space-x-1.5 font-bold text-[11px]">
-                    <Key size={13} className="text-pink-500" />
+                  <span className="flex items-center space-x-1.5 font-medium text-[11px]">
+                    <Key size={13} className="text-slate-400" />
                     <span>DeepSeek API Key {customApiKey ? '✓ (Custom key configured)' : '(Optional)'}</span>
                   </span>
-                  <span className="text-[10px] text-pink-600 font-bold">
-                    {showKeyInput ? 'Hide ▲' : 'Configure ▼'}
+                  <span className="text-[10px] text-slate-500 font-semibold">
+                    {showKeyInput ? 'Hide' : 'Configure'}
                   </span>
                 </button>
                 
                 {showKeyInput && (
-                  <div className="p-3.5 pt-1 space-y-2 border-t border-pink-100 bg-pink-50/30">
+                  <div className="p-3 pt-1 space-y-2 border-t border-slate-100 bg-slate-50">
                     <p className="text-[11px] text-slate-600 leading-relaxed">
-                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-pink-100 text-pink-700 px-1 py-0.5 rounded text-[10px] font-bold">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key here:
+                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-slate-200 text-slate-800 px-1 py-0.5 rounded text-[10px]">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key:
                     </p>
                     <div className="flex items-center space-x-2">
                       <input
@@ -465,20 +457,20 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                         value={customApiKey}
                         onChange={(e) => handleSaveCustomKey(e.target.value)}
                         placeholder="sk-..."
-                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-pink-200 text-xs font-mono focus:ring-2 focus:ring-pink-400 focus:outline-none"
+                        className="flex-1 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400"
                       />
                       {customApiKey && (
                         <button
                           type="button"
                           onClick={() => handleSaveCustomKey('')}
-                          className="px-2.5 py-2 text-[10px] font-bold text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-xl border border-rose-200"
+                          className="px-2.5 py-1.5 text-[10px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 cursor-pointer"
                         >
                           Clear
                         </button>
                       )}
                     </div>
-                    <div className="text-[9px] text-slate-500 flex items-center space-x-1">
-                      <span>🔒 Stored only in your local browser storage. Never saved to git or server logs.</span>
+                    <div className="text-[10px] text-slate-400">
+                      Stored only in your local browser storage. Never committed to git.
                     </div>
                   </div>
                 )}
@@ -489,17 +481,17 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading || !topic.trim()}
-                  className="w-full py-3.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all flex items-center justify-center space-x-2 ios-btn cursor-pointer disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs hover:shadow-md transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 active:scale-[0.99]"
                 >
                   {isLoading ? (
                     <div className="flex items-center space-x-2">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Architecting your flashcards with AI... 🎀</span>
+                      <span>Generating flashcards with AI...</span>
                     </div>
                   ) : (
                     <>
-                      <Sparkles size={16} />
-                      <span>Generate Deck with AI 🪄</span>
+                      <Sparkles size={15} />
+                      <span>Generate Cards</span>
                     </>
                   )}
                 </button>
@@ -512,72 +504,72 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
             <div className="space-y-4 animate-fadeIn">
               
               {/* Deck Summary Card */}
-              <div className="p-4 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl border border-pink-200/90 flex items-center justify-between">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <span className="text-3xl p-2 bg-white rounded-2xl shadow-xs border border-pink-200">
+                  <span className="text-2xl p-1.5 bg-white rounded-xl shadow-2xs border border-slate-200">
                     {destinationMode === 'existing' ? (selectedDeck?.icon || '📁') : (generatedResult.deck.icon || '🤖')}
                   </span>
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-wider text-pink-600">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-rose-600">
                       {destinationMode === 'existing' ? 'Destination Deck' : 'New Deck Title'}
                     </div>
-                    <h3 className="font-black text-slate-900 text-sm">
+                    <h3 className="font-bold text-slate-900 text-sm">
                       {destinationMode === 'existing' ? selectedDeck?.name : generatedResult.deck.name}
                     </h3>
-                    <p className="text-[11px] text-kitty-subtle mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-0.5">
                       {destinationMode === 'existing'
-                        ? 'Cards will be added directly into this existing deck.'
+                        ? 'Cards will be added directly into this deck.'
                         : generatedResult.deck.description}
                     </p>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-xs font-black text-pink-600 bg-white px-3 py-1 rounded-full border border-pink-200 shadow-xs">
+                  <span className="text-xs font-semibold text-slate-700 bg-white px-2.5 py-1 rounded-full border border-slate-200 shadow-2xs">
                     {selectedCount} / {generatedResult.cards.length} Cards
                   </span>
                 </div>
               </div>
 
               {/* Cards List Preview */}
-              <div className="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
                 {generatedResult.cards.map((card, idx) => {
                   const isSelected = selectedIndices[idx] !== false;
                   return (
                     <div
                       key={idx}
                       onClick={() => toggleSelect(idx)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start space-x-3 ${
+                      className={`p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start space-x-3 ${
                         isSelected 
-                          ? 'bg-white border-pink-300 shadow-xs ring-1 ring-pink-200' 
-                          : 'bg-gray-50 border-gray-200 opacity-60'
+                          ? 'bg-white border-slate-300 shadow-2xs ring-1 ring-rose-500/20' 
+                          : 'bg-slate-50 border-slate-200 opacity-60'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => {}} // handled by parent onClick
-                        className="rounded text-pink-600 focus:ring-pink-400 mt-1 accent-pink-500 w-4 h-4 cursor-pointer"
+                        onChange={() => {}}
+                        className="rounded text-rose-600 focus:ring-rose-400 mt-1 accent-rose-500 w-4 h-4 cursor-pointer"
                       />
 
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-pink-100 text-pink-700">
-                            {card.type === 'cloze' ? 'Cloze Deletion' : 'Basic Q&A'}
+                          <span className="text-[10px] uppercase font-semibold tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                            {card.type === 'cloze' ? 'Cloze' : 'Q&A'}
                           </span>
-                          <span className="text-[10px] text-kitty-subtle font-mono">Card {idx + 1}</span>
+                          <span className="text-[10px] text-slate-400 font-mono">#{idx + 1}</span>
                         </div>
 
-                        <div className="font-extrabold text-kitty-dark text-xs">
+                        <div className="font-semibold text-slate-900 text-xs">
                           {card.front}
                         </div>
 
-                        <div className="text-kitty-subtle text-[11px] leading-relaxed">
+                        <div className="text-slate-600 text-[11px] leading-relaxed">
                           {card.back}
                         </div>
 
                         {card.takeaway && (
-                          <div className="text-[10px] text-pink-700 bg-pink-50 px-2.5 py-1 rounded-xl border border-pink-100 inline-block font-medium">
+                          <div className="text-[10px] text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200 inline-block font-medium">
                             💡 {card.takeaway}
                           </div>
                         )}
@@ -588,11 +580,11 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-pink-100">
+              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setGeneratedResult(null)}
-                  className="px-4 py-2.5 rounded-2xl bg-pink-50 hover:bg-pink-100 text-kitty-dark font-bold text-xs transition-colors ios-btn"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs transition-colors cursor-pointer"
                 >
                   ← Back to Prompt
                 </button>
@@ -601,13 +593,13 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
                   type="button"
                   onClick={handleImportToCollection}
                   disabled={isLoading || selectedCount === 0}
-                  className="flex-1 py-2.5 rounded-2xl bg-[#FF4D80] hover:bg-[#F43F5E] text-white font-extrabold text-xs shadow-md shadow-pink-200 hover:shadow-lg transition-all flex items-center justify-center space-x-2 ios-btn cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-xs shadow-xs transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
                 >
                   <CheckCircle2 size={15} />
                   <span>
                     {destinationMode === 'existing'
-                      ? `Add ${selectedCount} Cards to "${selectedDeck?.name || 'Deck'}" 🎀`
-                      : `Create Deck & Add ${selectedCount} Cards 🎀`}
+                      ? `Add ${selectedCount} Cards to "${selectedDeck?.name || 'Deck'}"`
+                      : `Create Deck & Add ${selectedCount} Cards`}
                   </span>
                 </button>
               </div>
