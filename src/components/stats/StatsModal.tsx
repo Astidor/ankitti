@@ -58,7 +58,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
   }
 
   const getIntensityColor = (count: number) => {
-    if (count === 0) return 'bg-cocoa-100 border border-[#EAE4DC] hover:border-cocoa-300';
+    if (count === 0) return 'bg-pink-100/60 border border-pink-200/60 hover:border-pink-300';
     if (count < 10) return 'bg-matcha-200 border border-matcha-300 hover:bg-matcha-300';
     if (count < 25) return 'bg-matcha-300 border border-matcha-400 hover:bg-matcha-400';
     if (count < 50) return 'bg-matcha-500 border border-matcha-600 hover:bg-matcha-600';
@@ -67,31 +67,43 @@ export const StatsModal: React.FC<StatsModalProps> = ({
 
   const statsBody = (
     <div className="space-y-4 text-xs">
+      {/* Garden & Stats Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-display font-extrabold text-cocoa-900 tracking-tight flex items-center space-x-2">
+            <span>Study Garden & Insights</span>
+            <KittyBow size={20} />
+          </h2>
+          <p className="text-xs text-cocoa-500 mt-0.5">
+            Track your memory retention, daily streak momentum, and review heatmap.
+          </p>
+        </div>
+      </div>
       
       {/* Top 3 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         
         {/* Target Goal / Exam */}
-        <div className="bg-white rounded-2xl p-5 shadow-subtle border border-[#EAE4DC] flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">Target Goal</span>
             <Calendar size={15} className="text-strawberry-500" />
           </div>
           <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight">{daysUntilExam} Days</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">{daysUntilExam} Days</div>
             <div className="text-xs font-semibold text-strawberry-700 truncate mt-0.5">until {account.targetExam}</div>
           </div>
           <div className="text-[10px] text-cocoa-400 font-mono">Exam Date: {account.examDate}</div>
         </div>
 
         {/* Study Garden Daily Streak */}
-        <div className="bg-white rounded-2xl p-5 shadow-subtle border border-[#EAE4DC] flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">Daily Streak</span>
             <Flame size={16} className="text-honey-500" />
           </div>
           <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">
               {account.streakDays} {account.streakDays === 1 ? 'Day' : 'Days'}
             </div>
             <div className="text-xs font-semibold text-honey-700 mt-0.5">Consistent spaced reviews</div>
@@ -103,13 +115,13 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         </div>
 
         {/* Retention Rate */}
-        <div className="bg-white rounded-2xl p-5 shadow-subtle border border-[#EAE4DC] flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">SM-2 Retention</span>
             <CheckCircle2 size={16} className="text-matcha-600" />
           </div>
           <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight">{retentionRate}%</div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">{retentionRate}%</div>
             <div className="text-xs font-semibold text-matcha-700 mt-0.5">Recall accuracy</div>
           </div>
           <div className="text-[10px] text-cocoa-400 font-medium">Optimal target: 85% - 95%</div>
@@ -118,10 +130,10 @@ export const StatsModal: React.FC<StatsModalProps> = ({
       </div>
 
       {/* Spaced Review Garden Heatmap */}
-      <div className="bg-white rounded-2xl border border-[#EAE4DC] shadow-subtle p-5 sm:p-6 space-y-3.5">
+      <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] p-5 sm:p-6 space-y-3.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm">
+            <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm font-display">
               Study Garden Activity Heatmap
             </h4>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-matcha-50 text-matcha-700 border border-matcha-200">
@@ -135,7 +147,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         </div>
 
         {/* Heatmap Grid */}
-        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto p-3.5 bg-cocoa-50 rounded-xl border border-[#EAE4DC]">
+        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto p-3.5 bg-pink-50/40 rounded-xl border border-pink-100">
           {heatmapDays.map((d, idx) => (
             <div
               key={idx}
@@ -148,7 +160,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         {/* Heatmap Legend */}
         <div className="flex items-center justify-end space-x-1.5 text-[10px] text-cocoa-400 pt-1 font-semibold">
           <span>Less</span>
-          <span className="w-3 h-3 rounded-md bg-cocoa-100 border border-[#EAE4DC]" />
+          <span className="w-3 h-3 rounded-md bg-pink-100/60 border border-pink-200/60" />
           <span className="w-3 h-3 rounded-md bg-matcha-200" />
           <span className="w-3 h-3 rounded-md bg-matcha-300" />
           <span className="w-3 h-3 rounded-md bg-matcha-500" />
@@ -158,9 +170,9 @@ export const StatsModal: React.FC<StatsModalProps> = ({
       </div>
 
       {/* Card Maturity Breakdown */}
-      <div className="bg-white rounded-2xl border border-[#EAE4DC] shadow-subtle p-5 sm:p-6 space-y-3.5">
+      <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] p-5 sm:p-6 space-y-3.5">
         <div className="flex items-center justify-between">
-          <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm flex items-center space-x-2">
+          <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm flex items-center space-x-2 font-display">
             <TrendingUp size={15} className="text-strawberry-500" />
             <span>Card Maturity Distribution</span>
           </h4>
@@ -170,7 +182,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-cocoa-100 border border-[#EAE4DC]">
+        <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-pink-100 border border-pink-200/60">
           <div 
             className="bg-taro-400 h-full transition-all" 
             style={{ width: `${cards.length ? (newCardsCount / cards.length) * 100 : 0}%` }} 
@@ -195,7 +207,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
 
         {/* Legend stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs font-semibold">
-          <div className="flex items-center space-x-2.5 p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC]">
+          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
             <span className="w-2.5 h-2.5 rounded-full bg-taro-400" />
             <div>
               <div className="text-base font-bold text-cocoa-900">{newCardsCount}</div>
@@ -203,7 +215,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5 p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC]">
+          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
             <span className="w-2.5 h-2.5 rounded-full bg-honey-400" />
             <div>
               <div className="text-base font-bold text-cocoa-900">{learnCardsCount}</div>
@@ -211,7 +223,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5 p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC]">
+          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
             <span className="w-2.5 h-2.5 rounded-full bg-strawberry-400" />
             <div>
               <div className="text-base font-bold text-cocoa-900">{youngCardsCount}</div>
@@ -219,7 +231,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5 p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC]">
+          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
             <span className="w-2.5 h-2.5 rounded-full bg-matcha-500" />
             <div>
               <div className="text-base font-bold text-cocoa-900">{matureCardsCount}</div>
@@ -242,16 +254,16 @@ export const StatsModal: React.FC<StatsModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl overflow-hidden border border-[#EAE4DC] flex flex-col">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl overflow-hidden border border-pink-100 flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-[#EAE4DC]">
+        <div className="px-6 py-4 flex items-center justify-between border-b border-pink-100">
           <div className="flex items-center space-x-2">
             <KittyBow size={18} />
-            <h3 className="text-base font-bold text-cocoa-900">Study Garden Analytics</h3>
+            <h3 className="text-base font-bold text-cocoa-900 font-display">Study Garden Analytics</h3>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-500 hover:text-cocoa-900 flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa-500 hover:text-cocoa-900 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X size={15} />
           </button>

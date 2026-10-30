@@ -598,11 +598,11 @@ export function App() {
 
   // 🌸 APP STUDIO: REFINED SIDEBAR CADDY + KAWAII WORKSPACE 🌸
   return (
-    <div className="min-h-screen bg-[#F9F9F9] text-[#231F1D] flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
+    <div className="min-h-screen kawaii-studio-bg text-cocoa-900 flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
       <FloatingPetals />
       
       {/* 🍱 REFINED LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
-      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white border-r border-[#EAE6DF] p-4 justify-between shrink-0 z-30 select-none">
+      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white/95 backdrop-blur-sm border-r border-pink-100 p-4 justify-between shrink-0 z-30 select-none shadow-[2px_0_12px_rgba(255,77,121,0.02)]">
         
         {/* Top Segment: Brand, Nav & Add Action */}
         <div className="space-y-4">
@@ -618,15 +618,15 @@ export function App() {
               className="flex items-center space-x-2.5 text-left group cursor-pointer"
               title="Ankitti Studio"
             >
-              <div className="w-8 h-8 rounded-xl bg-white border border-[#EAE6DF] text-[#D84570] flex items-center justify-center group-hover:scale-105 transition-transform">
-                <KittyBow size={18} />
+              <div className="w-9 h-9 rounded-2xl bg-strawberry-50 border border-strawberry-100/80 text-strawberry-600 flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
+                <KittyBow size={20} />
               </div>
               <div>
-                <span className="font-extrabold text-base tracking-tight text-[#231F1D] block leading-tight">
+                <span className="font-display font-extrabold text-lg tracking-tight text-cocoa-900 block leading-tight">
                   Ankitti
                 </span>
-                <span className="text-xs font-semibold text-strawberry-600 tracking-wider uppercase block">
-                  Study Studio
+                <span className="text-[11px] font-bold text-strawberry-600 tracking-wider uppercase block">
+                  Study Studio 🎀
                 </span>
               </div>
             </button>
@@ -635,16 +635,16 @@ export function App() {
           {/* Primary Action Button: Add Flashcard */}
           <button
             onClick={() => handleOpenNewCard()}
-            className="w-full py-2.5 px-3 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-98 text-white font-semibold text-sm shadow-rose-btn hover:shadow-rose-btn-hover flex items-center justify-center space-x-2 transition-all atelier-btn cursor-pointer"
+            className="w-full py-2.5 px-3 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-98 text-white font-bold text-sm shadow-[0_4px_12px_rgba(255,77,121,0.3)] hover:shadow-[0_6px_16px_rgba(255,77,121,0.4)] flex items-center justify-center space-x-2 transition-all cursor-pointer"
             title="Create a new flashcard (Shortcut: Cmd/Ctrl+N)"
           >
-            <Plus size={15} strokeWidth={2.5} />
+            <Plus size={16} strokeWidth={2.5} />
             <span>New Flashcard</span>
             <kbd className="text-xs bg-white/20 px-1.5 py-0.5 rounded font-mono font-normal">⌘N</kbd>
           </button>
 
           {/* Persistent Sidebar Navigation Links */}
-          <nav className="space-y-1 text-sm font-medium pt-1">
+          <nav className="space-y-1.5 text-sm font-medium pt-1">
             
             {/* Decks Tab */}
             <button
@@ -653,15 +653,15 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('decks');
               }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
                 currentTab === 'decks' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
               }`}
             >
-              <Layers size={15} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <Layers size={16} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
               <span className="flex-1 text-left">My Decks</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-cocoa-100/80 text-cocoa-600 font-semibold tabular-nums">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-pink-100/70 text-strawberry-700 font-bold tabular-nums">
                 {decks.length}
               </span>
             </button>
@@ -673,15 +673,15 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('browser');
               }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
                 currentTab === 'browser' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
               }`}
             >
-              <Search size={15} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <Search size={16} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
               <span className="flex-1 text-left">Card Catalog</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-cocoa-100/80 text-cocoa-600 font-semibold tabular-nums">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-cocoa-100/80 text-cocoa-700 font-bold tabular-nums">
                 {cards.length}
               </span>
             </button>
@@ -693,15 +693,15 @@ export function App() {
                 setActiveStudyDeck(null);
                 setCurrentTab('stats');
               }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
                 currentTab === 'stats' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-100 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
+                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
+                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
               }`}
             >
-              <BarChart2 size={15} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
+              <BarChart2 size={16} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
               <span className="flex-1 text-left">Garden & Stats</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-matcha-100 text-matcha-800 font-semibold">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-matcha-100 text-matcha-800 font-bold">
                 Heatmap
               </span>
             </button>
@@ -712,23 +712,23 @@ export function App() {
                 sounds.playClick();
                 setIsPomodoroOpen(!isPomodoroOpen);
               }}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
                 isPomodoroOpen
-                  ? 'bg-cocoa-100 text-cocoa-900 font-semibold border border-[#EAE6DF]'
-                  : 'text-cocoa-600 hover:bg-cocoa-50 hover:text-cocoa-900'
+                  ? 'bg-cocoa-100 text-cocoa-900 font-bold border border-pink-100'
+                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
               }`}
             >
               <span className="flex items-center space-x-2.5">
-                <Clock size={15} className="text-strawberry-500" />
+                <Clock size={16} className="text-strawberry-500" />
                 <span>Focus Timer</span>
               </span>
-              <span className="text-xs font-mono text-cocoa-500 bg-cocoa-100 px-1.5 py-0.5 rounded">25m</span>
+              <span className="text-xs font-mono font-bold text-cocoa-600 bg-cocoa-100 px-2 py-0.5 rounded-lg">25m</span>
             </button>
           </nav>
 
           {/* Embedded Pomodoro Dropdown if Active */}
           {isPomodoroOpen && (
-            <div className="p-3 bg-cocoa-50 rounded-2xl border border-[#EAE6DF] shadow-subtle animate-fadeIn">
+            <div className="p-3 bg-white rounded-2xl border border-pink-100 shadow-sm animate-fadeIn">
               <PomodoroWidget 
                 isOpen={true} 
                 isInline={true} 
@@ -737,54 +737,56 @@ export function App() {
           )}
         </div>
 
+
         {/* Bottom Segment: Companion Mascot, User Profile & Status */}
-        <div className="space-y-2.5 pt-3 border-t border-[#EAE6DF]">
+        <div className="space-y-2.5 pt-3 border-t border-pink-100">
           
           {hasAnyDraft && (
             <button
               onClick={() => handleOpenNewCard()}
-              className="w-full flex items-center space-x-1.5 px-2.5 py-1.5 rounded-xl bg-honey-50 border border-honey-200 text-honey-800 text-xs font-medium shadow-2xs cursor-pointer hover:bg-honey-100 transition-colors"
+              className="w-full flex items-center space-x-2 px-3 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs cursor-pointer hover:bg-amber-100 transition-colors"
             >
-              <FileEdit size={12} className="text-honey-600 shrink-0" />
+              <FileEdit size={13} className="text-amber-600 shrink-0" />
               <span className="truncate">Draft Card Saved</span>
             </button>
           )}
 
           {/* Mascot Study Companion Mini Pill */}
-          <div className="p-2.5 rounded-2xl bg-[#F9F9F9] border border-[#EAE6DF] flex items-center space-x-2.5">
-            <div className="w-9 h-9 rounded-xl bg-white border border-[#EAE6DF] p-0.5 shrink-0 flex items-center justify-center">
+          <div className="p-2.5 rounded-2xl bg-gradient-to-r from-pink-50/90 to-rose-50/70 border border-pink-200/80 flex items-center space-x-2.5 shadow-2xs">
+            <div className="w-10 h-10 rounded-xl bg-white border border-pink-200 p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
               <img 
                 src="/assets/reading_mascot.png" 
                 alt="Companion" 
-                className="w-full h-full object-cover rounded-lg"
+                className="w-full h-full object-contain rounded-lg"
               />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-[#231F1D] truncate flex items-center space-x-1">
+              <div className="text-xs font-black text-cocoa-900 truncate flex items-center space-x-1">
                 <span>Study Buddy</span>
+                <span className="text-xs">🌸</span>
               </div>
-              <div className="text-xs text-strawberry-600 font-medium truncate">
-                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Cheering for you'}
+              <div className="text-xs text-strawberry-700 font-bold truncate">
+                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Cheering for you! 🧋'}
               </div>
             </div>
           </div>
 
           {/* User Profile Pill */}
-          <div className="flex items-center justify-between p-2 rounded-xl bg-white border border-[#EAE6DF]">
+          <div className="flex items-center justify-between p-2 rounded-2xl bg-white border border-pink-100 shadow-2xs">
             <button
               onClick={() => setIsAccountModalOpen(true)}
               className="flex items-center space-x-2 min-w-0 text-left cursor-pointer group"
               title="Open Account Preferences"
             >
-              <KittyAvatar size={26} />
+              <KittyAvatar size={28} />
               <div className="min-w-0">
-                <div className="text-xs font-bold text-[#231F1D] truncate group-hover:text-strawberry-600 transition-colors">
+                <div className="text-xs font-bold text-cocoa-900 truncate group-hover:text-strawberry-600 transition-colors">
                   {account.name}
                 </div>
-                <div className="text-xs text-cocoa-600 flex items-center space-x-1">
+                <div className="text-[11px] text-cocoa-500 flex items-center space-x-1">
                   {account.email ? (
-                    <span className="text-matcha-600 font-semibold flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-matcha-500" />
+                    <span className="text-emerald-700 font-bold flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                       <span>Synced</span>
                     </span>
                   ) : (
@@ -802,20 +804,20 @@ export function App() {
                   sounds.enabled = next;
                   if (next) sounds.playRating(4);
                 }}
-                className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                  soundEnabled ? 'text-strawberry-500 hover:bg-cocoa-50' : 'text-cocoa-400 hover:bg-cocoa-50'
+                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+                  soundEnabled ? 'text-strawberry-600 hover:bg-pink-50' : 'text-cocoa-400 hover:bg-cocoa-50'
                 }`}
                 title={soundEnabled ? 'Mute audio' : 'Unmute audio'}
               >
-                {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+                {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
               </button>
 
               <button
                 onClick={() => { sounds.playClick(); setViewMode('landing'); }}
-                className="p-1.5 rounded-lg hover:bg-cocoa-50 text-cocoa-400 hover:text-cocoa-700 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-pink-50 text-cocoa-400 hover:text-strawberry-600 transition-colors cursor-pointer"
                 title="Landing Page & Overview"
               >
-                <Home size={13} />
+                <Home size={14} />
               </button>
             </div>
           </div>
@@ -826,7 +828,7 @@ export function App() {
       <div className="flex-1 flex flex-col min-w-0">
         
         {/* Mobile Top Header (Phone Only) */}
-        <header className="md:hidden sticky top-0 z-40 bg-white border-b border-[#EAE6DF] px-4 py-3 flex items-center justify-between">
+        <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-2xs">
           <div 
             onClick={() => {
               sounds.playClick();
@@ -836,13 +838,13 @@ export function App() {
             className="flex items-center space-x-2 cursor-pointer"
           >
             <KittyBow size={20} />
-            <span className="font-serif font-bold text-lg tracking-tight text-[#231F1D]">Ankitti</span>
+            <span className="font-display font-extrabold text-lg tracking-tight text-cocoa-900">Ankitti</span>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsPomodoroOpen(prev => !prev)}
-              className="p-2 rounded-xl bg-cocoa-50 text-strawberry-600 border border-[#EAE6DF] cursor-pointer"
+              className="p-2 rounded-2xl bg-strawberry-50 text-strawberry-600 border border-strawberry-100 cursor-pointer shadow-2xs"
               title="Focus Timer"
             >
               <Timer size={16} />
@@ -946,7 +948,7 @@ export function App() {
 
       {/* Mobile Bottom Navigation Dock (Phone Only) */}
       {!activeStudyDeck && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#EAE6DF] px-4 pt-1.5 pb-safe shadow-[0_-2px_10px_rgba(35,31,29,0.04)] flex items-center justify-around select-none">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-pink-100 px-4 pt-1.5 pb-safe shadow-[0_-4px_16px_rgba(255,77,121,0.06)] flex items-center justify-around select-none">
           <button
             onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
             className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
@@ -969,7 +971,7 @@ export function App() {
 
           <button
             onClick={() => handleOpenNewCard()}
-            className="w-11 h-11 -mt-4 rounded-full bg-strawberry-500 active:bg-strawberry-600 text-white flex items-center justify-center shadow-md border-2 border-white transition-transform active:scale-95 cursor-pointer"
+            className="w-12 h-12 -mt-5 rounded-full bg-strawberry-500 active:bg-strawberry-600 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(255,77,121,0.4)] border-2 border-white transition-transform active:scale-95 cursor-pointer"
             title="Create New Card"
           >
             <Plus size={22} strokeWidth={2.5} />
@@ -987,10 +989,10 @@ export function App() {
 
           <button
             onClick={() => handleOpenAiDeck()}
-            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-taro-700 font-medium cursor-pointer active:scale-95"
+            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-purple-700 font-medium cursor-pointer active:scale-95"
             title="AI Deck Architect"
           >
-            <Sparkles size={18} className="text-taro-600" />
+            <Sparkles size={18} className="text-purple-600" />
             <span className="text-xs mt-0.5">AI Deck</span>
           </button>
         </nav>

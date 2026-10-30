@@ -3,6 +3,7 @@ import { Search, Edit3, Trash2, Plus, Image as ImageIcon, X } from 'lucide-react
 import { Card, Deck } from '../../types/anki';
 import { formatIntervalPreview } from '../../services/scheduler';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
+import { KittyBow } from '../common/KittyIllustrations';
 
 interface CardBrowserProps {
   decks: Deck[];
@@ -68,8 +69,28 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Catalog Title Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-display font-extrabold text-cocoa-900 tracking-tight flex items-center space-x-2">
+            <span>Card Catalog</span>
+            <KittyBow size={20} />
+          </h2>
+          <p className="text-xs text-cocoa-500 mt-0.5">
+            Browse, search, and manage all {cards.length} flashcards across your decks.
+          </p>
+        </div>
+        <button
+          onClick={onNewCard}
+          className="self-start sm:self-auto px-4 py-2 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-rose-btn transition-all flex items-center space-x-1.5 cursor-pointer"
+        >
+          <Plus size={14} />
+          <span>New Flashcard</span>
+        </button>
+      </div>
+
       {/* Top Filter & Search Controls Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-[#EAE4DC] shadow-subtle">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)]">
         {/* Search Input */}
         <div className="relative flex-1">
           <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-cocoa-400" />
@@ -78,7 +99,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search cards, clozes, answers, tags..."
-            className="w-full pl-9 pr-8 py-2 rounded-xl bg-cocoa-50 border border-[#EAE4DC] text-xs font-medium text-cocoa-900 placeholder-cocoa-400 focus:outline-none focus:ring-2 focus:ring-strawberry-200 focus:border-strawberry-400 transition-all shadow-2xs"
+            className="w-full pl-9 pr-8 py-2 rounded-xl bg-pink-50/30 border border-pink-200/80 text-xs font-medium text-cocoa-900 placeholder-cocoa-400 focus:outline-none focus:ring-2 focus:ring-strawberry-200 focus:border-strawberry-400 transition-all shadow-2xs"
           />
           {searchTerm && (
             <button
@@ -96,7 +117,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
           <select
             value={selectedDeckId}
             onChange={(e) => setSelectedDeckId(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-[#EAE4DC] bg-white text-xs font-semibold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-200 shadow-2xs cursor-pointer"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-pink-200/80 bg-white text-xs font-semibold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-200 shadow-2xs cursor-pointer"
           >
             <option value="all">All Decks ({cards.length})</option>
             {decks.map(d => (
@@ -108,28 +129,20 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
           <select
             value={filterState}
             onChange={(e) => setFilterState(e.target.value)}
-            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-[#EAE4DC] bg-white text-xs font-semibold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-200 shadow-2xs cursor-pointer"
+            className="flex-1 sm:flex-none px-3 py-2 rounded-xl border border-pink-200/80 bg-white text-xs font-semibold text-cocoa-700 focus:outline-none focus:ring-2 focus:ring-strawberry-200 shadow-2xs cursor-pointer"
           >
             <option value="all">All States</option>
             <option value="new">New</option>
             <option value="learning">Learning</option>
             <option value="review">Review</option>
           </select>
-
-          <button
-            onClick={onNewCard}
-            className="hidden sm:flex px-3.5 py-2 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-semibold text-xs shadow-rose-btn transition-all items-center space-x-1.5 atelier-btn cursor-pointer whitespace-nowrap"
-          >
-            <Plus size={14} />
-            <span>Add Card</span>
-          </button>
         </div>
       </div>
 
       {/* Cards List / Table Container */}
-      <div className="bg-white rounded-2xl border border-[#EAE4DC] shadow-subtle overflow-hidden">
+      <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] overflow-hidden">
         {/* Mobile View: Clean Card Items */}
-        <div className="md:hidden divide-y divide-[#EAE4DC]">
+        <div className="md:hidden divide-y divide-pink-100">
           {filteredCards.map(card => {
             const stateBadge = {
               new: (
@@ -210,7 +223,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                   {stripPreviewText(card.front) || (card.frontImage ? '[Image Attachment]' : '(Empty)')}
                 </div>
 
-                <div className="text-cocoa-600 text-xs line-clamp-2 bg-cocoa-50 p-2 rounded-xl border border-[#EAE4DC] font-normal">
+                <div className="text-cocoa-600 text-xs line-clamp-2 bg-pink-50/30 p-2 rounded-xl border border-pink-100 font-normal">
                   {stripPreviewText(card.back) || (card.backImage ? '[Image Attachment]' : '(Empty)')}
                 </div>
 
@@ -226,7 +239,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
         {/* Desktop View: Full Data Table */}
         <div className="hidden md:block overflow-x-auto max-h-[560px]">
           <table className="w-full text-left border-collapse text-xs">
-            <thead className="sticky top-0 bg-cocoa-50 border-b border-[#EAE4DC] font-semibold text-cocoa-700 select-none z-10">
+            <thead className="sticky top-0 bg-pink-50/50 backdrop-blur-xs border-b border-pink-100 font-semibold text-cocoa-700 select-none z-10">
               <tr>
                 <th className="py-3 px-4 w-24 text-center">State</th>
                 <th className="py-3 px-4">Deck</th>
@@ -236,7 +249,7 @@ export const CardBrowser: React.FC<CardBrowserProps> = ({
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4DC] font-normal">
+            <tbody className="divide-y divide-pink-100 font-normal">
               {filteredCards.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-cocoa-400 text-xs">

@@ -7,35 +7,36 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['"Instrument Sans"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        serif: ['"Instrument Serif"', 'Georgia', 'serif'],
+        sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['"Quicksand"', '"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Quicksand"', 'Georgia', 'serif'],
       },
       colors: {
-        // Deep Warm Espresso & Cocoa neutrals (refined, high contrast, readable)
+        // Warm Cocoa / Chocolate neutrals (rich, friendly, high contrast)
         cocoa: {
-          50: '#FAF8F5',
-          100: '#F3EFEA',
-          200: '#E6DED9',
-          300: '#C9BCB7',
-          400: '#A69791',
-          500: '#877771',
-          600: '#6B5C56',
-          700: '#50413B',
-          800: '#382A26',
-          900: '#231815',
+          50: '#FCF8F6',
+          100: '#F6EEEB',
+          200: '#EBE0DC',
+          300: '#D6C5C0',
+          400: '#B89F99',
+          500: '#8E746E',
+          600: '#6B524D',
+          700: '#4D3733',
+          800: '#36221F',
+          900: '#221311',
         },
-        // Sweet Japanese Cherry Blossom / Strawberry Rose (calm, elegant, never neon)
+        // Authentic Sweet Hello Kitty Strawberry Rose
         strawberry: {
-          50: '#FFF5F7',
-          100: '#FFEBF0',
-          200: '#FED7E2',
-          300: '#FBB6CE',
-          400: '#E25580',
-          500: '#C73863', // Signature deep rose (passes WCAG AA 5.05:1 contrast with white)
-          600: '#B83256',
-          700: '#942644',
-          800: '#751E35',
-          900: '#561324',
+          50: '#FFF0F3',
+          100: '#FFE1E7',
+          200: '#FEC7D2',
+          300: '#FE9EB3',
+          400: '#F96288',
+          500: '#E63566', // Primary sweet strawberry rose
+          600: '#C72051', // High contrast rose (5.2:1 against white)
+          700: '#A6153F',
+          800: '#850E30',
+          900: '#660822',
         },
         // Soft Matcha Green (progress, completed, calm)
         matcha: {

@@ -166,7 +166,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
   if (isCompleted || queue.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4 max-w-lg mx-auto text-center animate-fadeIn select-none">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white border border-[#EAE4DC] p-2 mb-4 shadow-subtle flex items-center justify-center">
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white border border-pink-200 p-2 mb-4 shadow-subtle flex items-center justify-center">
           <img 
             src="/assets/celebrate_mascot.png" 
             alt="Celebrate" 
@@ -179,7 +179,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           <span>Session Finished!</span>
         </div>
 
-        <h2 className="text-xl sm:text-2xl font-bold text-cocoa-900 tracking-tight">
+        <h2 className="text-xl sm:text-2xl font-bold text-cocoa-900 tracking-tight font-display">
           Otsukaresama! 🌸
         </h2>
         <p className="text-xs text-cocoa-500 mt-1 max-w-sm leading-relaxed">
@@ -188,18 +188,18 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
         {/* Stats Summary */}
         <div className="grid grid-cols-2 gap-3 w-full my-5">
-          <div className="p-3.5 bg-white rounded-xl border border-[#EAE4DC] shadow-subtle text-center">
+          <div className="p-3.5 bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] text-center">
             <div className="text-2xl font-extrabold text-cocoa-900">{studiedCount}</div>
             <div className="text-[11px] font-medium text-cocoa-500 mt-0.5">Cards Reviewed</div>
           </div>
-          <div className="p-3.5 bg-white rounded-xl border border-[#EAE4DC] shadow-subtle text-center">
+          <div className="p-3.5 bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] text-center">
             <div className="text-2xl font-extrabold text-matcha-600">{elapsedMinutes}m</div>
             <div className="text-[11px] font-medium text-cocoa-500 mt-0.5">Focus Duration</div>
           </div>
         </div>
 
         {/* Drill & Relearn Actions */}
-        <div className="w-full bg-white border border-[#EAE4DC] p-4 rounded-2xl shadow-subtle mb-5 space-y-2.5">
+        <div className="w-full bg-white border border-pink-100 p-4 rounded-2xl shadow-[0_4px_16px_rgba(255,77,121,0.04)] mb-5 space-y-2.5">
           <span className="text-xs font-bold text-cocoa-900 block text-left">
             Drill & Relearn Anytime
           </span>
@@ -207,7 +207,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleRelearn('all')}
-              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-[#EAE4DC] transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-pink-200/80 transition-colors cursor-pointer"
             >
               <RotateCcw size={12} className="text-strawberry-500" />
               <span>Review All ({cards.length})</span>
@@ -215,7 +215,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
             <button
               onClick={() => handleRelearn('highYield')}
-              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-[#EAE4DC] transition-colors cursor-pointer"
+              className="px-3 py-2 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-800 font-semibold text-xs flex items-center justify-center space-x-1.5 border border-pink-200/80 transition-colors cursor-pointer"
             >
               <Zap size={12} className="text-amber-500" />
               <span>High Yield Only</span>
@@ -242,7 +242,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
       <div className="flex items-center justify-between pb-3 mb-2 gap-2">
         <button
           onClick={onBack}
-          className="flex items-center space-x-1 text-xs font-semibold text-cocoa-600 hover:text-cocoa-900 px-3 py-1.5 rounded-xl bg-white border border-[#EAE4DC] hover:border-strawberry-200 transition-colors shadow-2xs atelier-btn cursor-pointer"
+          className="flex items-center space-x-1 text-xs font-semibold text-cocoa-600 hover:text-cocoa-900 px-3 py-1.5 rounded-xl bg-white border border-pink-200/80 hover:border-strawberry-300 transition-colors shadow-2xs atelier-btn cursor-pointer"
         >
           <ChevronLeft size={14} />
           <span>Decks</span>
@@ -256,7 +256,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
         {/* Action / Edit */}
         <div className="flex items-center space-x-1.5">
-          <div className="hidden sm:inline-flex items-center p-0.5 bg-cocoa-100/70 rounded-lg border border-[#EAE4DC] text-[11px] font-semibold">
+          <div className="hidden sm:inline-flex items-center p-0.5 bg-cocoa-100/70 rounded-lg border border-pink-200/80 text-[11px] font-semibold">
             <button
               onClick={() => handleRelearn('due')}
               className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
@@ -277,7 +277,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
 
           <button
             onClick={() => onEditCard(currentCard)}
-            className="p-1.5 rounded-xl bg-white border border-[#EAE4DC] text-cocoa-500 hover:text-cocoa-900 hover:border-strawberry-200 transition-colors shadow-2xs atelier-btn cursor-pointer"
+            className="p-1.5 rounded-xl bg-white border border-pink-200/80 text-cocoa-500 hover:text-cocoa-900 hover:border-strawberry-300 transition-colors shadow-2xs atelier-btn cursor-pointer"
             title="Edit Card (E)"
           >
             <Edit3 size={13} />
@@ -285,10 +285,10 @@ export const StudySession: React.FC<StudySessionProps> = ({
         </div>
       </div>
 
-      {/* Sleek Progress Bar */}
-      <div className="w-full bg-cocoa-100 h-1.5 rounded-full overflow-hidden mb-4">
+      {/* Sleek Kawaii Progress Bar */}
+      <div className="w-full bg-pink-100/70 h-2 rounded-full overflow-hidden mb-4 p-0.5 border border-pink-200/60 shadow-2xs">
         <div 
-          className="bg-strawberry-500 h-full rounded-full transition-all duration-300"
+          className="bg-gradient-to-r from-strawberry-400 to-strawberry-500 h-full rounded-full transition-all duration-300 shadow-2xs"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
@@ -304,7 +304,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           <div className="w-full min-h-[360px] bg-white rounded-3xl border-1.5 border-pink-200/90 shadow-[0_8px_24px_rgba(244,63,122,0.08)] hover:shadow-[0_12px_32px_rgba(244,63,122,0.12)] p-6 sm:p-8 flex flex-col justify-between transition-all duration-200">
             
             {/* Front Header */}
-            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
+            <div className="flex items-center justify-between text-xs pb-3 border-b border-pink-100">
               <div className="flex items-center space-x-2">
                 <span className="font-semibold text-[11px] px-2.5 py-0.5 rounded-full bg-strawberry-50 text-strawberry-700 border border-strawberry-100">
                   {currentCard.type === 'cloze' ? 'Cloze Deletion' : 'Question'}
@@ -332,7 +332,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {currentCard.frontImage && (
                 <div className="flex justify-center pt-4">
                   <div 
-                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-[#EAE4DC] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
+                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-pink-200 shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLightboxImage({ src: currentCard.frontImage!, title: 'Question Diagram' });
@@ -356,7 +356,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
             </div>
 
             {/* Front Footer */}
-            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EAE4DC] pt-3 mt-4">
+            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-pink-100 pt-3 mt-4">
               <span>Card {currentCardIndex + 1} of {queue.length}</span>
               <span className="text-[11px] text-cocoa-500 font-medium">
                 Tap card or press Space to flip
@@ -368,7 +368,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           <div className="w-full min-h-[360px] bg-white rounded-3xl border-1.5 border-pink-300 shadow-[0_8px_24px_rgba(244,63,122,0.12)] p-6 sm:p-8 flex flex-col justify-between transition-all animate-fadeIn">
             
             {/* Back Header */}
-            <div className="flex items-center justify-between text-xs pb-3 border-b border-[#EAE4DC]">
+            <div className="flex items-center justify-between text-xs pb-3 border-b border-pink-100">
               <span className="text-strawberry-600 font-bold text-xs flex items-center space-x-1.5">
                 <span className="w-2 h-2 rounded-full bg-strawberry-500" />
                 <span>Answer</span>
@@ -380,7 +380,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
             <div className="my-auto py-4 space-y-3">
               {/* Question prompt badge */}
               {(currentCard.front || currentCard.frontImage) && (
-                <div className="p-3 bg-cocoa-50 rounded-xl border border-[#EAE4DC] text-xs text-cocoa-600 leading-relaxed text-left">
+                <div className="p-3 bg-pink-50/40 rounded-xl border border-pink-100 text-xs text-cocoa-600 leading-relaxed text-left">
                   <span className="font-semibold text-cocoa-400 block text-[10px] uppercase tracking-wider mb-0.5">
                     Question
                   </span>
@@ -411,7 +411,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
               {currentCard.backImage && (
                 <div className="flex justify-center pt-2">
                   <div 
-                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-[#EAE4DC] shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
+                    className="relative group cursor-zoom-in inline-block rounded-xl overflow-hidden border border-pink-200 shadow-2xs hover:border-strawberry-300 transition-all max-w-full"
                     onClick={(e) => {
                       e.stopPropagation();
                       setLightboxImage({ src: currentCard.backImage!, title: 'Back Diagram' });
@@ -450,7 +450,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
             </div>
 
             {/* Back Footer */}
-            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-[#EAE4DC] pt-3 mt-4">
+            <div className="flex items-center justify-between text-xs text-cocoa-400 font-medium border-t border-pink-100 pt-3 mt-4">
               <span>Card {currentCardIndex + 1} of {queue.length}</span>
               <span>Rate recall below (Keys 1-4)</span>
             </div>
