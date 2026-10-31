@@ -78,8 +78,9 @@ function documentFor(opts: {
 <meta name="description" content="${esc(description)}" />
 <link rel="canonical" href="${url}" />
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-<meta name="theme-color" content="#f5f1ff" />
-<meta name="color-scheme" content="light only" />
+<meta name="theme-color" content="#f5f1ff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#17112a" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

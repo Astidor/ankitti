@@ -32,10 +32,10 @@ export interface CreateActions {
 }
 
 const CHOICES = (a: CreateActions) => [
-  { key: 'card', title: 'Add a card', sub: 'Write a question and its answer', icon: FilePlus2, bg: '#ffd2e5', run: a.onAddCard },
-  { key: 'deck', title: 'New deck', sub: 'An empty deck for a new subject', icon: FolderPlus, bg: '#c9f0dc', run: a.onNewDeck },
-  { key: 'import', title: 'Import from Anki', sub: '.apkg, .csv, .tsv or .json files', icon: Download, bg: '#cfe6ff', run: a.onImport },
-  { key: 'ai', title: 'Make a deck with AI', sub: 'Type a topic, get a draft to edit', icon: Sparkles, bg: '#fff0b0', run: a.onAi },
+  { key: 'card', title: 'Add a card', sub: 'Write a question and its answer', icon: FilePlus2, bg: 'var(--c-pink-soft)', run: a.onAddCard },
+  { key: 'deck', title: 'New deck', sub: 'An empty deck for a new subject', icon: FolderPlus, bg: 'var(--c-mint)', run: a.onNewDeck },
+  { key: 'import', title: 'Import from Anki', sub: '.apkg, .csv, .tsv or .json files', icon: Download, bg: 'var(--c-sky)', run: a.onImport },
+  { key: 'ai', title: 'Make a deck with AI', sub: 'Type a topic, get a draft to edit', icon: Sparkles, bg: 'var(--c-butter)', run: a.onAi },
 ];
 
 const ChoiceList: React.FC<{ actions: CreateActions; close: () => void }> = ({ actions, close }) => (

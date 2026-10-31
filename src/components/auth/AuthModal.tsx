@@ -75,7 +75,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, initialMode = 'log
       onClose={onClose}
       busy={isLoading}
       size="sm"
-      tint="#d9ccfd"
+      tint="var(--c-lilac)"
       title={isLogin ? 'Welcome back' : 'Create your account'}
       description={
         isLogin

@@ -18,9 +18,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Ankitti" />
     <meta name="application-name" content="Ankitti" />
-    <meta name="theme-color" content="#f5f1ff" />
-    <!-- The design is light only: keeps browsers from auto-darkening the page or its form controls. -->
-    <meta name="color-scheme" content="light only" />
+    <meta name="theme-color" content="#f5f1ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17112a" media="(prefers-color-scheme: dark)" />
+    <!-- Ankitti has its own light and dark themes, so browsers shouldn't repaint it. -->
+    <meta name="color-scheme" content="light dark" />
     <meta name="msapplication-TileColor" content="#f5f1ff" />
 
     <!-- Google Fonts — Plus Jakarta Sans (Clean Modern UI) & Quicksand (Kawaii Rounded Display) -->
@@ -97,7 +98,7 @@
     ]
     </script>
   </head>
-  <body class="bg-[#f5f1ff] text-[#33245e] selection:bg-[#ffd2e5] selection:text-[#33245e] antialiased min-h-screen">
+  <body class="antialiased min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

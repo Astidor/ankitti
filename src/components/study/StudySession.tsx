@@ -22,10 +22,10 @@ interface StudySessionProps {
 const TIP_KEY = 'ankitti_rating_tip_seen';
 
 const RATES = [
-  { rating: 1 as const, label: 'Again', meaning: 'Forgot it', key: 'again' as const, bg: '#ffd2e5' },
-  { rating: 2 as const, label: 'Hard', meaning: 'Took effort', key: 'hard' as const, bg: '#ffdcc4' },
-  { rating: 3 as const, label: 'Good', meaning: 'Got it', key: 'good' as const, bg: '#c9f0dc' },
-  { rating: 4 as const, label: 'Easy', meaning: 'Too easy', key: 'easy' as const, bg: '#cfe6ff' },
+  { rating: 1 as const, label: 'Again', meaning: 'Forgot it', key: 'again' as const, bg: 'var(--c-pink-soft)' },
+  { rating: 2 as const, label: 'Hard', meaning: 'Took effort', key: 'hard' as const, bg: 'var(--c-peach)' },
+  { rating: 3 as const, label: 'Good', meaning: 'Got it', key: 'good' as const, bg: 'var(--c-mint)' },
+  { rating: 4 as const, label: 'Easy', meaning: 'Too easy', key: 'easy' as const, bg: 'var(--c-sky)' },
 ];
 
 const isHighYield = (c: Card) => !!(c.medicalMeta?.highYield || c.tags?.some((t) => t.toLowerCase().includes('high')));
@@ -173,7 +173,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
     const highYieldCount = cards.filter(isHighYield).length;
     return (
       <div className="st-done">
-        <KittyShape fill="#c9f0dc" mood="happy" style={{ width: 150, margin: '0 auto' }} />
+        <KittyShape fill="var(--c-mint)" mood="happy" style={{ width: 150, margin: '0 auto' }} />
         <h1 className="st-display">{studiedCount > 0 ? 'Nice work!' : 'Nothing to review here'}</h1>
         <p>
           {studiedCount > 0
@@ -249,7 +249,7 @@ export const StudySession: React.FC<StudySessionProps> = ({
           if (!isFlipped && e.key === 'Enter') handleFlip();
         }}
       >
-        <Ears fill="#fffbf6" />
+        <Ears fill="var(--c-paper)" />
         <div className="st-card-face" aria-hidden="true">
           <svg width="140" height="52" viewBox="-70 -22 140 50">
             <FaceG x={0} y={0} s={1.2} mood={isFlipped ? 'happy' : 'think'} />

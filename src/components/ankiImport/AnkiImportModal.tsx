@@ -70,7 +70,7 @@ export const AnkiImportModal: React.FC<AnkiImportModalProps> = ({ isOpen, decks,
       open={isOpen}
       onClose={onClose}
       busy={isLoading}
-      tint="#cfe6ff"
+      tint="var(--c-sky)"
       title="Import cards"
       description="Bring in a deck from Anki or a spreadsheet. The file is opened on your device; nothing is uploaded to read it."
       footer={
@@ -149,7 +149,7 @@ export const AnkiImportModal: React.FC<AnkiImportModalProps> = ({ isOpen, decks,
             </span>
           </div>
           {sample && (
-            <div style={{ padding: 16, borderRadius: 18, border: '2px solid var(--st-line)', background: '#fff' }}>
+            <div style={{ padding: 16, borderRadius: 18, border: '2px solid var(--st-line)', background: 'var(--c-raised)' }}>
               <p className="st-muted" style={{ margin: '0 0 6px', fontWeight: 800, fontSize: '0.875rem' }}>First card</p>
               <p style={{ margin: 0, fontWeight: 800, overflowWrap: 'anywhere' }}>{sample.front.slice(0, 160)}</p>
               <p className="st-muted" style={{ margin: '4px 0 0', fontWeight: 600, overflowWrap: 'anywhere' }}>{sample.back.slice(0, 200)}</p>
