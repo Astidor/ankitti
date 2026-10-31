@@ -95,6 +95,8 @@ export interface UserAccount {
   avatar: string; // Avatar identifier
   targetExam: string; // e.g. "JLPT N5 Japanese", "Full-Stack Interview", "General Learning"
   examDate: string; // YYYY-MM-DD
+  /** True once the learner picks the date themselves; the default is a placeholder. */
+  examDateSet?: boolean;
   dailyGoal: number; // cards per day
   streakDays: number;
   lastStudiedDate?: string;

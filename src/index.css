@@ -17,35 +17,32 @@
 
   html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
-    overflow-y: auto;
+    /* clip, not hidden: hidden turns html/body into scroll containers and breaks position: sticky */
+    overflow-x: clip;
     min-height: 100%;
     touch-action: manipulation;
   }
 
   body {
-    font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #221311; /* Deep rich warm chocolate */
-    background-color: #FFFBF9; /* Warm marshmallow ground */
+    font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #33245e; /* Plum ink, shared with the landing page */
+    background-color: #f5f1ff; /* Lavender ground */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow-x: clip;
     min-height: 100vh;
     font-variant-numeric: tabular-nums;
   }
 
   ::selection {
-    background-color: #FEC7D2;
-    color: #850E30;
+    background-color: #ffd2e5;
+    color: #33245e;
   }
 }
 
 /* 🌸 Kawaii Studio Desk-Mat Background Pattern 🌸 */
 .kawaii-studio-bg {
-  background-color: #FFFBF9;
-  background-image: radial-gradient(#FBCFE8 0.85px, transparent 0.85px);
-  background-size: 24px 24px;
+  background-color: #f5f1ff;
 }
 
 /* 🎀 Kawaii Stationery Graph Paper Grid Background (Reference 4 style) 🎀 */

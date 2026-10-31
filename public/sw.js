@@ -1,5 +1,5 @@
 // Ankitti 🎀 Service Worker — Full Offline Support & Mobile PWA Cache
-const CACHE_NAME = 'ankitti-pwa-v1';
+const CACHE_NAME = 'ankitti-pwa-v2';
 
 // Essential App Shell assets to precache on installation
 const PRECACHE_ASSETS = [
@@ -11,11 +11,6 @@ const PRECACHE_ASSETS = [
   '/icon-512.png',
   '/icon-maskable.png',
   '/apple-touch-icon.png',
-  '/assets/hero_mascot.png',
-  '/assets/reading_mascot.png',
-  '/assets/celebrate_mascot.png',
-  '/assets/cafe_mascot.png',
-  '/assets/study_background.png',
   '/sql-wasm.wasm'
 ];
 

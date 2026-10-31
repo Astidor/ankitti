@@ -1,21 +1,11 @@
-import React, { useState } from 'react';
-import { 
-  X, 
-  Volume2, 
-  VolumeX, 
-  Download, 
-  RotateCcw, 
-  Check, 
-  Mail, 
-  Sparkles,
-  Cloud,
-  CloudOff
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Check, Download, LogOut, Smartphone, Trash2, Volume2, VolumeX } from 'lucide-react';
 import { UserAccount } from '../../types/anki';
 import { storage } from '../../services/storage';
 import { api } from '../../services/api';
 import { sounds } from '../../services/audio';
-import { KittyBow, KittyAvatar } from '../common/KittyIllustrations';
+import { KittyAvatar } from '../common/KittyIllustrations';
+import { Dialog, Field } from '../studio/Dialog';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -24,19 +14,23 @@ interface AccountModalProps {
   onAccountChange: (account: UserAccount) => void;
   onResetData: () => void;
   onOpenAuth?: (mode: 'login' | 'signup') => void;
+  onLogout?: () => void;
+  onOpenInstall?: () => void;
 }
 
 const GOAL_OPTIONS = [
   'JLPT N5 Japanese',
   'Conversational Spanish',
-  'Computer Science & Algorithms',
-  'Full-Stack Web Development',
-  'AWS Cloud Solutions',
-  'USMLE & Human Physiology',
-  'Bar Exam / Law School',
-  'SAT / ACT Prep',
-  'General Knowledge & Lifelong Learning',
+  'Computer science',
+  'Medical school',
+  'Bar exam',
+  'SAT / ACT',
+  'General learning',
 ];
+
+// Values the app fills in by itself; shown as empty so they don't look like the learner's own goal.
+const PLACEHOLDER_GOALS = ['Daily Retention', 'General Studies', 'General learning'];
+const ownGoal = (goal: string) => (PLACEHOLDER_GOALS.includes(goal) ? '' : goal);
 
 export const AccountModal: React.FC<AccountModalProps> = ({
   isOpen,
@@ -45,312 +39,191 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   onAccountChange,
   onResetData,
   onOpenAuth,
+  onLogout,
+  onOpenInstall,
 }) => {
-  const [name, setName] = useState<string>(currentAccount.name);
-  const [role, setRole] = useState<string>(currentAccount.role);
-  const [targetExam, setTargetExam] = useState<string>(currentAccount.targetExam);
-  const [examDate, setExamDate] = useState<string>(currentAccount.examDate);
-  const [dailyGoal, setDailyGoal] = useState<number>(currentAccount.dailyGoal || 25);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(currentAccount.soundEnabled ?? true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
+  const [name, setName] = useState(currentAccount.name);
+  const [targetExam, setTargetExam] = useState(ownGoal(currentAccount.targetExam));
+  const [examDate, setExamDate] = useState(currentAccount.examDateSet ? currentAccount.examDate : '');
+  const [soundEnabled, setSoundEnabled] = useState(currentAccount.soundEnabled ?? true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  if (!isOpen) return null;
+  // Start from the account as it is now each time the dialog opens.
+  useEffect(() => {
+    if (!isOpen) return;
+    setName(currentAccount.name);
+    setTargetExam(ownGoal(currentAccount.targetExam));
+    setExamDate(currentAccount.examDateSet ? currentAccount.examDate : '');
+    setSoundEnabled(currentAccount.soundEnabled ?? true);
+    setSaved(false);
+  }, [isOpen, currentAccount]);
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const isGuest = !currentAccount.email;
+
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setIsSaving(true);
     const updated: UserAccount = {
       ...currentAccount,
-      name: name.trim(),
-      role: role.trim(),
+      name: name.trim() || currentAccount.name,
       targetExam: targetExam.trim(),
-      examDate,
-      dailyGoal,
+      // The server needs a date; an empty field keeps the old one but marks it as not set.
+      examDate: examDate || currentAccount.examDate,
+      examDateSet: !!examDate,
       soundEnabled,
     };
-
     try {
-      if (currentAccount.email) {
-        await api.updateProfile(updated);
-      }
+      if (currentAccount.email) await api.updateProfile(updated);
     } catch {
-      // Fallback to local storage if offline
+      // Offline: saved on this device and synced later.
     }
-
     storage.saveAccount(updated);
     sounds.enabled = soundEnabled;
     onAccountChange(updated);
     sounds.playRating(4);
     setIsSaving(false);
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const handleExportBackup = () => {
     const data = storage.exportAllAsJSON();
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `ankitti_backup_${(currentAccount.email || 'export').replace(/\W+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `ankitti-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     sounds.playRating(4);
   };
 
+  const handleErase = () => {
+    const message = isGuest
+      ? 'This deletes every deck, card and review on this device. It can’t be undone. Download a backup first if you might want them back.\n\nErase everything?'
+      : 'This removes everything stored on this device and signs you out. Cards saved to your account stay there and come back when you sign in again.\n\nErase this device?';
+    if (confirm(message)) {
+      onResetData();
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#FAF7F2] rounded-t-[28px] sm:rounded-[28px] w-full max-w-lg max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-[#EFE8DE]">
-        
-        {/* iOS Grabber */}
-        <div className="pt-2 pb-1 px-4 flex justify-center bg-white/50 sm:hidden">
-          <div className="w-10 h-1 bg-cocoa-200 rounded-full" />
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      tint="#d9ccfd"
+      title="Account and settings"
+      description={isGuest ? 'You’re using Ankitti as a guest. Everything is saved on this device only.' : `Signed in as ${currentAccount.email}.`}
+      footer={
+        <>
+          <button className="st-btn st-btn-secondary" onClick={onClose}>Close</button>
+          <button className="st-btn st-btn-primary" onClick={() => handleSave()} disabled={isSaving}>
+            {saved ? (<><Check size={18} strokeWidth={3} /> Saved</>) : 'Save changes'}
+          </button>
+        </>
+      }
+    >
+      {/* Who you are */}
+      <section style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <KittyAvatar size={56} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p className="st-display" style={{ margin: 0, fontSize: '1.25rem' }}>{currentAccount.name}</p>
+          <p className="st-muted" style={{ margin: 0, fontWeight: 600 }}>{currentAccount.email || 'Guest on this device'}</p>
         </div>
+        {!isGuest && onLogout && (
+          <button className="st-btn st-btn-secondary st-btn-sm" onClick={() => { onClose(); onLogout(); }}>
+            <LogOut size={16} /> Sign out
+          </button>
+        )}
+      </section>
 
-        <div className="flex items-center justify-between px-5 py-3.5 bg-white border-b border-[#EFE8DE] select-none">
-          <div className="flex items-center space-x-2.5">
-            <span className="p-1.5 bg-strawberry-50 rounded-xl text-strawberry-600 border border-strawberry-100 flex items-center justify-center">
-              <KittyBow size={16} />
-            </span>
-            <div>
-              <div className="text-sm font-extrabold text-[#3E2D28] tracking-tight">
-                Account & Preferences
-              </div>
-              <div className="text-[11px] text-cocoa-500">Manage your study profile and data backups</div>
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-500 hover:text-[#3E2D28] transition-colors cursor-pointer"
-            title="Close"
-          >
-            <X size={15} />
+      {isGuest && (
+        <div className="st-alert st-alert-warn">
+          <span style={{ flex: 1 }}>
+            <strong>Keep your cards safe.</strong> Create a free account and your decks follow you to every phone and computer.
+          </span>
+          <button className="st-btn st-btn-secondary st-btn-sm" onClick={() => { onClose(); onOpenAuth?.('signup'); }}>
+            Sign in or sign up
           </button>
         </div>
+      )}
 
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
-          
-          {/* User Identity & Cloud Sync Card */}
-          <div className="p-4 rounded-2xl bg-white border border-[#EFE8DE] space-y-3 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] flex items-center justify-center shadow-2xs">
-                  <KittyAvatar size={32} />
-                </div>
-                <div>
-                  <div className="font-extrabold text-sm text-[#3E2D28]">{currentAccount.name}</div>
-                  <div className="text-[11px] text-cocoa-500 flex items-center space-x-1 mt-0.5">
-                    <Mail size={12} className="text-cocoa-400" />
-                    <span>{currentAccount.email || 'Local Guest Mode (This Device)'}</span>
-                  </div>
-                </div>
-              </div>
+      <form onSubmit={handleSave} style={{ display: 'grid', gap: 16 }}>
+        <Field label="Your name" htmlFor="acc-name">
+          <input id="acc-name" className="st-text" type="text" value={name} onChange={(e) => setName(e.target.value)} />
+        </Field>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+          <Field label="What you’re studying for" htmlFor="acc-goal">
+            <input
+              id="acc-goal"
+              className="st-text"
+              type="text"
+              list="acc-goal-options"
+              value={targetExam}
+              onChange={(e) => setTargetExam(e.target.value)}
+              placeholder="JLPT N5"
+            />
+            <datalist id="acc-goal-options">
+              {GOAL_OPTIONS.map((opt) => <option key={opt} value={opt} />)}
+            </datalist>
+          </Field>
+          <Field label="Exam date (optional)" htmlFor="acc-date" hint="Progress counts down to it.">
+            <input id="acc-date" className="st-text" type="date" value={examDate} onChange={(e) => setExamDate(e.target.value)} />
+          </Field>
+        </div>
 
-              {currentAccount.email ? (
-                <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-matcha-50 border border-matcha-200 text-matcha-800 text-[10px] font-bold">
-                  <Cloud size={12} className="text-matcha-600" />
-                  <span>Cloud Synced</span>
-                </div>
-              ) : (
-                <div className="flex items-center space-x-1 px-3 py-1 rounded-full bg-honey-50 border border-honey-200 text-honey-800 text-[10px] font-bold">
-                  <CloudOff size={12} className="text-honey-600" />
-                  <span>Local Only</span>
-                </div>
-              )}
-            </div>
-
-            {/* Cloud Storage CTA */}
-            {!currentAccount.email && (
-              <div className="pt-2.5 border-t border-[#EFE8DE]">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                  <div className="text-[11px] text-cocoa-600 leading-snug">
-                    <strong className="text-[#3E2D28] font-bold">Want to study across multiple devices?</strong> Create an account for automatic cloud backup.
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      onOpenAuth?.('signup');
-                    }}
-                    className="squishy-btn px-3.5 py-1.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-[11px] flex items-center justify-center space-x-1.5 shadow-squishy-pink shrink-0 cursor-pointer transition-all"
-                  >
-                    <Cloud size={13} />
-                    <span>Enable Cloud Sync</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Profile Details Form */}
-          <form onSubmit={handleSaveProfile} className="space-y-3.5 bg-white p-4 rounded-2xl border border-[#EFE8DE] shadow-2xs">
-            <div className="font-bold text-[#3E2D28] text-xs flex items-center space-x-1.5 border-b border-[#EFE8DE] pb-2">
-              <Sparkles size={14} className="text-strawberry-500" />
-              <span>Study Preferences</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
-                  Learner Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
-                  Role / Specialization
-                </label>
-                <input
-                  type="text"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  placeholder="e.g. Student, Engineer, Polyglot"
-                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
-                  Primary Learning Goal
-                </label>
-                <input
-                  type="text"
-                  list="goal-options"
-                  value={targetExam}
-                  onChange={(e) => setTargetExam(e.target.value)}
-                  placeholder="e.g. Japanese JLPT N5, USMLE"
-                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-bold text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
-                />
-                <datalist id="goal-options">
-                  {GOAL_OPTIONS.map(opt => (
-                    <option key={opt} value={opt} />
-                  ))}
-                </datalist>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-cocoa-700 mb-1">
-                  Target Exam Date
-                </label>
-                <input
-                  type="date"
-                  value={examDate}
-                  onChange={(e) => setExamDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] font-mono text-xs text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-[11px] font-bold text-cocoa-700">
-                    Daily Card Target
-                  </label>
-                  <span className="text-xs font-bold text-strawberry-600 font-mono">
-                    {dailyGoal} cards / day
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="100"
-                  step="5"
-                  value={dailyGoal}
-                  onChange={(e) => setDailyGoal(Number(e.target.value))}
-                  className="w-full accent-strawberry-500 cursor-pointer"
-                />
-              </div>
-            </div>
-
-            {/* Sound Toggle */}
-            <div className="flex items-center justify-between pt-2.5 border-t border-[#EFE8DE]">
-              <div className="flex items-center space-x-2">
-                {soundEnabled ? <Volume2 size={16} className="text-strawberry-500" /> : <VolumeX size={16} className="text-cocoa-400" />}
-                <div>
-                  <span className="font-bold text-[#3E2D28] block text-xs">Audio Feedback</span>
-                  <span className="text-[10px] text-cocoa-500">Audio chimes on card flips and rating choices</span>
-                </div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={soundEnabled}
-                  onChange={(e) => {
-                    setSoundEnabled(e.target.checked);
-                    sounds.enabled = e.target.checked;
-                    if (e.target.checked) sounds.playRating(4);
-                  }}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-cocoa-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-cocoa-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-strawberry-500"></div>
-              </label>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="squishy-btn px-5 py-2.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center space-x-1.5 cursor-pointer disabled:opacity-50"
-              >
-                {saveSuccess ? <Check size={14} /> : <Sparkles size={14} />}
-                <span>{saveSuccess ? 'Changes Saved' : 'Save Preferences'}</span>
-              </button>
-            </div>
-          </form>
-
-          {/* Backup & Data Management */}
-          <div className="bg-white p-4 rounded-2xl border border-[#EFE8DE] space-y-2.5 shadow-2xs">
-            <span className="font-bold text-[#3E2D28] block text-xs">
-              Data Management & Backup
+        <button
+          type="button"
+          className="st-option"
+          role="switch"
+          aria-checked={soundEnabled}
+          onClick={() => {
+            const next = !soundEnabled;
+            setSoundEnabled(next);
+            sounds.enabled = next;
+            if (next) sounds.playRating(4);
+          }}
+        >
+          {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
+          <span style={{ flex: 1 }}>
+            <span className="st-option-title">Sounds</span>
+            <span className="st-option-sub">Soft clicks when you flip and rate cards</span>
+          </span>
+          <span className="st-option-title">{soundEnabled ? 'On' : 'Off'}</span>
+        </button>
+        {onOpenInstall && (
+          <button type="button" className="st-option" onClick={() => { onClose(); onOpenInstall(); }}>
+            <Smartphone size={20} />
+            <span style={{ flex: 1 }}>
+              <span className="st-option-title">Install on this device</span>
+              <span className="st-option-sub">Open Ankitti like an app, even offline</span>
             </span>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={handleExportBackup}
-                className="px-3.5 py-2 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] hover:bg-white text-cocoa-700 font-semibold text-xs shadow-2xs flex items-center space-x-1.5 cursor-pointer"
-              >
-                <Download size={13} className="text-cocoa-500" />
-                <span>Export Backup (.json)</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm('Reset your decks and cards to the initial starter collections?')) {
-                    onResetData();
-                    sounds.playRating(3);
-                    onClose();
-                  }
-                }}
-                className="px-3.5 py-2 rounded-xl bg-white border border-strawberry-200 hover:bg-strawberry-50 text-strawberry-700 font-semibold text-xs shadow-2xs flex items-center space-x-1.5 ml-auto cursor-pointer"
-              >
-                <RotateCcw size={13} />
-                <span>Reset to Starters</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="p-3.5 bg-white border-t border-[#EFE8DE] flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-[#FAF7F2] border border-[#EFE8DE] hover:bg-cocoa-100 text-cocoa-700 font-bold text-xs transition-colors cursor-pointer"
-          >
-            Done
           </button>
-        </div>
-      </div>
-    </div>
+        )}
+        {/* Lets Enter in a field save the form */}
+        <button type="submit" hidden />
+      </form>
+
+      <section style={{ display: 'grid', gap: 10 }}>
+        <h3 className="st-display" style={{ margin: 0, fontSize: '1.125rem' }}>Your data</h3>
+        <button type="button" className="st-option" onClick={handleExportBackup}>
+          <Download size={20} />
+          <span>
+            <span className="st-option-title">Download a backup</span>
+            <span className="st-option-sub">Every deck, card and review as one .json file</span>
+          </span>
+        </button>
+        <button type="button" className="st-option" onClick={handleErase} style={{ color: '#85164a' }}>
+          <Trash2 size={20} />
+          <span>
+            <span className="st-option-title">{isGuest ? 'Erase everything' : 'Erase this device'}</span>
+            <span className="st-option-sub">
+              {isGuest ? 'Deletes all decks and cards here and starts fresh' : 'Clears this device and signs you out. Your account keeps its cards.'}
+            </span>
+          </span>
+        </button>
+      </section>
+    </Dialog>
   );
 };

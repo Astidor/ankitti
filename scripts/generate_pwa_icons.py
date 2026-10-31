@@ -2,8 +2,10 @@ import os
 from PIL import Image, ImageOps
 
 os.makedirs('public', exist_ok=True)
-src_path = 'public/assets/hero_mascot.png'
+# Masters are 1024x1024 renders of the cat-eared card mark (see public/favicon.svg).
+src_path = 'scripts/icon-src/app-icon.png'
 base_img = Image.open(src_path).convert('RGBA')
+mask_img = Image.open('scripts/icon-src/app-icon-maskable.png').convert('RGBA')
 
 # 1. Generate 512x512 standard icon
 im_512 = base_img.resize((512, 512), Image.Resampling.LANCZOS)
@@ -17,11 +19,8 @@ im_192.save('public/icon-192.png', 'PNG')
 im_apple = base_img.resize((180, 180), Image.Resampling.LANCZOS)
 im_apple.save('public/apple-touch-icon.png', 'PNG')
 
-# 4. Generate maskable 512x512 icon (has safe margins so Android round/squircle cropping doesn't cut the mascot)
-maskable = Image.new('RGBA', (512, 512), (255, 240, 245, 255)) # soft pastel pink
-inner = base_img.resize((410, 410), Image.Resampling.LANCZOS)
-maskable.paste(inner, (51, 51), inner if inner.mode == 'RGBA' else None)
-maskable.save('public/icon-maskable.png', 'PNG')
+# 4. Maskable 512x512 icon: the mark sits inside the safe zone so round/squircle crops keep it whole
+mask_img.resize((512, 512), Image.Resampling.LANCZOS).save('public/icon-maskable.png', 'PNG')
 
 # 5. Generate 48x48 favicon for Google Search results
 im_48 = base_img.resize((48, 48), Image.Resampling.LANCZOS)

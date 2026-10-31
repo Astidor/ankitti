@@ -1,0 +1,14 @@
+# Ankitti
+
+> Ankitti is a free spaced repetition flashcard app that runs in the browser. It schedules cards with an Anki-style SM-2 algorithm (learning steps of 1 and 10 minutes, a 1-day graduating interval, ease starting at 2.5), imports Anki .apkg decks plus CSV, TSV and JSON, lets you relearn any deck at any time, saves card drafts as you type, drafts decks from a topic with AI, and works offline as an installable app. It is free on every device, with no ads.
+
+## Guides
+
+- [A gentler Anki alternative](https://ankitti.com/anki-alternative/): honest comparison of Anki and Ankitti, including what Anki does better
+- [Open an .apkg file in your browser](https://ankitti.com/open-apkg-file/): what is inside an .apkg file and how to open one without installing Anki
+- [The SM-2 algorithm, explained](https://ankitti.com/sm2-algorithm/): the original SuperMemo formula, the Anki-style variant, worked intervals and code
+- [What is spaced repetition?](https://ankitti.com/spaced-repetition/): the forgetting curve, testing effect and how to write good flashcards
+
+## App
+
+- [Ankitti](https://ankitti.com/): start studying, import a deck, or try a starter deck

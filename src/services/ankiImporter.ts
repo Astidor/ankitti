@@ -323,6 +323,7 @@ async function parseApkgFile(file: File, targetDeckId?: string): Promise<ImportR
 }
 
 // 2. Text / TSV / CSV Parser
+const HEADER_WORDS = new Set(['front', 'back', 'question', 'answer', 'term', 'definition', 'word', 'meaning', 'prompt', 'tags']);
 async function parseTextDelimitedFile(file: File, targetDeckId?: string): Promise<ImportResult> {
   const text = await file.text();
   const lines = text.split(/\r?\n/).filter(line => line.trim().length > 0);
@@ -358,6 +359,8 @@ async function parseTextDelimitedFile(file: File, targetDeckId?: string): Promis
     const tags = tagPart ? tagPart.split(/[, ]+/).filter(Boolean) : ['Anki-Import'];
 
     if (!front) continue;
+    // A spreadsheet's header row ("Front,Back", "Question;Answer", "Term,Definition") is not a card.
+    if (cards.length === 0 && HEADER_WORDS.has(front.toLowerCase()) && (!back || HEADER_WORDS.has(back.toLowerCase()))) continue;
 
     cards.push({
       id: `c_import_${i}_${Date.now()}`,

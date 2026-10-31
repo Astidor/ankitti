@@ -4,20 +4,13 @@ import {
   Search, 
   BarChart2, 
   Timer,
-  Clock,
   Home,
   Plus,
   Volume2,
   VolumeX,
   FileEdit,
-  ArrowLeft,
-  Sparkles,
-  LogOut,
-  Smartphone,
   WifiOff,
-  Cloud,
   CheckCircle2,
-  Sprout
 } from 'lucide-react';
 import { Deck, Card, UserAccount, ReviewLog, DeckStats } from './types/anki';
 import { storage } from './services/storage';
@@ -26,7 +19,7 @@ import { sounds } from './services/audio';
 import { ImportResult } from './services/ankiImporter';
 
 import { LandingPage } from './components/landing/LandingPage';
-import { DeckList } from './components/decks/DeckList';
+import { DeckList, deckColour } from './components/decks/DeckList';
 import { DeckModal } from './components/decks/DeckModal';
 import { MergeDeckModal } from './components/decks/MergeDeckModal';
 import { StudySession, StudyFilterMode } from './components/study/StudySession';
@@ -39,9 +32,10 @@ import { AuthModal } from './components/auth/AuthModal';
 import { AiDeckModal } from './components/ai/AiDeckModal';
 import { CardBrowser } from './components/browser/CardBrowser';
 import { PomodoroWidget } from './components/common/PomodoroWidget';
-import { KittyBow, KittyAvatar, AestheticMascot } from './components/common/KittyIllustrations';
+import { KittyBow, KittyAvatar } from './components/common/KittyIllustrations';
+import { CreateButton, CreateSheet } from './components/studio/Menus';
+import './components/studio/studio.css';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
-import { FloatingPetals } from './components/common/FloatingPetals';
 
 export function App() {
   const [account, setAccount] = useState<UserAccount>(storage.getActiveAccount());
@@ -73,6 +67,7 @@ export function App() {
   });
   const [studyMode, setStudyMode] = useState<StudyFilterMode>('due');
   const [isPomodoroOpen, setIsPomodoroOpen] = useState<boolean>(false);
+  const [isCreateSheetOpen, setIsCreateSheetOpen] = useState<boolean>(false);
 
   // Modals
   const [isCardEditorOpen, setIsCardEditorOpen] = useState<boolean>(false);
@@ -591,6 +586,11 @@ export function App() {
             setAiDeckTargetDeck(null);
           }}
           onDeckCreated={handleAiDeckCreated}
+          onNeedSignIn={() => {
+            setIsAiDeckModalOpen(false);
+            setAuthModalMode('signup');
+            setIsAuthModalOpen(true);
+          }}
         />
 
         <PwaInstallModal
@@ -603,288 +603,156 @@ export function App() {
     );
   }
 
-  // 🌸 APP STUDIO: REFINED SIDEBAR CADDY + KAWAII WORKSPACE 🌸
+  // ── Studio: sidebar on desktop, top bar and bottom dock on phones ──
+  const totalDueToday = decks.reduce((sum, d) => {
+    const st = getDeckStats(d.id);
+    return sum + st.newCount + st.learnCount + st.dueCount;
+  }, 0);
+
+  const goTab = (tab: 'decks' | 'browser' | 'stats') => {
+    sounds.playClick();
+    setActiveStudyDeck(null);
+    setCurrentTab(tab);
+  };
+
+  const createActions = {
+    onAddCard: () => handleOpenNewCard(),
+    onNewDeck: () => { setEditingDeck(null); setIsDeckModalOpen(true); },
+    onImport: () => setIsImportModalOpen(true),
+    onAi: () => handleOpenAiDeck(),
+  };
+
+  const isOn = (tab: 'decks' | 'browser' | 'stats') => (currentTab === tab && !activeStudyDeck ? 'page' : undefined);
+
+  const NAV = [
+    { tab: 'decks' as const, label: 'My decks', short: 'Decks', icon: Layers, count: totalDueToday, due: true },
+    { tab: 'browser' as const, label: 'All cards', short: 'Cards', icon: Search, count: cards.length, due: false },
+    { tab: 'stats' as const, label: 'Progress', short: 'Progress', icon: BarChart2, count: null as number | null, due: false },
+  ];
+
   return (
-    <div className="min-h-screen kawaii-studio-bg text-cocoa-900 flex flex-col md:flex-row font-sans select-auto relative overflow-x-hidden">
-      <FloatingPetals />
-      
-      {/* 🍱 REFINED LEFT SIDEBAR CADDY (DESKTOP & TABLET) 🍱 */}
-      <aside className="hidden md:flex flex-col w-60 lg:w-64 h-screen sticky top-0 bg-white/95 backdrop-blur-sm border-r border-pink-100 p-4 justify-between shrink-0 z-30 select-none shadow-[2px_0_12px_rgba(255,77,121,0.02)]">
-        
-        {/* Top Segment: Brand, Nav & Add Action */}
-        <div className="space-y-4">
-          
-          {/* Brand Header */}
-          <div className="flex items-center justify-between pb-1">
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setActiveStudyDeck(null);
-                setCurrentTab('decks');
-              }}
-              className="flex items-center space-x-2.5 text-left group cursor-pointer"
-              title="Ankitti Studio"
-            >
-              <div className="w-9 h-9 rounded-2xl bg-strawberry-50 border border-strawberry-100/80 text-strawberry-600 flex items-center justify-center group-hover:scale-105 transition-transform shadow-2xs">
-                <KittyBow size={20} />
-              </div>
-              <div>
-                <span className="font-display font-extrabold text-lg tracking-tight text-cocoa-900 block leading-tight">
-                  Ankitti
-                </span>
-                <span className="text-[11px] font-bold text-strawberry-600 tracking-wider uppercase block">
-                  Study Studio 🎀
-                </span>
-              </div>
-            </button>
-          </div>
+    <div className="st st-shell">
+      <aside className="st-side" aria-label="Studio">
+        <button className="st-brand" onClick={() => goTab('decks')} aria-label="Ankitti, my decks">
+          <KittyBow size={30} />
+          ankitti
+        </button>
 
-          {/* Primary Action Button: Add Flashcard */}
+        <CreateButton actions={createActions} />
+
+        <nav className="st-nav" aria-label="Main">
+          {NAV.map((n) => (
+            <button key={n.tab} className="st-nav-item" aria-current={isOn(n.tab)} onClick={() => goTab(n.tab)}>
+              <n.icon size={19} strokeWidth={2.4} />
+              <span>{n.label}</span>
+              {n.count !== null && n.count > 0 && (
+                <span className={`st-count ${n.due ? 'st-count-due' : ''}`} title={n.due ? `${n.count} cards to review today` : `${n.count} cards`}>
+                  {n.count}
+                </span>
+              )}
+            </button>
+          ))}
           <button
-            onClick={() => handleOpenNewCard()}
-            className="w-full py-2.5 px-3 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 active:scale-98 text-white font-bold text-sm shadow-[0_4px_12px_rgba(255,77,121,0.3)] hover:shadow-[0_6px_16px_rgba(255,77,121,0.4)] flex items-center justify-center space-x-2 transition-all cursor-pointer"
-            title="Create a new flashcard (Shortcut: Cmd/Ctrl+N)"
+            className="st-nav-item"
+            aria-pressed={isPomodoroOpen}
+            onClick={() => { sounds.playClick(); setIsPomodoroOpen(!isPomodoroOpen); }}
           >
-            <Plus size={16} strokeWidth={2.5} />
-            <span>New Flashcard</span>
-            <kbd className="text-xs bg-white/20 px-1.5 py-0.5 rounded font-mono font-normal">⌘N</kbd>
+            <Timer size={19} strokeWidth={2.4} />
+            <span>Focus timer</span>
           </button>
+        </nav>
 
-          {/* Persistent Sidebar Navigation Links */}
-          <nav className="space-y-1.5 text-sm font-medium pt-1">
-            
-            {/* Decks Tab */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setActiveStudyDeck(null);
-                setCurrentTab('decks');
-              }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
-                currentTab === 'decks' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
-              }`}
-            >
-              <Layers size={16} className={currentTab === 'decks' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
-              <span className="flex-1 text-left">My Decks</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-pink-100/70 text-strawberry-700 font-bold tabular-nums">
-                {decks.length}
-              </span>
-            </button>
-
-            {/* Card Browser Tab */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setActiveStudyDeck(null);
-                setCurrentTab('browser');
-              }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
-                currentTab === 'browser' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
-              }`}
-            >
-              <Search size={16} className={currentTab === 'browser' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
-              <span className="flex-1 text-left">Card Catalog</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-cocoa-100/80 text-cocoa-700 font-bold tabular-nums">
-                {cards.length}
-              </span>
-            </button>
-
-            {/* Study Garden & Stats Tab */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setActiveStudyDeck(null);
-                setCurrentTab('stats');
-              }}
-              className={`w-full flex items-center space-x-2.5 px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
-                currentTab === 'stats' && !activeStudyDeck
-                  ? 'bg-strawberry-50 text-strawberry-700 font-bold border border-strawberry-200/70 shadow-2xs'
-                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
-              }`}
-            >
-              <BarChart2 size={16} className={currentTab === 'stats' && !activeStudyDeck ? 'text-strawberry-600' : 'text-cocoa-400'} />
-              <span className="flex-1 text-left">Garden & Stats</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-matcha-100 text-matcha-800 font-bold">
-                Heatmap
-              </span>
-            </button>
-
-            {/* Collapsible Focus Pomodoro */}
-            <button
-              onClick={() => {
-                sounds.playClick();
-                setIsPomodoroOpen(!isPomodoroOpen);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-2xl transition-all cursor-pointer ${
-                isPomodoroOpen
-                  ? 'bg-cocoa-100 text-cocoa-900 font-bold border border-pink-100'
-                  : 'text-cocoa-600 hover:bg-pink-50/50 hover:text-cocoa-900'
-              }`}
-            >
-              <span className="flex items-center space-x-2.5">
-                <Clock size={16} className="text-strawberry-500" />
-                <span>Focus Timer</span>
-              </span>
-              <span className="text-xs font-mono font-bold text-cocoa-600 bg-cocoa-100 px-2 py-0.5 rounded-lg">25m</span>
-            </button>
-          </nav>
-
-          {/* Embedded Pomodoro Dropdown if Active */}
-          {isPomodoroOpen && (
-            <div className="p-3 bg-white rounded-2xl border border-pink-100 shadow-sm animate-fadeIn">
-              <PomodoroWidget 
-                isOpen={true} 
-                isInline={true} 
-              />
-            </div>
-          )}
-        </div>
-
-
-        {/* Bottom Segment: Companion Mascot, User Profile & Status */}
-        <div className="space-y-2.5 pt-3 border-t border-pink-100">
-          
-          {hasAnyDraft && (
-            <button
-              onClick={() => handleOpenNewCard()}
-              className="w-full flex items-center space-x-2 px-3 py-2 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold shadow-2xs cursor-pointer hover:bg-amber-100 transition-colors"
-            >
-              <FileEdit size={13} className="text-amber-600 shrink-0" />
-              <span className="truncate">Draft Card Saved</span>
-            </button>
-          )}
-
-          {/* Mascot Study Companion Mini Pill */}
-          <div className="p-2.5 rounded-2xl bg-gradient-to-r from-pink-50/90 to-rose-50/70 border border-pink-200/80 flex items-center space-x-2.5 shadow-2xs">
-            <div className="w-10 h-10 rounded-xl bg-white border border-pink-200 p-0.5 shrink-0 flex items-center justify-center shadow-2xs">
-              <img 
-                src="/assets/reading_mascot.png" 
-                alt="Companion" 
-                className="w-full h-full object-contain rounded-lg"
-              />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-black text-cocoa-900 truncate flex items-center space-x-1">
-                <span>Study Buddy</span>
-                <span className="text-xs">🌸</span>
-              </div>
-              <div className="text-xs text-strawberry-700 font-bold truncate">
-                {activeStudyDeck ? `In: ${activeStudyDeck.name}` : 'Cheering for you! 🧋'}
-              </div>
-            </div>
+        {isPomodoroOpen && (
+          <div className="p-3 bg-white rounded-2xl border-2 border-cocoa-200 animate-fadeIn">
+            <PomodoroWidget isOpen={true} isInline={true} />
           </div>
+        )}
 
-          {/* User Profile Pill */}
-          <div className="flex items-center justify-between p-2 rounded-2xl bg-white border border-pink-100 shadow-2xs">
-            <button
-              onClick={() => setIsAccountModalOpen(true)}
-              className="flex items-center space-x-2 min-w-0 text-left cursor-pointer group"
-              title="Open Account Preferences"
-            >
-              <KittyAvatar size={28} />
-              <div className="min-w-0">
-                <div className="text-xs font-bold text-cocoa-900 truncate group-hover:text-strawberry-600 transition-colors">
-                  {account.name}
-                </div>
-                <div className="text-[11px] text-cocoa-500 flex items-center space-x-1">
-                  {account.email ? (
-                    <span className="text-emerald-700 font-bold flex items-center space-x-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                      <span>Synced</span>
-                    </span>
-                  ) : (
-                    <span>Guest</span>
-                  )}
-                </div>
-              </div>
+        <div className="st-side-foot">
+          {hasAnyDraft && (
+            <button className="st-ghost" onClick={() => handleOpenNewCard()}>
+              <FileEdit size={17} /> Finish your unsaved card
             </button>
+          )}
 
-            <div className="flex items-center space-x-1">
+          {!account.email && (
+            <div className="st-guest">
+              <p>You’re studying as a guest. Sign in to keep your cards on every device.</p>
               <button
-                onClick={() => {
-                  const next = !soundEnabled;
-                  setSoundEnabled(next);
-                  sounds.enabled = next;
-                  if (next) sounds.playRating(4);
-                }}
-                className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-                  soundEnabled ? 'text-strawberry-600 hover:bg-pink-50' : 'text-cocoa-400 hover:bg-cocoa-50'
-                }`}
-                title={soundEnabled ? 'Mute audio' : 'Unmute audio'}
+                className="st-btn st-btn-secondary st-btn-sm st-btn-block"
+                onClick={() => { setAuthModalMode('signup'); setIsAuthModalOpen(true); }}
               >
-                {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
-              </button>
-
-              <button
-                onClick={() => { sounds.playClick(); setViewMode('landing'); }}
-                className="p-1.5 rounded-xl hover:bg-pink-50 text-cocoa-400 hover:text-strawberry-600 transition-colors cursor-pointer"
-                title="Landing Page & Overview"
-              >
-                <Home size={14} />
+                Sign in or sign up
               </button>
             </div>
+          )}
+
+          <div className="st-account">
+            <button className="st-account-btn" onClick={() => setIsAccountModalOpen(true)} title="Account and settings">
+              <KittyAvatar size={36} />
+              <span className="min-w-0">
+                <span className="st-account-name block">{account.name}</span>
+                <span className="st-account-sub">{account.email ? 'Saved to your account' : 'Guest'}</span>
+              </span>
+            </button>
+            <button
+              className="st-icon-btn"
+              onClick={() => {
+                const next = !soundEnabled;
+                setSoundEnabled(next);
+                sounds.enabled = next;
+                if (next) sounds.playRating(4);
+              }}
+              aria-label={soundEnabled ? 'Turn sounds off' : 'Turn sounds on'}
+              title={soundEnabled ? 'Turn sounds off' : 'Turn sounds on'}
+            >
+              {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+            </button>
+            <button
+              className="st-icon-btn"
+              onClick={() => { sounds.playClick(); setViewMode('landing'); }}
+              aria-label="Go to the Ankitti website"
+              title="Go to the Ankitti website"
+            >
+              <Home size={18} />
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* 🍱 MAIN STAGE: THE BENTO DESK MAT WORKSPACE 🍱 */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
-        {/* Mobile Top Header (Phone Only) */}
-        <header className="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-2xs">
-          <div 
-            onClick={() => {
-              sounds.playClick();
-              setActiveStudyDeck(null);
-              setCurrentTab('decks');
-            }}
-            className="flex items-center space-x-2 cursor-pointer"
-          >
-            <KittyBow size={20} />
-            <span className="font-display font-extrabold text-lg tracking-tight text-cocoa-900">Ankitti</span>
-          </div>
-
-          <div className="flex items-center space-x-2">
+      <div className="st-main">
+        <header className="st-topbar">
+          <button className="st-brand" onClick={() => goTab('decks')} aria-label="Ankitti, my decks">
+            <KittyBow size={26} />
+            ankitti
+          </button>
+          <div className="flex items-center gap-1">
             <button
-              onClick={() => setIsPomodoroOpen(prev => !prev)}
-              className="p-2 rounded-2xl bg-strawberry-50 text-strawberry-600 border border-strawberry-100 cursor-pointer shadow-2xs"
-              title="Focus Timer"
+              className="st-icon-btn"
+              onClick={() => setIsPomodoroOpen((prev) => !prev)}
+              aria-label="Focus timer"
+              title="Focus timer"
             >
-              <Timer size={16} />
+              <Timer size={20} />
             </button>
-
-            <button
-              onClick={() => setIsAccountModalOpen(true)}
-              className="cursor-pointer"
-            >
-              <KittyAvatar size={28} />
+            <button className="st-icon-btn" onClick={() => setIsAccountModalOpen(true)} aria-label="Account and settings">
+              <KittyAvatar size={30} />
             </button>
           </div>
         </header>
 
-        {/* Offline Status Alert Banner */}
         {!isOnline && (
-          <div className="bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
-            <WifiOff size={14} className="shrink-0" />
-            <span>Offline Mode Active — Studying works completely offline without internet.</span>
+          <div className="st-banner st-banner-offline" role="status">
+            <WifiOff size={16} /> You’re offline. You can keep studying; changes save on this device.
           </div>
         )}
-
-        {/* Online Restored Toast */}
         {showOnlineToast && (
-          <div className="bg-matcha-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-xs animate-fadeIn">
-            <span>Back online! Synced smoothly with cloud. ✨</span>
+          <div className="st-banner st-banner-online" role="status">
+            <CheckCircle2 size={16} /> Back online. Everything is synced.
           </div>
         )}
 
-
-
-        {/* Workspace Canvas (Natural Scroll Area) */}
-        <main className="flex-1 w-full max-w-6xl mx-auto px-5 sm:px-6 lg:px-8 py-5 sm:py-7 pb-24 md:pb-12 min-w-0">
+        <main className="st-canvas">
           {activeStudyDeck ? (
             <StudySession
               deck={activeStudyDeck}
@@ -945,65 +813,34 @@ export function App() {
         </main>
       </div>
 
-      {/* Floating Pomodoro Widget for Mobile / Small Screens */}
+      {/* Floating focus timer on phones */}
       <div className="md:hidden">
-        <PomodoroWidget 
-          isOpen={isPomodoroOpen} 
-          onClose={() => setIsPomodoroOpen(false)} 
-        />
+        <PomodoroWidget isOpen={isPomodoroOpen} onClose={() => setIsPomodoroOpen(false)} />
       </div>
 
-      {/* Mobile Bottom Navigation Dock (Phone Only) */}
       {!activeStudyDeck && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-pink-100 px-4 pt-1.5 pb-safe shadow-[0_-4px_16px_rgba(255,77,121,0.06)] flex items-center justify-around select-none">
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('decks'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'decks' ? 'text-strawberry-600 font-bold' : 'text-cocoa-600 font-medium'
-            }`}
-          >
-            <Layers size={18} className={currentTab === 'decks' ? 'text-strawberry-500' : 'text-cocoa-500'} />
-            <span className="text-xs mt-0.5">Decks</span>
+        <nav className="st-dock" aria-label="Main">
+          {NAV.slice(0, 2).map((n) => (
+            <button key={n.tab} className="st-dock-item" aria-current={isOn(n.tab)} onClick={() => goTab(n.tab)}>
+              <n.icon size={22} strokeWidth={2.4} />
+              {n.short}
+            </button>
+          ))}
+          <button className="st-dock-create" onClick={() => { sounds.playClick(); setIsCreateSheetOpen(true); }} aria-label="Create">
+            <Plus size={26} strokeWidth={3} />
           </button>
-
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('browser'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'browser' ? 'text-strawberry-600 font-bold' : 'text-cocoa-600 font-medium'
-            }`}
-          >
-            <Search size={18} className={currentTab === 'browser' ? 'text-strawberry-500' : 'text-cocoa-500'} />
-            <span className="text-xs mt-0.5">Cards</span>
+          <button className="st-dock-item" aria-current={isOn('stats')} onClick={() => goTab('stats')}>
+            <BarChart2 size={22} strokeWidth={2.4} />
+            Progress
           </button>
-
-          <button
-            onClick={() => handleOpenNewCard()}
-            className="w-12 h-12 -mt-5 rounded-full bg-strawberry-500 active:bg-strawberry-600 text-white flex items-center justify-center shadow-[0_4px_14px_rgba(255,77,121,0.4)] border-2 border-white transition-transform active:scale-95 cursor-pointer"
-            title="Create New Card"
-          >
-            <Plus size={22} strokeWidth={2.5} />
-          </button>
-
-          <button
-            onClick={() => { sounds.playClick(); setCurrentTab('stats'); }}
-            className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all cursor-pointer ${
-              currentTab === 'stats' ? 'text-strawberry-600 font-bold' : 'text-cocoa-600 font-medium'
-            }`}
-          >
-            <BarChart2 size={18} className={currentTab === 'stats' ? 'text-strawberry-500' : 'text-cocoa-500'} />
-            <span className="text-xs mt-0.5">Garden</span>
-          </button>
-
-          <button
-            onClick={() => handleOpenAiDeck()}
-            className="flex flex-col items-center justify-center min-w-[56px] min-h-[44px] py-1 px-2 rounded-xl transition-all text-purple-700 font-medium cursor-pointer active:scale-95"
-            title="AI Deck Architect"
-          >
-            <Sparkles size={18} className="text-purple-600" />
-            <span className="text-xs mt-0.5">AI Deck</span>
+          <button className="st-dock-item" onClick={() => setIsAccountModalOpen(true)}>
+            <KittyAvatar size={24} />
+            Me
           </button>
         </nav>
       )}
+
+      <CreateSheet open={isCreateSheetOpen} onClose={() => setIsCreateSheetOpen(false)} actions={createActions} />
 
       {/* Global Modals */}
       {(targetDeckForCard || decks[0]) && (
@@ -1011,6 +848,7 @@ export function App() {
           isOpen={isCardEditorOpen}
           editingCard={editingCard}
           deck={targetDeckForCard || decks[0]}
+          decks={decks}
           onClose={() => setIsCardEditorOpen(false)}
           onSaveCard={handleSaveCard}
         />
@@ -1019,6 +857,7 @@ export function App() {
       <DeckModal
         isOpen={isDeckModalOpen}
         editingDeck={editingDeck}
+        displayColour={editingDeck ? deckColour(editingDeck, Math.max(0, decks.findIndex((d) => d.id === editingDeck.id))) : undefined}
         onClose={() => setIsDeckModalOpen(false)}
         onSaveDeck={handleSaveDeck}
       />
@@ -1056,6 +895,8 @@ export function App() {
           setAuthModalMode(mode);
           setIsAuthModalOpen(true);
         }}
+        onLogout={handleLogout}
+        onOpenInstall={() => setIsInstallModalOpen(true)}
       />
 
       <AuthModal
@@ -1074,6 +915,11 @@ export function App() {
           setAiDeckTargetDeck(null);
         }}
         onDeckCreated={handleAiDeckCreated}
+        onNeedSignIn={() => {
+          setIsAiDeckModalOpen(false);
+          setAuthModalMode('signup');
+          setIsAuthModalOpen(true);
+        }}
       />
 
       <PwaInstallModal
