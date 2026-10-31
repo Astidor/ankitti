@@ -79,6 +79,7 @@ function documentFor(opts: {
 <link rel="canonical" href="${url}" />
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
 <meta name="theme-color" content="#f5f1ff" />
+<meta name="color-scheme" content="light only" />
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

@@ -16,6 +16,8 @@
   }
 
   html {
+    /* Light-only design: stops dark-mode browsers from darkening the page and form controls. */
+    color-scheme: light only;
     scroll-behavior: smooth;
     /* clip, not hidden: hidden turns html/body into scroll containers and breaks position: sticky */
     overflow-x: clip;
