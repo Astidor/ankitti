@@ -3,9 +3,10 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
-const root = path.resolve(import.meta.dirname, '..');
+// import.meta.dirname needs Node 20.11+; this works on any Node that runs Vite.
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dist = path.join(root, 'dist');
 const ssrDir = path.join(root, 'dist-ssr');
 
