@@ -6,7 +6,8 @@
       "package_name": "com.ankitti.app",
       "sha256_cert_fingerprints": [
         "E4:F5:D2:8C:97:5D:6A:01:11:C3:03:F4:22:40:31:26:8B:17:7C:32:89:E6:AF:4F:5A:33:B9:7F:17:81:EB:B6",
-        "AD:86:B9:FF:20:CA:9A:24:3B:EB:AB:10:A4:B9:5F:5B:DD:37:B8:62:AD:69:86:A1:21:6B:0A:ED:C4:D7:38:8F"
+        "AD:86:B9:FF:20:CA:9A:24:3B:EB:AB:10:A4:B9:5F:5B:DD:37:B8:62:AD:69:86:A1:21:6B:0A:ED:C4:D7:38:8F",
+        "DB:AD:64:8B:71:92:20:16:95:FD:98:EC:60:EA:9E:A5:A0:00:FC:55:5B:23:65:13:78:D2:27:95:D6:F9:EF:1C"
       ]
     }
   }
