@@ -93,7 +93,7 @@ export const INITIAL_CARDS: Card[] = [
     deckId: 'deck_japanese',
     type: 'cloze',
     front: 'Essential animals in Japanese:\n1. Cat = {{c1::猫 (ねこ - neko)}}\n2. Dog = {{c2::犬 (いぬ - inu)}}\n3. Bird = {{c3::鳥 (とり - tori)}}',
-    back: '### Pets & Animals Mnemonic\n- **Neko**: Hello Kitty is a neko!\n- **Inu**: Shiba Inu dog breed!',
+    back: '### Pets & Animals Mnemonic\n- **Neko**: a cat says "nya", so "neko" sounds like a purr!\n- **Inu**: Shiba Inu dog breed!',
     tags: ['Vocabulary', 'Animals', 'Kanji'],
     createdAt: Date.now() - 8 * 86400000,
     due: Date.now() - 7200000,
@@ -106,7 +106,7 @@ export const INITIAL_CARDS: Card[] = [
     medicalMeta: {
       highYield: true,
       category: 'Vocabulary',
-      mnemonic: 'Neko = Hello Kitty!',
+      mnemonic: 'Neko = a cat curled up on your "knee" (ne-ko)!',
       difficulty: 'Normal',
     },
   },
