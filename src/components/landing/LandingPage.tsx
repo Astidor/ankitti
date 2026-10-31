@@ -193,7 +193,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     <div ref={rootRef} className="lp" id="top">
       {/* ── Hero ── */}
       <header className="lp-hero lp-grid-paper">
-        <KittyShape fill="var(--c-lilac)" className="lp-hero-giant" />
+        <KittyShape fill="var(--c-field-lilac)" className="lp-hero-giant" />
 
         <nav className="lp-wrap lp-nav" aria-label="Main">
           <a href="#top" className="lp-wordmark" aria-label="Ankitti home">
@@ -475,7 +475,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </p>
               </div>
               <div className="lp-compare-art" {...reveal(2)}>
-                <svg viewBox="40 20 380 340" role="img" aria-label="A stack of sleepy cat-eared flashcards">
+                <svg viewBox="40 20 380 340" className="pastel-scope" role="img" aria-label="A stack of sleepy cat-eared flashcards">
                   <g transform="translate(60 205) rotate(-6)">
                     <path d={KITTY_PATH} transform="scale(1.5)" fill="var(--c-mint)" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
                   </g>

@@ -41,6 +41,9 @@ export const FaceG: React.FC<{ x: number; y: number; s?: number; mood: Mood }> =
   </g>
 );
 
+/** Pastel-filled drawings keep dark sticker outlines in dark mode (see .pastel-scope in index.css). */
+const isPastel = (fill: string) => !/--c-(paper|ground|raised|field-)/.test(fill);
+
 export const KittyShape: React.FC<{
   fill: string;
   mood?: Mood;
@@ -48,7 +51,13 @@ export const KittyShape: React.FC<{
   style?: React.CSSProperties;
   title?: string;
 }> = ({ fill, mood, className, style, title }) => (
-  <svg viewBox="0 0 200 170" className={className} style={style} role={title ? 'img' : undefined} aria-hidden={title ? undefined : true}>
+  <svg
+    viewBox="0 0 200 170"
+    className={[className, isPastel(fill) ? 'pastel-scope' : ''].filter(Boolean).join(' ') || undefined}
+    style={style}
+    role={title ? 'img' : undefined}
+    aria-hidden={title ? undefined : true}
+  >
     {title && <title>{title}</title>}
     <path d={KITTY_PATH} fill={fill} stroke={INK} strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     <path d="M40 30 L46 15 L60 30 Z" fill={BLUSH} />
@@ -111,7 +120,7 @@ export const Heart: React.FC<{ size: number; className?: string; style?: React.C
 );
 
 export const MiniKitty: React.FC<{ fill: string }> = ({ fill }) => (
-  <svg width="22" height="19" viewBox="0 0 200 170" aria-hidden="true">
+  <svg width="22" height="19" viewBox="0 0 200 170" aria-hidden="true" className={isPastel(fill) ? 'pastel-scope' : undefined}>
     <path d={KITTY_PATH} fill={fill} stroke={INK} strokeWidth="14" strokeLinejoin="round" />
   </svg>
 );

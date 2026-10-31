@@ -533,7 +533,7 @@
 }
 
 /* ── Compared with Anki (report card) ─────────────── */
-.lp-compare { background: var(--lp-pink-soft); }
+.lp-compare { background: var(--c-field-pink); }
 .lp-compare-head {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.55fr);

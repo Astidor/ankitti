@@ -4,7 +4,7 @@ import { FaceG, INK, KITTY_PATH, KittyShape, type Mood } from '../landing/kitty'
 // The Ankitti mark: a flashcard with cat ears (same drawing as the landing page).
 // Kept under its old name so every screen that used the bow picks it up.
 export const KittyBow: React.FC<{ size?: number; className?: string }> = ({ size = 24, className = '' }) => (
-  <svg width={size} height={size * 0.85} viewBox="0 0 200 170" className={`inline-block ${className}`} aria-hidden="true">
+  <svg width={size} height={size * 0.85} viewBox="0 0 200 170" className={`inline-block pastel-scope ${className}`} aria-hidden="true">
     <path d={KITTY_PATH} fill="var(--c-pink-soft)" stroke={INK} strokeWidth="14" strokeLinejoin="round" />
   </svg>
 );
@@ -48,7 +48,7 @@ export const AestheticMascot: React.FC<MascotProps> = ({ pose = 'hero', classNam
 
 // Account avatar: a small kitty face on a round pastel disc.
 export const KittyAvatar: React.FC<{ size?: number; className?: string }> = ({ size = 40, className = '' }) => (
-  <svg width={size} height={size} viewBox="0 0 100 100" className={`shrink-0 ${className}`} aria-hidden="true">
+  <svg width={size} height={size} viewBox="0 0 100 100" className={`shrink-0 pastel-scope ${className}`} aria-hidden="true">
     <circle cx="50" cy="50" r="47" fill="var(--c-lilac)" stroke={INK} strokeWidth="5" />
     <g transform="translate(14 22) scale(0.36)">
       <path d={KITTY_PATH} fill="var(--c-paper)" stroke={INK} strokeWidth="12" strokeLinejoin="round" />
