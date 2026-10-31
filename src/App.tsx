@@ -50,8 +50,15 @@ export function App() {
   const [reviewLogs, setReviewLogs] = useState<ReviewLog[]>(storage.getReviewLogs());
   const [soundEnabled, setSoundEnabled] = useState<boolean>(account.soundEnabled ?? true);
 
-  // View state: 'landing' or 'app' (Default to app)
-  const [viewMode, setViewMode] = useState<'landing' | 'app'>('app');
+  // View state: 'landing' or 'app' (Default to landing page for web visitors)
+  const [viewMode, setViewMode] = useState<'landing' | 'app'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('view') === 'app') return 'app';
+      if (params.get('view') === 'landing') return 'landing';
+    }
+    return 'landing';
+  });
 
   // App Studio state
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
