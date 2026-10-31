@@ -3,6 +3,7 @@ import { ArrowRight, Check, Plus } from 'lucide-react';
 import { sounds } from '../../services/audio';
 import { Deck, UserAccount } from '../../types/anki';
 import { GUIDES, guideUrl } from '../../seo/site';
+import { INITIAL_DECKS } from '../../services/storage';
 import { BLUSH, Ears, FaceG, Heart, INK, KITTY_PATH, KittyShape, MiniKitty, Pencil, Sparkle } from './kitty';
 import './landing.css';
 
@@ -18,6 +19,9 @@ interface LandingPageProps {
 }
 
 const YEAR = new Date().getFullYear();
+const STARTER_IDS = new Set(INITIAL_DECKS.map((d) => d.id));
+/** Anki nests decks as "Parent::Child"; show that as "Parent › Child". */
+const deckLabel = (name: string) => name.split('::').map((p) => p.trim()).filter(Boolean).join(' › ');
 
 /* ─── Content ─── */
 
@@ -134,7 +138,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const card = DEMO_CARDS[demoIndex];
-  const shownDecks = decks.slice(0, 6);
+  // A viewer with decks of their own sees those, under "Your decks"; everyone else sees the starters.
+  const ownDecks = decks.filter((d) => !STARTER_IDS.has(d.id));
+  const hasOwnDecks = ownDecks.length > 0;
+  const shownDecks = (hasOwnDecks ? ownDecks : decks).slice(0, 6);
   const activeDeck = shownDecks[Math.min(deckIndex, shownDecks.length - 1)];
 
   // Section entrances: hidden only once JS is running, revealed as they scroll in.
@@ -313,9 +320,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <section id="decks" className="lp-section">
             <div className="lp-wrap lp-decks-grid">
               <div>
-                <h2 className="lp-h2 lp-display" {...reveal(0)}>Starter decks, ready to go</h2>
+                <h2 className="lp-h2 lp-display" {...reveal(0)}>{hasOwnDecks ? 'Your decks' : 'Starter decks, ready to go'}</h2>
                 <p className="lp-decks-intro" {...reveal(1)}>
-                  Pick one and do your first review in under a minute. Or make your own, or bring yours over from Anki.
+                  {hasOwnDecks
+                    ? 'Pick up where you left off. Choose a deck and carry on reviewing.'
+                    : 'Pick one and do your first review in under a minute. Or make your own, or bring yours over from Anki.'}
                 </p>
                 <ul className="lp-deck-names" {...reveal(2)}>
                   {shownDecks.map((d, i) => (
@@ -328,7 +337,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         <svg className="lp-deck-dot" viewBox="0 0 200 170" aria-hidden="true">
                           <path d={KITTY_PATH} fill={DECK_COLOURS[i % DECK_COLOURS.length]} stroke={INK} strokeWidth="14" strokeLinejoin="round" />
                         </svg>
-                        {d.name}
+                        {deckLabel(d.name)}
                       </button>
                     </li>
                   ))}
@@ -342,7 +351,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <article className="lp-deck-card lp-eared">
                   <Ears fill="#fffbf6" />
                   <div className="lp-deck-card-inner" key={activeDeck.id}>
-                    <h3 className="lp-display">{activeDeck.name}</h3>
+                    <h3 className="lp-display">{deckLabel(activeDeck.name)}</h3>
                     <p>{activeDeck.description}</p>
                     <button className="lp-btn lp-btn-pink" onClick={click(() => onOpenDeck(activeDeck))}>
                       Study this deck <ArrowRight size={18} strokeWidth={2.75} />
