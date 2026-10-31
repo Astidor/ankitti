@@ -3,6 +3,7 @@ import { Deck, DeckSettings } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
 import { sounds } from '../../services/audio';
 import { Dialog, Field } from '../studio/Dialog';
+import { themedColour } from '../../theme';
 
 interface DeckModalProps {
   isOpen: boolean;
@@ -72,7 +73,7 @@ export const DeckModal: React.FC<DeckModalProps> = ({ isOpen, editingDeck, onClo
       open={isOpen}
       onClose={onClose}
       size="sm"
-      tint={color}
+      tint={themedColour(color)}
       title={editingDeck ? 'Rename and settings' : 'New deck'}
       description={editingDeck ? 'Changes apply straight away. Your cards and their progress stay as they are.' : 'A deck holds the cards for one subject. You can add cards right after.'}
       footer={
@@ -115,7 +116,7 @@ export const DeckModal: React.FC<DeckModalProps> = ({ isOpen, editingDeck, onClo
                 key={c}
                 type="button"
                 className="st-swatch"
-                style={{ background: c }}
+                style={{ background: themedColour(c) }}
                 aria-pressed={color === c}
                 aria-label={COLOR_NAMES[i]}
                 title={COLOR_NAMES[i]}

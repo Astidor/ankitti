@@ -126,7 +126,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({ isOpen, decks = [], in
           name: result.deck.name,
           description: result.deck.description,
           icon: result.deck.icon || '✨',
-          color: '#fff0b0',
+          color: 'var(--c-butter)',
           settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 20, reviewsPerDay: 100 },
           createdAt: now,
           updatedAt: now,
@@ -190,7 +190,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({ isOpen, decks = [], in
       onClose={onClose}
       busy={isLoading}
       size="lg"
-      tint="#fff0b0"
+      tint="var(--c-butter)"
       title={result ? 'Check your new cards' : 'Make cards with AI'}
       description={
         result
@@ -315,7 +315,7 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({ isOpen, decks = [], in
                   type="checkbox"
                   checked={on}
                   onChange={() => setSelected((prev) => ({ ...prev, [i]: !on }))}
-                  style={{ width: 20, height: 20, marginTop: 2, accentColor: '#d6307c', flex: 'none' }}
+                  style={{ width: 20, height: 20, marginTop: 2, accentColor: 'var(--c-pink)', flex: 'none' }}
                 />
                 <span style={{ minWidth: 0 }}>
                   <span className="st-option-title" style={{ overflowWrap: 'anywhere' }}>{card.front}</span>

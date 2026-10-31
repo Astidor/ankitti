@@ -7,6 +7,101 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
+
+  /* ── Theme: one set of colours for the website, studio and guides. Dark values below. ── */
+  --c-ground: #f5f1ff;      /* page background */
+  --c-paper: #fffbf6;       /* cards, panels, dialogs */
+  --c-raised: #ffffff;      /* inputs, rows on paper */
+  --c-ink: #33245e;         /* text and line-art outlines */
+  --c-ink-soft: #5f5191;    /* secondary text */
+  --c-line: #e2d9f5;        /* quiet borders */
+  --c-grid: #e7dffb;        /* grid-paper lines */
+  --c-drop: #33245e;        /* solid drop shadows under stickers and buttons */
+  --c-placeholder: #8d80b8;
+  --c-hover: rgba(217, 204, 253, 0.4);
+  --c-scrim: rgba(51, 36, 94, 0.4);
+  --c-shadow: rgba(51, 36, 94, 0.2);
+  --c-mix: #ffffff;         /* what custom deck colours are softened towards */
+
+  --c-pink: #d6307c;        /* the accent: primary buttons */
+  --c-pink-hover: #bf216a;
+  --c-on-pink: #ffffff;
+  --c-band: #5f4bc6;        /* the purple "how it works" band */
+  --c-on-band: #ffffff;
+
+  --c-pink-soft: #ffd2e5;
+  --c-lilac: #d9ccfd;
+  --c-mint: #c9f0dc;
+  --c-butter: #fff0b0;
+  --c-peach: #ffdcc4;
+  --c-sky: #cfe6ff;
+  --c-oat: #f3e1d3;
+  --c-sea: #d6f2f0;
+  --c-blush: #ffb3d1;
+  --c-pink-line: #f5a9c9;   /* dashed rules on pink panels */
+
+  --c-due: #a41a58;         /* "to review" text */
+  --c-ok: #276749;          /* "nothing due", success */
+  --c-error-bg: #ffe0ed;
+  --c-error-text: #85164a;
+
+  --c-heat-0: #fffbf6;
+  --c-heat-1: #ffe0ed;
+  --c-heat-2: #ffc2dc;
+  --c-heat-3: #f06aa6;
+  --c-heat-4: #d6307c;
+
+  --c-code-bg: #33245e;     /* code blocks in the guides */
+  --c-code-text: #f5f1ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-ground: #17112a;
+    --c-paper: #221a3b;
+    --c-raised: #2a2148;
+    --c-ink: #f2ecff;
+    --c-ink-soft: #b8acdc;
+    --c-line: #3b3060;
+    --c-grid: #221b3a;
+    --c-drop: #07050f;
+    --c-placeholder: #8a7fb0;
+    --c-hover: rgba(160, 140, 235, 0.18);
+    --c-scrim: rgba(5, 3, 12, 0.62);
+    --c-shadow: rgba(0, 0, 0, 0.45);
+    --c-mix: #17112a;
+
+    --c-pink: #d6307c;
+    --c-pink-hover: #e4478f;
+    --c-on-pink: #ffffff;
+    --c-band: #2f2468;
+    --c-on-band: #f2ecff;
+
+    --c-pink-soft: #4d2444;
+    --c-lilac: #3a2e6c;
+    --c-mint: #1d4135;
+    --c-butter: #423818;
+    --c-peach: #4a2d20;
+    --c-sky: #1d3452;
+    --c-oat: #3f3428;
+    --c-sea: #1b4143;
+    --c-blush: #ff8fbf;
+    --c-pink-line: #7a3a68;
+
+    --c-due: #ff9fcb;
+    --c-ok: #8fe3b6;
+    --c-error-bg: #4d2444;
+    --c-error-text: #ffc2dc;
+
+    --c-heat-0: #221a3b;
+    --c-heat-1: #4d2444;
+    --c-heat-2: #7a2f5d;
+    --c-heat-3: #b83d7d;
+    --c-heat-4: #ff6fae;
+
+    --c-code-bg: #0f0b1d;
+    --c-code-text: #f2ecff;
+  }
 }
 
 @layer base {
@@ -16,8 +111,8 @@
   }
 
   html {
-    /* Light-only design: stops dark-mode browsers from darkening the page and form controls. */
-    color-scheme: light only;
+    /* Ankitti has its own light and dark themes, so browsers shouldn't repaint it. */
+    color-scheme: light dark;
     scroll-behavior: smooth;
     /* clip, not hidden: hidden turns html/body into scroll containers and breaks position: sticky */
     overflow-x: clip;
@@ -27,8 +122,8 @@
 
   body {
     font-family: Nunito, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: #33245e; /* Plum ink, shared with the landing page */
-    background-color: #f5f1ff; /* Lavender ground */
+    color: var(--c-ink);
+    background-color: var(--c-ground);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: clip;
@@ -37,8 +132,8 @@
   }
 
   ::selection {
-    background-color: #ffd2e5;
-    color: #33245e;
+    background-color: var(--c-pink-soft);
+    color: var(--c-ink);
   }
 }
 
@@ -307,62 +402,62 @@
   display: inline-block;
   padding: 0.15rem 0.55rem;
   border-radius: 0.5rem;
-  background-color: #FFF5F7;
-  color: #B83256;
+  background-color: var(--c-pink-soft);
+  color: var(--c-ink);
   font-weight: 700;
-  border: 1px dashed #F687B3;
+  border: 1.5px dashed var(--c-pink);
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .cloze-badge:hover {
-  background-color: #FFEBF0;
+  background-color: var(--c-lilac);
 }
 
 .cloze-active {
   display: inline-block;
   padding: 0.15rem 0.55rem;
   border-radius: 0.5rem;
-  background-color: #E2F5E8;
-  color: #276749;
+  background-color: var(--c-mint);
+  color: var(--c-ink);
   font-weight: 700;
-  border: 1px solid #9BDBAF;
+  border: 1.5px solid var(--c-ok);
 }
 
 /* Rich Card Markdown Formatting */
 .card-rich-content strong,
 .card-rich-content b {
-  color: #231815;
+  color: var(--c-ink);
   font-weight: 700;
 }
 
 .card-rich-content em,
 .card-rich-content i {
-  color: #B83256;
+  color: var(--c-due);
   font-style: italic;
 }
 
 .card-rich-content u {
   text-decoration: underline;
-  text-decoration-color: #F687B3;
+  text-decoration-color: var(--c-pink);
   text-underline-offset: 3px;
   text-decoration-thickness: 2px;
 }
 
 .card-rich-content code {
-  background: #F3EFEA;
-  color: #B83256;
+  background: var(--c-lilac);
+  color: var(--c-ink);
   padding: 0.15rem 0.4rem;
   border-radius: 0.375rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.85em;
   font-weight: 600;
-  border: 1px solid #E6DED9;
+  border: 1px solid var(--c-line);
 }
 
 .card-rich-content mark {
-  background: #FEF0C3;
-  color: #382A26;
+  background: var(--c-butter);
+  color: var(--c-ink);
   padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
 }
@@ -378,12 +473,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E6DED9;
+  background: var(--c-line);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #C9BCB7;
+  background: var(--c-ink-soft);
 }
 
 /* Mobile Safe Area Padding */

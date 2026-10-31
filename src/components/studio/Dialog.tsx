@@ -23,7 +23,7 @@ export const Dialog: React.FC<DialogProps> = ({
   onClose,
   title,
   description,
-  tint = '#ffd2e5',
+  tint = 'var(--c-pink-soft)',
   size = 'md',
   footer,
   busy = false,

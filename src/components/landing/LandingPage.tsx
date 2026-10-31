@@ -53,20 +53,20 @@ const DEMO_CARDS = [
 ];
 
 const RATES = [
-  { label: 'Again', bg: '#ffd2e5' },
-  { label: 'Hard', bg: '#ffdcc4' },
-  { label: 'Good', bg: '#c9f0dc' },
-  { label: 'Easy', bg: '#cfe6ff' },
+  { label: 'Again', bg: 'var(--c-pink-soft)' },
+  { label: 'Hard', bg: 'var(--c-peach)' },
+  { label: 'Good', bg: 'var(--c-mint)' },
+  { label: 'Easy', bg: 'var(--c-sky)' },
 ];
 
-const DECK_COLOURS = ['#ffd2e5', '#d9ccfd', '#c9f0dc', '#fff0b0', '#ffdcc4', '#cfe6ff'];
+const DECK_COLOURS = ['var(--c-pink-soft)', 'var(--c-lilac)', 'var(--c-mint)', 'var(--c-butter)', 'var(--c-peach)', 'var(--c-sky)'];
 
 const STAGES = [
-  { when: '10 minutes', grow: 12, bg: '#fff0b0', text: 'First, a quick second look while it is still fresh.' },
-  { when: '1 day', grow: 12, bg: '#ffdcc4', text: 'Remembered it? It graduates and comes back tomorrow.' },
-  { when: '3 days', grow: 15, bg: '#ffd2e5', text: 'Then the gap grows by the card’s ease, about 2.5×.' },
-  { when: '8 days', grow: 22, bg: '#c9f0dc', text: 'Easy answers stretch it further. Misses pull it back.' },
-  { when: '3 weeks and on', grow: 39, bg: '#cfe6ff', text: 'Past 21 days the card is mature. You barely see it.' },
+  { when: '10 minutes', grow: 12, bg: 'var(--c-butter)', text: 'First, a quick second look while it is still fresh.' },
+  { when: '1 day', grow: 12, bg: 'var(--c-peach)', text: 'Remembered it? It graduates and comes back tomorrow.' },
+  { when: '3 days', grow: 15, bg: 'var(--c-pink-soft)', text: 'Then the gap grows by the card’s ease, about 2.5×.' },
+  { when: '8 days', grow: 22, bg: 'var(--c-mint)', text: 'Easy answers stretch it further. Misses pull it back.' },
+  { when: '3 weeks and on', grow: 39, bg: 'var(--c-sky)', text: 'Past 21 days the card is mature. You barely see it.' },
 ];
 
 // Kept fair to Anki: it is great software, and the guide page says what it still does better.
@@ -84,38 +84,38 @@ export const FAQS = [
   {
     q: 'Can I import my Anki decks?',
     a: 'Yes. Drop in an .apkg file and Ankitti unpacks it right in your browser, with tags, cloze cards and each card’s review history. CSV, TSV and JSON work too.',
-    bg: '#ffd2e5',
+    bg: 'var(--c-pink-soft)',
   },
   {
     q: 'How does “Relearn anytime” work?',
     a: 'Anki locks a deck once the day’s reviews are done. In Ankitti you can open any deck and drill it again, and your real schedule is left alone.',
-    bg: '#d9ccfd',
+    bg: 'var(--c-lilac)',
   },
   {
     q: 'Will I lose a card if I close the tab?',
     a: 'No. Every keystroke in the card editor is saved as you type. Reopen the tab and your draft is waiting where you left it.',
-    bg: '#c9f0dc',
+    bg: 'var(--c-mint)',
   },
   {
     q: 'Is it really free?',
     a: 'Yes. No subscription and no ads.',
-    bg: '#fff0b0',
+    bg: 'var(--c-butter)',
   },
   {
     q: 'Can I use it on my phone?',
     a: 'Yes. Ankitti installs as an app from your browser (“Add to Home Screen” on iPhone) and keeps working offline.',
-    bg: '#ffdcc4',
+    bg: 'var(--c-peach)',
   },
 ];
 
 const FOOT_LETTERS = [
-  { ch: 'a', h: 70, bg: '#ffd2e5' },
-  { ch: 'n', h: 86, bg: '#d9ccfd' },
-  { ch: 'k', h: 100, bg: '#c9f0dc' },
-  { ch: 'i', h: 62, bg: '#fff0b0' },
-  { ch: 't', h: 90, bg: '#ffdcc4' },
-  { ch: 't', h: 76, bg: '#cfe6ff' },
-  { ch: 'i', h: 94, bg: '#ffd2e5' },
+  { ch: 'a', h: 70, bg: 'var(--c-pink-soft)' },
+  { ch: 'n', h: 86, bg: 'var(--c-lilac)' },
+  { ch: 'k', h: 100, bg: 'var(--c-mint)' },
+  { ch: 'i', h: 62, bg: 'var(--c-butter)' },
+  { ch: 't', h: 90, bg: 'var(--c-peach)' },
+  { ch: 't', h: 76, bg: 'var(--c-sky)' },
+  { ch: 'i', h: 94, bg: 'var(--c-pink-soft)' },
 ];
 
 /* ─── Page ─── */
@@ -193,11 +193,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     <div ref={rootRef} className="lp" id="top">
       {/* ── Hero ── */}
       <header className="lp-hero lp-grid-paper">
-        <KittyShape fill="#d9ccfd" className="lp-hero-giant" />
+        <KittyShape fill="var(--c-lilac)" className="lp-hero-giant" />
 
         <nav className="lp-wrap lp-nav" aria-label="Main">
           <a href="#top" className="lp-wordmark" aria-label="Ankitti home">
-            <MiniKitty fill="#ffd2e5" />
+            <MiniKitty fill="var(--c-pink-soft)" />
             ankitti
           </a>
           <div className="lp-nav-links">
@@ -241,7 +241,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="lp-wrap lp-hero-grid">
           <div style={{ position: 'relative' }}>
             <Sparkle size={34} className="lp-twinkle" style={{ top: -36, left: '58%' }} />
-            <Sparkle size={20} fill="#ffd2e5" className="lp-twinkle" style={{ top: -6, left: '70%', animationDelay: '-1.4s' }} />
+            <Sparkle size={20} fill="var(--c-pink-soft)" className="lp-twinkle" style={{ top: -6, left: '70%', animationDelay: '-1.4s' }} />
             <h1 className="lp-display" {...reveal(0)}>
               Flashcards, but cute.
             </h1>
@@ -257,9 +257,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </button>
             </div>
             <ul className="lp-hero-notes" {...reveal(3)}>
-              <li><MiniKitty fill="#c9f0dc" /> Free, no ads</li>
-              <li><MiniKitty fill="#fff0b0" /> Works offline</li>
-              <li><MiniKitty fill="#cfe6ff" /> Space to flip, 1–4 to rate</li>
+              <li><MiniKitty fill="var(--c-mint)" /> Free, no ads</li>
+              <li><MiniKitty fill="var(--c-butter)" /> Works offline</li>
+              <li><MiniKitty fill="var(--c-sky)" /> Space to flip, 1–4 to rate</li>
             </ul>
           </div>
 
@@ -275,7 +275,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               aria-label="Try a review"
               aria-live="polite"
             >
-              <Ears fill="#fffbf6" />
+              <Ears fill="var(--c-paper)" />
               <div className="lp-study-top">
                 <span>{card.topic}</span>
                 <span>{reviewed} reviewed</span>
@@ -347,9 +347,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="lp-disc-stage" {...reveal(1)}>
                 <div className="lp-disc" style={{ background: DECK_COLOURS[deckIndex % DECK_COLOURS.length] }} />
                 <Sparkle size={40} className="lp-twinkle" style={{ top: '8%', left: '10%' }} />
-                <Sparkle size={24} fill="#fffbf6" className="lp-twinkle" style={{ bottom: '12%', right: '8%', animationDelay: '-1.8s' }} />
+                <Sparkle size={24} fill="var(--c-paper)" className="lp-twinkle" style={{ bottom: '12%', right: '8%', animationDelay: '-1.8s' }} />
                 <article className="lp-deck-card lp-eared">
-                  <Ears fill="#fffbf6" />
+                  <Ears fill="var(--c-paper)" />
                   <div className="lp-deck-card-inner" key={activeDeck.id}>
                     <h3 className="lp-display">{deckLabel(activeDeck.name)}</h3>
                     <p>{activeDeck.description}</p>
@@ -401,10 +401,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div data-ui className="lp-tile-art" style={{ fontSize: 'clamp(56px, 7vw, 96px)', top: 26, right: -24, display: 'grid', gap: '0.22em', justifyItems: 'end' }}>
                 <span className="lp-key" style={{ minWidth: '3.6em' }}>space</span>
                 <span style={{ display: 'flex', gap: '0.18em' }}>
-                  <span className="lp-key" style={{ background: '#ffd2e5' }}>1</span>
-                  <span className="lp-key" style={{ background: '#ffdcc4' }}>2</span>
-                  <span className="lp-key" style={{ background: '#c9f0dc' }}>3</span>
-                  <span className="lp-key" style={{ background: '#cfe6ff' }}>4</span>
+                  <span className="lp-key" style={{ background: 'var(--c-pink-soft)' }}>1</span>
+                  <span className="lp-key" style={{ background: 'var(--c-peach)' }}>2</span>
+                  <span className="lp-key" style={{ background: 'var(--c-mint)' }}>3</span>
+                  <span className="lp-key" style={{ background: 'var(--c-sky)' }}>4</span>
                 </span>
               </div>
               <h3>Made for the keyboard</h3>
@@ -421,7 +421,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <div className="lp-tile lp-tile-s" {...reveal(3)}>
               <div data-ui className="lp-tile-art" style={{ fontSize: 'clamp(24px, 5vw, 36px)', top: 18, right: -18 }}>
-                <span className="lp-chip"><Check size={30} strokeWidth={3.5} color="#2f855a" /> Saved</span>
+                <span className="lp-chip"><Check size={30} strokeWidth={3.5} color="var(--c-ok)" /> Saved</span>
               </div>
               <h3>Drafts never vanish</h3>
               <p className="lp-tile-sub">Every keystroke is kept.</p>
@@ -453,7 +453,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <div className="lp-tile lp-tile-c" {...reveal(4)}>
               <div data-ui className="lp-tile-art lp-display" style={{ fontSize: 'clamp(28px, 3.2vw, 44px)', top: 22, left: 22, whiteSpace: 'nowrap' }}>
-                The <span className="lp-chip" style={{ background: '#ffd2e5' }}>[ … ]</span> makes ATP
+                The <span className="lp-chip" style={{ background: 'var(--c-pink-soft)' }}>[ … ]</span> makes ATP
               </div>
               <h3>Cloze cards</h3>
               <p className="lp-tile-sub">Hide any word with {'{{c1::…}}'}.</p>
@@ -477,13 +477,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="lp-compare-art" {...reveal(2)}>
                 <svg viewBox="40 20 380 340" role="img" aria-label="A stack of sleepy cat-eared flashcards">
                   <g transform="translate(60 205) rotate(-6)">
-                    <path d={KITTY_PATH} transform="scale(1.5)" fill="#c9f0dc" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+                    <path d={KITTY_PATH} transform="scale(1.5)" fill="var(--c-mint)" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
                   </g>
                   <g transform="translate(95 160) rotate(5)">
-                    <path d={KITTY_PATH} transform="scale(1.5)" fill="#fff0b0" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+                    <path d={KITTY_PATH} transform="scale(1.5)" fill="var(--c-butter)" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
                   </g>
                   <g transform="translate(70 110) rotate(-2)">
-                    <path d={KITTY_PATH} transform="scale(1.5)" fill="#fffbf6" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
+                    <path d={KITTY_PATH} transform="scale(1.5)" fill="var(--c-paper)" stroke={INK} strokeWidth="2" strokeLinejoin="round" />
                     <path d="M40 30 L46 15 L60 30 Z" transform="scale(1.5)" fill={BLUSH} />
                     <path d="M140 30 L154 15 L160 30 Z" transform="scale(1.5)" fill={BLUSH} />
                     <FaceG x={150} y={140} s={1.4} mood="sleep" />
@@ -505,7 +505,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <td />
                     <th scope="col" className="lp-vs-anki">Anki</th>
                     <th scope="col" className="lp-vs-us lp-eared">
-                      <Ears fill="#ffd2e5" />
+                      <Ears fill="var(--c-pink-soft)" />
                       Ankitti
                     </th>
                   </tr>
@@ -517,7 +517,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       <td className="lp-vs-anki">{r.anki}</td>
                       <td className="lp-vs-us">
                         <span className="lp-vs-val">
-                          <MiniKitty fill="#fffbf6" />
+                          <MiniKitty fill="var(--c-paper)" />
                           {r.us}
                         </span>
                       </td>
@@ -582,8 +582,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </div>
             <div {...reveal(2, { position: 'relative', display: 'flex', justifyContent: 'center' })}>
               <Sparkle size={42} className="lp-twinkle" style={{ top: -10, left: '6%' }} />
-              <Sparkle size={26} fill="#ffd2e5" className="lp-twinkle" style={{ bottom: 20, right: '4%', animationDelay: '-1.2s' }} />
-              <KittyShape fill="#ffd2e5" mood="happy" className="lp-bob" style={{ width: '100%', maxWidth: 380 }} title="A happy cat-eared flashcard" />
+              <Sparkle size={26} fill="var(--c-pink-soft)" className="lp-twinkle" style={{ bottom: 20, right: '4%', animationDelay: '-1.2s' }} />
+              <KittyShape fill="var(--c-pink-soft)" mood="happy" className="lp-bob" style={{ width: '100%', maxWidth: 380 }} title="A happy cat-eared flashcard" />
             </div>
           </div>
         </section>

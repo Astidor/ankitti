@@ -7,13 +7,13 @@ import { GUIDE_CONTENT } from './content';
 // Static pages: prerendered to HTML at build time and shipped without the app's JavaScript.
 
 const FOOT_LETTERS = [
-  { ch: 'a', h: 70, bg: '#ffd2e5' },
-  { ch: 'n', h: 86, bg: '#d9ccfd' },
-  { ch: 'k', h: 100, bg: '#c9f0dc' },
-  { ch: 'i', h: 62, bg: '#fff0b0' },
-  { ch: 't', h: 90, bg: '#ffdcc4' },
-  { ch: 't', h: 76, bg: '#cfe6ff' },
-  { ch: 'i', h: 94, bg: '#ffd2e5' },
+  { ch: 'a', h: 70, bg: 'var(--c-pink-soft)' },
+  { ch: 'n', h: 86, bg: 'var(--c-lilac)' },
+  { ch: 'k', h: 100, bg: 'var(--c-mint)' },
+  { ch: 'i', h: 62, bg: 'var(--c-butter)' },
+  { ch: 't', h: 90, bg: 'var(--c-peach)' },
+  { ch: 't', h: 76, bg: 'var(--c-sky)' },
+  { ch: 'i', h: 94, bg: 'var(--c-pink-soft)' },
 ];
 
 const formatDate = (iso: string) =>
@@ -31,7 +31,7 @@ const Shell: React.FC<{
     <header className="lp-grid-paper gp-head">
       <nav className="lp-wrap lp-nav" aria-label="Main">
         <a href="/" className="lp-wordmark" aria-label="Ankitti home">
-          <MiniKitty fill="#ffd2e5" />
+          <MiniKitty fill="var(--c-pink-soft)" />
           ankitti
         </a>
         <div className="lp-nav-links">
@@ -59,8 +59,8 @@ const Shell: React.FC<{
         </div>
         <div className="gp-hero-art" aria-hidden="true">
           <Sparkle size={36} style={{ top: 0, left: '8%' }} />
-          <Sparkle size={22} fill="#ffd2e5" style={{ bottom: 12, right: '6%' }} />
-          <KittyShape fill="#ffd2e5" mood={mood} style={{ width: '100%', maxWidth: 260 }} />
+          <Sparkle size={22} fill="var(--c-pink-soft)" style={{ bottom: 12, right: '6%' }} />
+          <KittyShape fill="var(--c-pink-soft)" mood={mood} style={{ width: '100%', maxWidth: 260 }} />
         </div>
       </div>
     </header>
@@ -120,7 +120,7 @@ const Shell: React.FC<{
 
 const TryCard: React.FC = () => (
   <div className="gp-try lp-eared">
-    <Ears fill="#ffd2e5" />
+    <Ears fill="var(--c-pink-soft)" />
     <p className="gp-try-h lp-display">Try it in your browser</p>
     <p>Free flashcards with Anki-style spaced repetition. Opens your .apkg decks. Nothing to install.</p>
     <a className="lp-btn lp-btn-pink" href="/">
@@ -163,7 +163,7 @@ export const GuidePage: React.FC<{ slug: string }> = ({ slug }) => {
               {others.map((g) => (
                 <li key={g.slug}>
                   <a href={guideUrl(g.slug)}>
-                    <MiniKitty fill="#d9ccfd" />
+                    <MiniKitty fill="var(--c-lilac)" />
                     {g.linkText}
                   </a>
                 </li>
@@ -190,9 +190,9 @@ export const GuidesIndex: React.FC = () => (
             <a
               href={guideUrl(g.slug)}
               className="gp-index-card lp-eared"
-              style={{ background: ['#ffd2e5', '#d9ccfd', '#c9f0dc', '#fff0b0'][i % 4] }}
+              style={{ background: ['var(--c-pink-soft)', 'var(--c-lilac)', 'var(--c-mint)', 'var(--c-butter)'][i % 4] }}
             >
-              <Ears fill={['#ffd2e5', '#d9ccfd', '#c9f0dc', '#fff0b0'][i % 4]} />
+              <Ears fill={['var(--c-pink-soft)', 'var(--c-lilac)', 'var(--c-mint)', 'var(--c-butter)'][i % 4]} />
               <h2 className="lp-display">{GUIDE_CONTENT[g.slug].h1}</h2>
               <p>{g.description}</p>
               <span className="gp-index-go">Read the guide <ArrowRight size={18} strokeWidth={2.75} /></span>

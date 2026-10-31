@@ -18,6 +18,7 @@ import { Deck, DeckStats } from '../../types/anki';
 import { sounds } from '../../services/audio';
 import { Ears, KittyShape } from '../landing/kitty';
 import { usePopover } from '../studio/Menus';
+import { C, themedColour } from '../../theme';
 
 export type StudyFilterMode = 'due' | 'all' | 'flagged' | 'highYield';
 
@@ -36,18 +37,13 @@ interface DeckListProps {
   onMergeDeck?: (deck?: Deck) => void;
 }
 
-export const DECK_COLOURS = ['#ffd2e5', '#d9ccfd', '#c9f0dc', '#fff0b0', '#ffdcc4', '#cfe6ff'];
+export const DECK_COLOURS = [C.pinkSoft, C.lilac, C.mint, C.butter, C.peach, C.sky];
 const SECONDS_PER_CARD = 10;
 
-/** The deck's own colour as a pastel card colour, or null to use the next colour in the set. */
+/** The deck's own colour, themed, or null to use the next colour in the set. */
 const deckPastel = (hex?: string): string | null => {
-  const m = hex?.match(/^#([0-9a-f]{6})$/i);
-  if (!m || hex!.toLowerCase() === '#d84570') return null; // starter decks share one placeholder colour
-  const n = parseInt(m[1], 16);
-  const [r, g, b] = [n >> 16, (n >> 8) & 255, n & 255];
-  if ((0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.8) return hex!;
-  const mix = (c: number) => Math.round(c * 0.32 + 255 * 0.68).toString(16).padStart(2, '0');
-  return `#${mix(r)}${mix(g)}${mix(b)}`;
+  if (!hex || !/^#[0-9a-f]{6}$/i.test(hex) || hex.toLowerCase() === '#d84570') return null; // starter decks share one placeholder colour
+  return themedColour(hex);
 };
 /** The colour a deck is drawn in everywhere: its own pastel, or the next one in the set. */
 export const deckColour = (deck: Deck, index: number) => deckPastel(deck.color) ?? DECK_COLOURS[index % DECK_COLOURS.length];
@@ -199,22 +195,22 @@ export const DeckList: React.FC<DeckListProps> = (props) => {
   if (decks.length === 0) {
     return (
       <div className="st-empty">
-        <KittyShape fill="#ffd2e5" mood="happy" style={{ width: 150, margin: '0 auto' }} />
+        <KittyShape fill="var(--c-pink-soft)" mood="happy" style={{ width: 150, margin: '0 auto' }} />
         <h1 className="st-display">Let’s make your first deck</h1>
         <p>A deck is a stack of flashcards about one subject. Pick how you’d like to start.</p>
         <div className="st-choices">
-          <button className="st-choice" style={{ background: '#c9f0dc' }} onClick={() => { sounds.playClick(); onCreateDeck(); }}>
+          <button className="st-choice" style={{ background: 'var(--c-mint)' }} onClick={() => { sounds.playClick(); onCreateDeck(); }}>
             <FolderPlus size={26} />
             <strong>Start from scratch</strong>
             <span>Make an empty deck and write your own cards.</span>
           </button>
-          <button className="st-choice" style={{ background: '#cfe6ff' }} onClick={() => { sounds.playClick(); onOpenImport(); }}>
+          <button className="st-choice" style={{ background: 'var(--c-sky)' }} onClick={() => { sounds.playClick(); onOpenImport(); }}>
             <Download size={26} />
             <strong>Import from Anki</strong>
             <span>Bring an .apkg, .csv, .tsv or .json file.</span>
           </button>
           {onOpenAiDeck && (
-            <button className="st-choice" style={{ background: '#fff0b0' }} onClick={() => { sounds.playClick(); onOpenAiDeck(); }}>
+            <button className="st-choice" style={{ background: 'var(--c-butter)' }} onClick={() => { sounds.playClick(); onOpenAiDeck(); }}>
               <Sparkles size={26} />
               <strong>Make one with AI</strong>
               <span>Type a topic and edit the draft it gives you.</span>
@@ -237,7 +233,7 @@ export const DeckList: React.FC<DeckListProps> = (props) => {
       {/* Today: the one thing to do next */}
       {totalDue > 0 && next ? (
         <section className="st-today" aria-labelledby="st-today-h">
-          <KittyShape fill="#fffbf6" mood="think" className="st-today-face" />
+          <KittyShape fill="var(--c-paper)" mood="think" className="st-today-face" />
           <div>
             <h2 id="st-today-h" className="st-display">{plural(totalDue, 'card')} to review today</h2>
             <p>
@@ -253,7 +249,7 @@ export const DeckList: React.FC<DeckListProps> = (props) => {
         </section>
       ) : (
         <section className="st-today st-today-done" aria-labelledby="st-today-h">
-          <KittyShape fill="#fffbf6" mood="happy" className="st-today-face" />
+          <KittyShape fill="var(--c-paper)" mood="happy" className="st-today-face" />
           <div>
             <h2 id="st-today-h" className="st-display">All caught up for today</h2>
             <p>Nothing is due. Come back tomorrow, or practise any deck below whenever you like.</p>

@@ -551,15 +551,14 @@ export function App() {
         />
 
         {!isOnline && (
-          <div className="fixed top-0 left-0 right-0 z-50 bg-amber-600 text-white text-xs font-bold py-2 px-4 text-center flex items-center justify-center space-x-2 shadow-md">
-            <WifiOff size={14} className="shrink-0 animate-pulse" />
-            <span>📡 Offline Mode Active — Studying works completely offline!</span>
+          <div className="st st-banner st-banner-offline" role="status" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+            <WifiOff size={16} /> You’re offline. You can keep studying; changes save on this device.
           </div>
         )}
 
         {showOnlineToast && (
-          <div className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-matcha-600 text-white text-xs font-bold py-2 px-5 rounded-full text-center flex items-center justify-center space-x-2 shadow-lg animate-fadeIn">
-            <span>✨ Back online! Synced smoothly with cloud.</span>
+          <div className="st st-banner st-banner-online" role="status" style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+            <CheckCircle2 size={16} /> Back online. Everything is synced.
           </div>
         )}
 
@@ -663,9 +662,7 @@ export function App() {
         </nav>
 
         {isPomodoroOpen && (
-          <div className="p-3 bg-white rounded-2xl border-2 border-cocoa-200 animate-fadeIn">
-            <PomodoroWidget isOpen={true} isInline={true} />
-          </div>
+          <PomodoroWidget isOpen={true} isInline={true} />
         )}
 
         <div className="st-side-foot">

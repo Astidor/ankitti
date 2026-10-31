@@ -112,7 +112,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     <Dialog
       open={isOpen}
       onClose={onClose}
-      tint="#d9ccfd"
+      tint="var(--c-lilac)"
       title="Account and settings"
       description={isGuest ? 'You’re using Ankitti as a guest. Everything is saved on this device only.' : `Signed in as ${currentAccount.email}.`}
       footer={
@@ -214,7 +214,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             <span className="st-option-sub">Every deck, card and review as one .json file</span>
           </span>
         </button>
-        <button type="button" className="st-option" onClick={handleErase} style={{ color: '#85164a' }}>
+        <button type="button" className="st-option" onClick={handleErase} style={{ color: 'var(--c-due)' }}>
           <Trash2 size={20} />
           <span>
             <span className="st-option-title">{isGuest ? 'Erase everything' : 'Erase this device'}</span>

@@ -76,7 +76,7 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
         sourceId,
         mode === 'existing' ? targetId : '',
         { deleteSourceDeck: deleteSource, tagMergedCards: tagCards },
-        mode === 'new' ? { name: newName.trim(), icon: '', color: '#ffd2e5' } : undefined
+        mode === 'new' ? { name: newName.trim(), icon: '', color: 'var(--c-pink-soft)' } : undefined
       );
       sounds.playRating(4);
       onClose();
@@ -95,7 +95,7 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
       open={isOpen}
       onClose={onClose}
       busy={isSubmitting}
-      tint="#c9f0dc"
+      tint="var(--c-mint)"
       title="Combine decks"
       description="Move every card from one deck into another. Each card keeps its progress."
       footer={
@@ -153,14 +153,14 @@ export const MergeDeckModal: React.FC<MergeDeckModalProps> = ({
 
       <div style={{ display: 'grid', gap: 10 }}>
         <label className="st-option" style={{ cursor: 'pointer' }}>
-          <input type="checkbox" checked={deleteSource} onChange={(e) => setDeleteSource(e.target.checked)} style={{ width: 20, height: 20, accentColor: '#d6307c' }} />
+          <input type="checkbox" checked={deleteSource} onChange={(e) => setDeleteSource(e.target.checked)} style={{ width: 20, height: 20, accentColor: 'var(--c-pink)' }} />
           <span>
             <span className="st-option-title">Delete “{source?.name ?? 'the old deck'}” afterwards</span>
             <span className="st-option-sub">It will be empty once its cards have moved.</span>
           </span>
         </label>
         <label className="st-option" style={{ cursor: 'pointer' }}>
-          <input type="checkbox" checked={tagCards} onChange={(e) => setTagCards(e.target.checked)} style={{ width: 20, height: 20, accentColor: '#d6307c' }} />
+          <input type="checkbox" checked={tagCards} onChange={(e) => setTagCards(e.target.checked)} style={{ width: 20, height: 20, accentColor: 'var(--c-pink)' }} />
           <span>
             <span className="st-option-title">Tag the moved cards</span>
             <span className="st-option-sub">So you can still find which deck they came from.</span>

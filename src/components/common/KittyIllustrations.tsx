@@ -5,7 +5,7 @@ import { FaceG, INK, KITTY_PATH, KittyShape, type Mood } from '../landing/kitty'
 // Kept under its old name so every screen that used the bow picks it up.
 export const KittyBow: React.FC<{ size?: number; className?: string }> = ({ size = 24, className = '' }) => (
   <svg width={size} height={size * 0.85} viewBox="0 0 200 170" className={`inline-block ${className}`} aria-hidden="true">
-    <path d={KITTY_PATH} fill="#ffd2e5" stroke={INK} strokeWidth="14" strokeLinejoin="round" />
+    <path d={KITTY_PATH} fill="var(--c-pink-soft)" stroke={INK} strokeWidth="14" strokeLinejoin="round" />
   </svg>
 );
 
@@ -36,10 +36,10 @@ interface MascotProps {
 }
 
 const POSE_MOOD: Record<MascotPose, { mood: Mood; fill: string }> = {
-  hero: { mood: 'happy', fill: '#ffd2e5' },
-  celebrate: { mood: 'happy', fill: '#c9f0dc' },
-  reading: { mood: 'think', fill: '#fffbf6' },
-  cafe: { mood: 'sleep', fill: '#fff0b0' },
+  hero: { mood: 'happy', fill: 'var(--c-pink-soft)' },
+  celebrate: { mood: 'happy', fill: 'var(--c-mint)' },
+  reading: { mood: 'think', fill: 'var(--c-paper)' },
+  cafe: { mood: 'sleep', fill: 'var(--c-butter)' },
 };
 
 export const AestheticMascot: React.FC<MascotProps> = ({ pose = 'hero', className = 'w-36 h-36', alt = 'Ankitti' }) => (
@@ -49,9 +49,9 @@ export const AestheticMascot: React.FC<MascotProps> = ({ pose = 'hero', classNam
 // Account avatar: a small kitty face on a round pastel disc.
 export const KittyAvatar: React.FC<{ size?: number; className?: string }> = ({ size = 40, className = '' }) => (
   <svg width={size} height={size} viewBox="0 0 100 100" className={`shrink-0 ${className}`} aria-hidden="true">
-    <circle cx="50" cy="50" r="47" fill="#d9ccfd" stroke={INK} strokeWidth="5" />
+    <circle cx="50" cy="50" r="47" fill="var(--c-lilac)" stroke={INK} strokeWidth="5" />
     <g transform="translate(14 22) scale(0.36)">
-      <path d={KITTY_PATH} fill="#fffbf6" stroke={INK} strokeWidth="12" strokeLinejoin="round" />
+      <path d={KITTY_PATH} fill="var(--c-paper)" stroke={INK} strokeWidth="12" strokeLinejoin="round" />
       <FaceG x={100} y={96} s={1.25} mood="happy" />
     </g>
   </svg>

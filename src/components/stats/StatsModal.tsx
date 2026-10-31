@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { UserAccount, ReviewLog, Deck, Card } from '../../types/anki';
 import { Dialog } from '../studio/Dialog';
 import { deckColour } from '../decks/DeckList';
+import { C } from '../../theme';
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -24,14 +25,14 @@ const dayKey = (t: number | Date) => {
 };
 const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
 
-const SHADES = ['#fffbf6', '#ffe0ed', '#ffc2dc', '#f06aa6', '#d6307c'];
+const SHADES = [0, 1, 2, 3, 4].map((i) => `var(--c-heat-${i})`);
 const shadeFor = (count: number) => (count === 0 ? 0 : count < 5 ? 1 : count < 15 ? 2 : count < 40 ? 3 : 4);
 
 const STAGES = [
-  { key: 'new', label: 'Not studied yet', colour: '#d9ccfd' },
-  { key: 'learning', label: 'Learning', colour: '#fff0b0' },
-  { key: 'young', label: 'Getting there', colour: '#ffc2dc' },
-  { key: 'mature', label: `Well known (${MATURE_DAYS}+ days)`, colour: '#c9f0dc' },
+  { key: 'new', label: 'Not studied yet', colour: C.lilac },
+  { key: 'learning', label: 'Learning', colour: C.butter },
+  { key: 'young', label: 'Getting there', colour: 'var(--c-heat-2)' },
+  { key: 'mature', label: `Well known (${MATURE_DAYS}+ days)`, colour: C.mint },
 ] as const;
 
 const stageOf = (c: Card) =>
@@ -230,7 +231,7 @@ export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, isInline = false
   if (isInline) return body;
 
   return (
-    <Dialog open={isOpen} onClose={onClose} size="lg" tint="#c9f0dc" title="Progress">
+    <Dialog open={isOpen} onClose={onClose} size="lg" tint="var(--c-mint)" title="Progress">
       {body}
     </Dialog>
   );

@@ -301,7 +301,7 @@ export const CardEditorModal: React.FC<CardEditorModalProps> = ({ isOpen, deck, 
       open={isOpen}
       onClose={onClose}
       size="md"
-      tint="#ffd2e5"
+      tint="var(--c-pink-soft)"
       title={editingCard ? 'Edit card' : 'New card'}
       description={
         editingCard

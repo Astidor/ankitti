@@ -2,8 +2,8 @@ import React from 'react';
 
 // The motif shared by the landing page and the guides: a flashcard with cat ears, in plum line art.
 
-export const INK = '#33245e';
-export const BLUSH = '#ffb3d1';
+export const INK = 'var(--c-ink)';
+export const BLUSH = 'var(--c-blush)';
 
 /* ─── The motif: a flashcard with cat ears ─── */
 
@@ -19,8 +19,8 @@ export const FaceG: React.FC<{ x: number; y: number; s?: number; mood: Mood }> =
       <>
         <ellipse cx="-22" cy="0" rx="5" ry="6.5" fill={INK} />
         <ellipse cx="22" cy="0" rx="5" ry="6.5" fill={INK} />
-        <circle cx="-20.5" cy="-2.5" r="1.7" fill="#fff" />
-        <circle cx="23.5" cy="-2.5" r="1.7" fill="#fff" />
+        <circle cx="-20.5" cy="-2.5" r="1.7" fill="var(--c-paper)" />
+        <circle cx="23.5" cy="-2.5" r="1.7" fill="var(--c-paper)" />
       </>
     )}
     {mood === 'happy' && (
@@ -72,7 +72,7 @@ export const Ears: React.FC<{ fill: string }> = ({ fill }) => (
 /* ─── Doodles in the same line ─── */
 
 export const Sparkle: React.FC<{ size: number; fill?: string; className?: string; style?: React.CSSProperties }> = ({
-  size, fill = '#fff0b0', className = '', style,
+  size, fill = 'var(--c-butter)', className = '', style,
 }) => (
   <svg width={size} height={size} viewBox="-2 -2 28 28" className={`lp-doodle ${className}`} style={style} aria-hidden="true">
     <path
@@ -88,10 +88,10 @@ export const Sparkle: React.FC<{ size: number; fill?: string; className?: string
 export const Pencil: React.FC<{ className?: string; style?: React.CSSProperties }> = ({ className = '', style }) => (
   <svg width="150" height="40" viewBox="0 0 150 40" className={`lp-doodle ${className}`} style={style} aria-hidden="true">
     <g stroke={INK} strokeWidth="3" strokeLinejoin="round">
-      <rect x="22" y="8" width="96" height="24" rx="3" fill="#fff0b0" />
-      <rect x="118" y="8" width="16" height="24" fill="#c9f0dc" />
-      <path d="M134 8 H140 Q147 8 147 15 V25 Q147 32 140 32 H134 Z" fill="#ffd2e5" />
-      <path d="M22 8 L2 20 L22 32 Z" fill="#ffdcc4" />
+      <rect x="22" y="8" width="96" height="24" rx="3" fill="var(--c-butter)" />
+      <rect x="118" y="8" width="16" height="24" fill="var(--c-mint)" />
+      <path d="M134 8 H140 Q147 8 147 15 V25 Q147 32 140 32 H134 Z" fill="var(--c-pink-soft)" />
+      <path d="M22 8 L2 20 L22 32 Z" fill="var(--c-peach)" />
       <path d="M9 16 L2 20 L9 24 Z" fill={INK} />
       <path d="M26 20 H114" fill="none" strokeWidth="2" />
     </g>
@@ -102,7 +102,7 @@ export const Heart: React.FC<{ size: number; className?: string; style?: React.C
   <svg width={size} height={size} viewBox="-2 -2 28 26" className={`lp-doodle ${className}`} style={style} aria-hidden="true">
     <path
       d="M12 21 C5 15.5 1 12 1 7.5 C1 4 3.7 1.5 7 1.5 C9.2 1.5 11 2.7 12 4.5 C13 2.7 14.8 1.5 17 1.5 C20.3 1.5 23 4 23 7.5 C23 12 19 15.5 12 21 Z"
-      fill="#ffd2e5"
+      fill="var(--c-pink-soft)"
       stroke={INK}
       strokeWidth="2"
       strokeLinejoin="round"
