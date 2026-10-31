@@ -1,7 +1,7 @@
-import React from 'react';
-import { X, Flame, CheckCircle2, TrendingUp, Calendar, Sprout, Sparkles } from 'lucide-react';
+import React, { useMemo } from 'react';
 import { UserAccount, ReviewLog, Deck, Card } from '../../types/anki';
-import { KittyBow } from '../common/KittyIllustrations';
+import { Dialog } from '../studio/Dialog';
+import { deckColour } from '../decks/DeckList';
 
 interface StatsModalProps {
   isOpen: boolean;
@@ -13,267 +13,225 @@ interface StatsModalProps {
   onClose: () => void;
 }
 
-export const StatsModal: React.FC<StatsModalProps> = ({
-  isOpen,
-  isInline = false,
-  account,
-  decks,
-  cards,
-  reviewLogs,
-  onClose,
-}) => {
+const DAY = 86_400_000;
+const WEEKS = 12;
+const MATURE_DAYS = 21;
+
+/** Local calendar date, so a review at 23:30 counts for today, not tomorrow in UTC. */
+const dayKey = (t: number | Date) => {
+  const d = new Date(t);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const plural = (n: number, one: string, many = `${one}s`) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
+
+const SHADES = ['#fffbf6', '#ffe0ed', '#ffc2dc', '#f06aa6', '#d6307c'];
+const shadeFor = (count: number) => (count === 0 ? 0 : count < 5 ? 1 : count < 15 ? 2 : count < 40 ? 3 : 4);
+
+const STAGES = [
+  { key: 'new', label: 'Not studied yet', colour: '#d9ccfd' },
+  { key: 'learning', label: 'Learning', colour: '#fff0b0' },
+  { key: 'young', label: 'Getting there', colour: '#ffc2dc' },
+  { key: 'mature', label: `Well known (${MATURE_DAYS}+ days)`, colour: '#c9f0dc' },
+] as const;
+
+const stageOf = (c: Card) =>
+  c.state === 'new' ? 'new' : c.state === 'learning' || c.state === 'relearning' ? 'learning' : (c.interval || 0) >= MATURE_DAYS ? 'mature' : 'young';
+
+export const StatsModal: React.FC<StatsModalProps> = ({ isOpen, isInline = false, account, decks, cards, reviewLogs, onClose }) => {
+  const stats = useMemo(() => {
+    const now = Date.now();
+    const byDay = new Map<string, number>();
+    reviewLogs.forEach((r) => byDay.set(dayKey(r.timestamp), (byDay.get(dayKey(r.timestamp)) || 0) + 1));
+
+    // Days in a row, counting back from today (or from yesterday if today has no reviews yet).
+    let streak = 0;
+    let cursor = new Date();
+    if (!byDay.has(dayKey(cursor))) cursor = new Date(now - DAY);
+    while (byDay.has(dayKey(cursor))) {
+      streak++;
+      cursor = new Date(cursor.getTime() - DAY);
+    }
+
+    // Heatmap: whole weeks, Monday first, ending with the current week.
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const mondayOffset = (today.getDay() + 6) % 7;
+    const start = new Date(today.getTime() - (mondayOffset + (WEEKS - 1) * 7) * DAY);
+    const weeks: { key: string; count: number; future: boolean; date: Date }[][] = [];
+    for (let w = 0; w < WEEKS; w++) {
+      const col = [];
+      for (let d = 0; d < 7; d++) {
+        const date = new Date(start.getTime() + (w * 7 + d) * DAY);
+        col.push({ key: dayKey(date), count: byDay.get(dayKey(date)) || 0, future: date > today, date });
+      }
+      weeks.push(col);
+    }
+    const windowTotal = weeks.flat().reduce((n, d) => n + d.count, 0);
+
+    const recent = reviewLogs.filter((r) => r.timestamp > now - 30 * DAY);
+    const remembered = recent.length ? Math.round((recent.filter((r) => r.rating >= 3).length / recent.length) * 100) : null;
+
+    const stageCounts = { new: 0, learning: 0, young: 0, mature: 0 };
+    cards.forEach((c) => stageCounts[stageOf(c)]++);
+
+    const exam = account.examDateSet && account.examDate ? new Date(`${account.examDate}T12:00:00`) : null;
+    const examDays = exam && !isNaN(exam.getTime()) ? Math.ceil((exam.getTime() - now) / DAY) : null;
+
+    const perDeck = decks.map((d, i) => {
+      const own = cards.filter((c) => c.deckId === d.id);
+      const due = own.filter((c) => c.state === 'new' || c.state === 'learning' || c.due <= now).length;
+      const mature = own.filter((c) => stageOf(c) === 'mature').length;
+      return { deck: d, colour: deckColour(d, i), total: own.length, due, mature };
+    });
+
+    return {
+      today: byDay.get(dayKey(now)) || 0,
+      streak,
+      weeks,
+      windowTotal,
+      remembered,
+      recentCount: recent.length,
+      stageCounts,
+      examDays,
+      perDeck,
+    };
+  }, [reviewLogs, cards, decks, account.examDate, account.examDateSet]);
+
   if (!isOpen) return null;
 
-  // Calculate days until target exam
-  const examDate = new Date(account.examDate);
-  const today = new Date();
-  const diffTime = examDate.getTime() - today.getTime();
-  const daysUntilExam = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-
-  // Calculate retention rate (ratings 3 and 4 vs total reviews)
-  const totalReviews = reviewLogs.length;
-  const successfulReviews = reviewLogs.filter(r => r.rating >= 3).length;
-  const retentionRate = totalReviews > 0 ? Math.round((successfulReviews / totalReviews) * 100) : 92;
-
-  // Breakdown of card stages
-  const newCardsCount = cards.filter(c => c.state === 'new').length;
-  const learnCardsCount = cards.filter(c => c.state === 'learning' || c.state === 'relearning').length;
-  const youngCardsCount = cards.filter(c => c.state === 'review' && (c.interval || 0) < 21).length;
-  const matureCardsCount = cards.filter(c => c.state === 'review' && (c.interval || 0) >= 21).length;
-
-  // Generate 84 days (12 weeks) Activity Heatmap
-  const heatmapDays = [];
-  const reviewsByDay: Record<string, number> = {};
-
-  reviewLogs.forEach(r => {
-    const d = new Date(r.timestamp).toISOString().split('T')[0];
-    reviewsByDay[d] = (reviewsByDay[d] || 0) + 1;
-  });
-
-  for (let i = 83; i >= 0; i--) {
-    const dateObj = new Date(Date.now() - i * 86400000);
-    const dateStr = dateObj.toISOString().split('T')[0];
-    const count = reviewsByDay[dateStr] || 0;
-    heatmapDays.push({ date: dateStr, count });
-  }
-
-  const getIntensityColor = (count: number) => {
-    if (count === 0) return 'bg-pink-100/60 border border-pink-200/60 hover:border-pink-300';
-    if (count < 10) return 'bg-matcha-200 border border-matcha-300 hover:bg-matcha-300';
-    if (count < 25) return 'bg-matcha-300 border border-matcha-400 hover:bg-matcha-400';
-    if (count < 50) return 'bg-matcha-500 border border-matcha-600 hover:bg-matcha-600';
-    return 'bg-matcha-700 border border-matcha-800 hover:bg-matcha-800';
-  };
-
-  const statsBody = (
-    <div className="space-y-4 text-xs">
-      {/* Garden & Stats Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+  const total = cards.length;
+  const body = (
+    <div className="st-progress-page">
+      <div className="st-head">
         <div>
-          <h2 className="text-xl sm:text-2xl font-display font-extrabold text-cocoa-900 tracking-tight flex items-center space-x-2">
-            <span>Study Garden & Insights</span>
-            <KittyBow size={20} />
-          </h2>
-          <p className="text-xs text-cocoa-500 mt-0.5">
-            Track your memory retention, daily streak momentum, and review heatmap.
-          </p>
+          <h1 className="st-h1 st-display">Progress</h1>
+          <p className="st-sub">How much you’ve studied, and how well it’s sticking.</p>
         </div>
       </div>
-      
-      {/* Top 3 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-        
-        {/* Target Goal / Exam */}
-        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">Target Goal</span>
-            <Calendar size={15} className="text-strawberry-500" />
-          </div>
-          <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">{daysUntilExam} Days</div>
-            <div className="text-xs font-semibold text-strawberry-700 truncate mt-0.5">until {account.targetExam}</div>
-          </div>
-          <div className="text-[10px] text-cocoa-400 font-mono">Exam Date: {account.examDate}</div>
+
+      {/* The numbers that answer "am I keeping up?" */}
+      <section className="st-figures" aria-label="This week at a glance">
+        <div>
+          <b className="st-display">{stats.today}</b>
+          <span>{stats.today === 1 ? 'review today' : 'reviews today'}</span>
         </div>
+        <div>
+          <b className="st-display">{stats.streak}</b>
+          <span>{stats.streak === 1 ? 'day in a row' : 'days in a row'}</span>
+        </div>
+        <div>
+          <b className="st-display">{stats.remembered === null ? '–' : `${stats.remembered}%`}</b>
+          <span>{stats.remembered === null ? 'remembered (no reviews in 30 days)' : 'remembered in the last 30 days'}</span>
+        </div>
+        {stats.examDays !== null && stats.examDays >= 0 && (
+          <div>
+            <b className="st-display">{stats.examDays}</b>
+            <span>{stats.examDays === 1 ? 'day' : 'days'} until {account.targetExam || 'your exam'}</span>
+          </div>
+        )}
+      </section>
+      {stats.remembered !== null && (
+        <p className="st-sub" style={{ marginTop: 10 }}>
+          Remembering 85–95% of cards is a healthy pace. Much lower? Add fewer new cards for a few days.
+        </p>
+      )}
 
-        {/* Study Garden Daily Streak */}
-        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">Daily Streak</span>
-            <Flame size={16} className="text-honey-500" />
+      {/* Activity */}
+      <section className="st-panel" aria-labelledby="st-activity-h">
+        <div className="st-panel-h">
+          <h2 id="st-activity-h" className="st-display">Last {WEEKS} weeks</h2>
+          <span>{plural(stats.windowTotal, 'review')}</span>
+        </div>
+        <div className="st-heat-wrap">
+          <div className="st-heat-days" aria-hidden="true">
+            <span>Mon</span><span /><span>Wed</span><span /><span>Fri</span><span /><span>Sun</span>
           </div>
-          <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">
-              {account.streakDays} {account.streakDays === 1 ? 'Day' : 'Days'}
-            </div>
-            <div className="text-xs font-semibold text-honey-700 mt-0.5">Consistent spaced reviews</div>
-          </div>
-          <div className="text-[10px] text-matcha-600 font-semibold flex items-center space-x-1">
-            <Sprout size={12} />
-            <span>Memory garden blooming 🌱</span>
+          <div className="st-heat" role="img" aria-label={`Reviews per day over the last ${WEEKS} weeks: ${stats.windowTotal} in total`}>
+            {stats.weeks.map((col, w) => (
+              <div key={w} className="st-heat-col">
+                {col.map((d) => (
+                  <span
+                    key={d.key}
+                    className="st-heat-cell"
+                    style={{ background: d.future ? 'transparent' : SHADES[shadeFor(d.count)], borderColor: d.future ? 'transparent' : undefined }}
+                    title={d.future ? undefined : `${d.date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}: ${plural(d.count, 'review')}`}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Retention Rate */}
-        <div className="bg-white rounded-2xl p-5 shadow-[0_4px_16px_rgba(255,77,121,0.04)] border border-pink-100 flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-cocoa-500">SM-2 Retention</span>
-            <CheckCircle2 size={16} className="text-matcha-600" />
-          </div>
-          <div className="my-2.5">
-            <div className="text-2xl sm:text-3xl font-extrabold text-cocoa-900 tracking-tight font-display">{retentionRate}%</div>
-            <div className="text-xs font-semibold text-matcha-700 mt-0.5">Recall accuracy</div>
-          </div>
-          <div className="text-[10px] text-cocoa-400 font-medium">Optimal target: 85% - 95%</div>
+        <div className="st-heat-legend" aria-hidden="true">
+          <span>None</span>
+          {SHADES.map((c) => <span key={c} className="st-heat-cell" style={{ background: c }} />)}
+          <span>40+ a day</span>
         </div>
+        {stats.windowTotal === 0 && <p className="st-sub">Nothing yet. Each day you review lights up a square.</p>}
+      </section>
 
-      </div>
-
-      {/* Spaced Review Garden Heatmap */}
-      <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] p-5 sm:p-6 space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm font-display">
-              Study Garden Activity Heatmap
-            </h4>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-matcha-50 text-matcha-700 border border-matcha-200">
-              12 Weeks
-            </span>
-          </div>
-
-          <span className="text-[11px] text-cocoa-400 font-mono font-medium">
-            {reviewLogs.length} total reviews
-          </span>
+      {/* Card stages */}
+      <section className="st-panel" aria-labelledby="st-stages-h">
+        <div className="st-panel-h">
+          <h2 id="st-stages-h" className="st-display">How well you know your cards</h2>
+          <span>{plural(total, 'card')}</span>
         </div>
-
-        {/* Heatmap Grid */}
-        <div className="grid grid-flow-col grid-rows-7 gap-1.5 overflow-x-auto p-3.5 bg-pink-50/40 rounded-xl border border-pink-100">
-          {heatmapDays.map((d, idx) => (
-            <div
-              key={idx}
-              className={`w-3.5 h-3.5 rounded-md transition-all cursor-pointer ${getIntensityColor(d.count)}`}
-              title={`${d.date}: ${d.count} flashcards reviewed`}
-            />
+        {total > 0 && (
+          <div className="st-stack" role="img" aria-label={STAGES.map((s) => `${stats.stageCounts[s.key]} ${s.label}`).join(', ')}>
+            {STAGES.map((s) =>
+              stats.stageCounts[s.key] > 0 ? (
+                <span key={s.key} style={{ flexGrow: stats.stageCounts[s.key], background: s.colour }} />
+              ) : null
+            )}
+          </div>
+        )}
+        <ul className="st-legend">
+          {STAGES.map((s) => (
+            <li key={s.key}>
+              <span className="st-dot" style={{ background: s.colour }} />
+              <b>{stats.stageCounts[s.key].toLocaleString()}</b> {s.label}
+            </li>
           ))}
-        </div>
+        </ul>
+      </section>
 
-        {/* Heatmap Legend */}
-        <div className="flex items-center justify-end space-x-1.5 text-[10px] text-cocoa-400 pt-1 font-semibold">
-          <span>Less</span>
-          <span className="w-3 h-3 rounded-md bg-pink-100/60 border border-pink-200/60" />
-          <span className="w-3 h-3 rounded-md bg-matcha-200" />
-          <span className="w-3 h-3 rounded-md bg-matcha-300" />
-          <span className="w-3 h-3 rounded-md bg-matcha-500" />
-          <span className="w-3 h-3 rounded-md bg-matcha-700" />
-          <span>More</span>
-        </div>
-      </div>
-
-      {/* Card Maturity Breakdown */}
-      <div className="bg-white rounded-2xl border border-pink-100 shadow-[0_4px_16px_rgba(255,77,121,0.04)] p-5 sm:p-6 space-y-3.5">
-        <div className="flex items-center justify-between">
-          <h4 className="font-bold text-cocoa-900 text-xs sm:text-sm flex items-center space-x-2 font-display">
-            <TrendingUp size={15} className="text-strawberry-500" />
-            <span>Card Maturity Distribution</span>
-          </h4>
-          <span className="text-xs font-semibold text-cocoa-500 font-mono">
-            {cards.length} Cards in Collection
-          </span>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-pink-100 border border-pink-200/60">
-          <div 
-            className="bg-taro-400 h-full transition-all" 
-            style={{ width: `${cards.length ? (newCardsCount / cards.length) * 100 : 0}%` }} 
-            title={`New: ${newCardsCount}`}
-          />
-          <div 
-            className="bg-honey-400 h-full transition-all" 
-            style={{ width: `${cards.length ? (learnCardsCount / cards.length) * 100 : 0}%` }} 
-            title={`Learning: ${learnCardsCount}`}
-          />
-          <div 
-            className="bg-strawberry-400 h-full transition-all" 
-            style={{ width: `${cards.length ? (youngCardsCount / cards.length) * 100 : 0}%` }} 
-            title={`Young: ${youngCardsCount}`}
-          />
-          <div 
-            className="bg-matcha-500 h-full transition-all" 
-            style={{ width: `${cards.length ? (matureCardsCount / cards.length) * 100 : 0}%` }} 
-            title={`Mature: ${matureCardsCount}`}
-          />
-        </div>
-
-        {/* Legend stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 text-xs font-semibold">
-          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
-            <span className="w-2.5 h-2.5 rounded-full bg-taro-400" />
-            <div>
-              <div className="text-base font-bold text-cocoa-900">{newCardsCount}</div>
-              <div className="text-[10px] text-cocoa-500 font-medium">New Cards</div>
-            </div>
+      {/* By deck */}
+      {stats.perDeck.length > 0 && (
+        <section className="st-panel" aria-labelledby="st-decks-h">
+          <div className="st-panel-h">
+            <h2 id="st-decks-h" className="st-display">By deck</h2>
           </div>
-
-          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
-            <span className="w-2.5 h-2.5 rounded-full bg-honey-400" />
-            <div>
-              <div className="text-base font-bold text-cocoa-900">{learnCardsCount}</div>
-              <div className="text-[10px] text-cocoa-500 font-medium">Learning</div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
-            <span className="w-2.5 h-2.5 rounded-full bg-strawberry-400" />
-            <div>
-              <div className="text-base font-bold text-cocoa-900">{youngCardsCount}</div>
-              <div className="text-[10px] text-cocoa-500 font-medium">Young (&lt;21d)</div>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2.5 p-3 bg-pink-50/40 rounded-xl border border-pink-100">
-            <span className="w-2.5 h-2.5 rounded-full bg-matcha-500" />
-            <div>
-              <div className="text-base font-bold text-cocoa-900">{matureCardsCount}</div>
-              <div className="text-[10px] text-cocoa-500 font-medium">Mature (&ge;21d)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+          <table className="st-table">
+            <thead>
+              <tr>
+                <th scope="col">Deck</th>
+                <th scope="col">Cards</th>
+                <th scope="col">To review</th>
+                <th scope="col">Well known</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.perDeck.map((d) => (
+                <tr key={d.deck.id}>
+                  <th scope="row">
+                    <span className="st-dot" style={{ background: d.colour }} /> {d.deck.name}
+                  </th>
+                  <td>{d.total.toLocaleString()}</td>
+                  <td>{d.due === 0 ? '–' : d.due.toLocaleString()}</td>
+                  <td>{d.total === 0 ? '–' : `${Math.round((d.mature / d.total) * 100)}%`}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
     </div>
   );
 
-  if (isInline) {
-    return (
-      <div className="animate-fadeIn">
-        {statsBody}
-      </div>
-    );
-  }
+  if (isInline) return body;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl overflow-hidden border border-pink-100 flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-pink-100">
-          <div className="flex items-center space-x-2">
-            <KittyBow size={18} />
-            <h3 className="text-base font-bold text-cocoa-900 font-display">Study Garden Analytics</h3>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full bg-pink-50 hover:bg-pink-100 text-cocoa-500 hover:text-cocoa-900 flex items-center justify-center transition-colors cursor-pointer"
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {statsBody}
-        </div>
-      </div>
-    </div>
+    <Dialog open={isOpen} onClose={onClose} size="lg" tint="#c9f0dc" title="Progress">
+      {body}
+    </Dialog>
   );
 };

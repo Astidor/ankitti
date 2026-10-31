@@ -1,19 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  X, 
-  Sparkles, 
-  Bot, 
-  Layers, 
-  AlertCircle, 
-  ArrowRight, 
-  CheckCircle2,
-  Key
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import { Deck, Card, AiDeckResponse } from '../../types/anki';
 import { DEFAULT_DECK_SETTINGS } from '../../services/scheduler';
 import { api } from '../../services/api';
 import { sounds } from '../../services/audio';
-import { KittyBow } from '../common/KittyIllustrations';
+import { Dialog, Field } from '../studio/Dialog';
 
 interface AiDeckModalProps {
   isOpen: boolean;
@@ -21,154 +12,139 @@ interface AiDeckModalProps {
   initialDeckId?: string | null;
   onClose: () => void;
   onDeckCreated: (deck: Deck, cards: Card[]) => void;
+  /** Called when the AI needs an account; should open sign-up. */
+  onNeedSignIn?: () => void;
 }
 
-const PRESET_TOPICS = [
-  { label: 'Japanese N5 Verbs', topic: 'Japanese JLPT N5 essential verbs, polite forms (masu), and example sentences' },
-  { label: 'Pharmacology: Antibiotics', topic: 'High-yield antibiotics mechanisms, bacterial coverage, and classic side effects' },
-  { label: 'React 19 & Next.js', topic: 'Modern React server components, hooks, concurrent rendering, and performance' },
-  { label: 'Neuroscience Basics', topic: 'Brain lobes, cranial nerves, functions, and clinical lesions' },
-  { label: 'Constitutional Law', topic: 'US Constitutional Amendments 1 to 14, historic court cases, and key rights' },
+const KEY_STORAGE = 'ankitti_custom_deepseek_key';
+const EXAMPLES = ['Japanese N5 verbs', 'The Krebs cycle', 'Spanish for travel', 'Big-O of common algorithms', 'Cranial nerves'];
+const COUNTS = [5, 10, 15];
+const STYLES = [
+  { id: 'mixed' as const, label: 'A mix' },
+  { id: 'basic' as const, label: 'Questions' },
+  { id: 'cloze' as const, label: 'Fill in the blank' },
 ];
 
-export const AiDeckModal: React.FC<AiDeckModalProps> = ({
-  isOpen,
-  decks = [],
-  initialDeckId,
-  onClose,
-  onDeckCreated,
-}) => {
-  const [destinationMode, setDestinationMode] = useState<'existing' | 'new'>('new');
-  const [targetDeckId, setTargetDeckId] = useState<string>('');
+const readKey = () => {
+  try {
+    return localStorage.getItem(KEY_STORAGE) || '';
+  } catch {
+    return '';
+  }
+};
+
+export const AiDeckModal: React.FC<AiDeckModalProps> = ({ isOpen, decks = [], initialDeckId, onClose, onDeckCreated, onNeedSignIn }) => {
+  const [destination, setDestination] = useState<'new' | 'existing'>('new');
+  const [targetDeckId, setTargetDeckId] = useState('');
   const [topic, setTopic] = useState('');
   const [notes, setNotes] = useState('');
-  const [cardCount, setCardCount] = useState<number>(6);
+  const [cardCount, setCardCount] = useState(10);
   const [style, setStyle] = useState<'mixed' | 'basic' | 'cloze'>('mixed');
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [generatedResult, setGeneratedResult] = useState<AiDeckResponse | null>(null);
-  const [selectedIndices, setSelectedIndices] = useState<Record<number, boolean>>({});
-  const [customApiKey, setCustomApiKey] = useState<string>(() => {
-    return localStorage.getItem('ankitti_custom_deepseek_key') || '';
-  });
-  const [showKeyInput, setShowKeyInput] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [needsAccount, setNeedsAccount] = useState(false);
+  const [result, setResult] = useState<AiDeckResponse | null>(null);
+  const [selected, setSelected] = useState<Record<number, boolean>>({});
+  const [apiKey, setApiKey] = useState(readKey);
+  const [showMore, setShowMore] = useState(false);
 
-  const handleSaveCustomKey = (val: string) => {
-    setCustomApiKey(val);
-    if (val.trim()) {
-      localStorage.setItem('ankitti_custom_deepseek_key', val.trim());
-    } else {
-      localStorage.removeItem('ankitti_custom_deepseek_key');
-    }
-  };
-
+  // Opened from a deck: add to that deck. Opened from Create: make a new deck.
   useEffect(() => {
     if (!isOpen) return;
-
-    if (initialDeckId && decks.some(d => d.id === initialDeckId)) {
-      setDestinationMode('existing');
+    setResult(null);
+    setError(null);
+    setNeedsAccount(false);
+    if (initialDeckId && decks.some((d) => d.id === initialDeckId)) {
+      setDestination('existing');
       setTargetDeckId(initialDeckId);
-    } else if (decks.length > 0) {
-      setTargetDeckId(decks[0].id);
-      setDestinationMode(initialDeckId ? 'existing' : (decks.length > 0 ? 'existing' : 'new'));
     } else {
-      setDestinationMode('new');
+      setDestination('new');
+      setTargetDeckId(decks[0]?.id || '');
     }
   }, [isOpen, initialDeckId, decks]);
 
-  if (!isOpen) return null;
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!topic.trim()) return;
-
-    setIsLoading(true);
-    setErrorMessage(null);
-    setGeneratedResult(null);
-
-    const storedCustomKey = (localStorage.getItem('ankitti_custom_deepseek_key') || '').trim();
-    const effectiveKey = customApiKey.trim() || storedCustomKey || undefined;
-
+  const saveKey = (val: string) => {
+    setApiKey(val);
     try {
-      const result = await api.generateAiDeck({
+      if (val.trim()) localStorage.setItem(KEY_STORAGE, val.trim());
+      else localStorage.removeItem(KEY_STORAGE);
+    } catch {
+      /* storage unavailable: the key is used for this session only */
+    }
+  };
+
+  const targetDeck = decks.find((d) => d.id === targetDeckId);
+  const addingToExisting = destination === 'existing' && !!targetDeck;
+  const selectedCount = result ? result.cards.filter((_, i) => selected[i] !== false).length : 0;
+
+  const generate = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!topic.trim()) return;
+    setIsLoading(true);
+    setError(null);
+    setNeedsAccount(false);
+    setResult(null);
+    try {
+      const res = await api.generateAiDeck({
         topic: topic.trim(),
         cardCount,
         notes: notes.trim(),
         style,
-        apiKey: effectiveKey,
+        apiKey: apiKey.trim() || undefined,
       });
-
-      setGeneratedResult(result);
-      const initialSelected: Record<number, boolean> = {};
-      result.cards.forEach((_, idx) => {
-        initialSelected[idx] = true;
-      });
-      setSelectedIndices(initialSelected);
+      setResult(res);
+      setSelected(Object.fromEntries(res.cards.map((_, i) => [i, true])));
       sounds.playRating(4);
     } catch (err: unknown) {
       sounds.playRating(1);
-      const msg = err instanceof Error ? err.message : 'AI Generation failed';
-      if (msg === 'KEY_MISSING' || msg === 'AI_API_KEY_MISSING') {
-        setShowKeyInput(true);
-        setErrorMessage('DeepSeek API key is not configured in Cloudflare yet. You can provide your own API key below to generate cards immediately!');
+      const msg = err instanceof Error ? err.message : '';
+      if (/auth|sign in|log in|unauthori[sz]ed/i.test(msg)) {
+        setNeedsAccount(true);
+        setError('Making cards with AI needs a free account, so we can keep it fair for everyone.');
+      } else if (msg === 'KEY_MISSING' || msg === 'AI_API_KEY_MISSING') {
+        setShowMore(true);
+        setError('AI decks aren’t switched on for this site yet. If you have your own DeepSeek API key, add it under “More options” and try again.');
       } else {
-        setErrorMessage(msg);
+        setError(msg || 'The AI couldn’t make cards just now. Please try again in a moment.');
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedDeck = decks.find(d => d.id === targetDeckId);
-  const selectedCount = Object.values(selectedIndices).filter(Boolean).length;
-
-  const handleImportToCollection = async () => {
-    if (!generatedResult) return;
-
+  const addCards = async () => {
+    if (!result) return;
     setIsLoading(true);
     try {
       const now = Date.now();
-      let targetDeck: Deck;
-
-      if (destinationMode === 'existing' && targetDeckId && decks.length > 0) {
-        const found = decks.find(d => d.id === targetDeckId);
-        if (!found) {
-          throw new Error('Target destination deck not found');
-        }
-        targetDeck = found;
+      let deck: Deck;
+      if (addingToExisting) {
+        deck = targetDeck!;
       } else {
-        // Create brand new deck
-        const deckId = `deck_ai_${now}`;
-        targetDeck = {
-          id: deckId,
-          name: generatedResult.deck.name,
-          description: generatedResult.deck.description,
-          icon: generatedResult.deck.icon || '🤖',
-          color: generatedResult.deck.color || '#FF4D88',
-          settings: {
-            ...DEFAULT_DECK_SETTINGS,
-            newCardsPerDay: 20,
-            reviewsPerDay: 100,
-          },
+        deck = {
+          id: `deck_ai_${now}`,
+          name: result.deck.name,
+          description: result.deck.description,
+          icon: result.deck.icon || '✨',
+          color: '#fff0b0',
+          settings: { ...DEFAULT_DECK_SETTINGS, newCardsPerDay: 20, reviewsPerDay: 100 },
           createdAt: now,
           updatedAt: now,
         };
-        await api.createDeck(targetDeck);
+        await api.createDeck(deck);
       }
 
-      // Create Selected Cards
-      const createdCards: Card[] = [];
-      const cardsToCreate = generatedResult.cards.filter((_, idx) => selectedIndices[idx] !== false);
-
-      for (let i = 0; i < cardsToCreate.length; i++) {
-        const item = cardsToCreate[i];
+      const created: Card[] = [];
+      const picked = result.cards.filter((_, i) => selected[i] !== false);
+      for (let i = 0; i < picked.length; i++) {
+        const item = picked[i];
         const card: Card = {
           id: `card_ai_${i}_${now}`,
-          deckId: targetDeck.id,
+          deckId: deck.id,
           type: item.type,
           front: item.front,
           back: item.back,
-          tags: item.tags || ['AI-Generated'],
+          tags: item.tags || ['AI'],
           createdAt: now,
           due: now,
           interval: 0,
@@ -177,436 +153,180 @@ export const AiDeckModal: React.FC<AiDeckModalProps> = ({
           lapses: 0,
           state: 'new',
           stepIndex: 0,
-          medicalMeta: {
-            highYield: true,
-            takeaway: item.takeaway,
-            mnemonic: item.mnemonic,
-            clinicalPearl: item.takeaway,
-          },
+          medicalMeta: { highYield: true, takeaway: item.takeaway, mnemonic: item.mnemonic, clinicalPearl: item.takeaway },
         };
-
-        const saved = await api.createCard(card);
-        createdCards.push(saved);
+        created.push(await api.createCard(card));
       }
-
       sounds.playRating(4);
-      onDeckCreated(targetDeck, createdCards);
+      onDeckCreated(deck, created);
       onClose();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to import deck';
-      setErrorMessage(msg);
+      setError(err instanceof Error ? err.message : 'The cards couldn’t be saved. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleSelect = (idx: number) => {
-    setSelectedIndices(prev => ({
-      ...prev,
-      [idx]: !prev[idx],
-    }));
-  };
+  const footer = result ? (
+    <>
+      <span className="st-foot-note">Untick any card you don’t want.</span>
+      <button className="st-btn st-btn-secondary" onClick={() => setResult(null)} disabled={isLoading}>Back</button>
+      <button className="st-btn st-btn-primary" onClick={addCards} disabled={isLoading || selectedCount === 0}>
+        {isLoading ? <span className="st-spinner" aria-label="Saving" /> : addingToExisting ? `Add ${selectedCount} cards` : `Create deck with ${selectedCount} cards`}
+      </button>
+    </>
+  ) : (
+    <>
+      <button className="st-btn st-btn-secondary" onClick={onClose} disabled={isLoading}>Cancel</button>
+      <button className="st-btn st-btn-primary" onClick={() => generate()} disabled={isLoading || !topic.trim()}>
+        {isLoading ? (<><span className="st-spinner" /> Writing cards…</>) : (<><Sparkles size={18} /> Make cards</>)}
+      </button>
+    </>
+  );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-cocoa-900/40 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-[#FAF7F2] rounded-t-[28px] sm:rounded-[28px] w-full max-w-2xl max-h-[92vh] sm:max-h-[88vh] shadow-2xl overflow-hidden border border-[#EFE8DE] flex flex-col ios-bottom-sheet sm:animate-none">
-        
-        {/* iOS Grabber */}
-        <div className="pt-2 pb-1 flex justify-center bg-white/50 sm:hidden">
-          <div className="w-10 h-1 bg-cocoa-200 rounded-full" />
-        </div>
-
-        {/* Modal Header */}
-        <div className="px-5 py-3.5 flex items-center justify-between border-b border-[#EFE8DE] bg-white">
-          <div className="flex items-center space-x-2.5">
-            <span className="p-1.5 bg-strawberry-50 rounded-xl text-strawberry-600 border border-strawberry-100 flex items-center justify-center">
-              <Bot size={18} />
-            </span>
-            <div>
-              <div className="text-sm font-extrabold text-[#3E2D28] tracking-tight flex items-center space-x-1.5">
-                <span>AI Deck Architect</span>
-                <KittyBow size={15} />
-              </div>
-              <div className="text-[11px] text-cocoa-500">Generate high-yield flashcards with clozes and mnemonics</div>
-            </div>
-          </div>
-
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl bg-cocoa-50 hover:bg-cocoa-100 text-cocoa-500 hover:text-[#3E2D28] transition-colors cursor-pointer"
-            title="Close"
-          >
-            <X size={15} />
-          </button>
-        </div>
-
-        {/* Modal Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
-          
-          {/* Error Notice */}
-          {errorMessage && (
-            <div className="p-3.5 bg-strawberry-50 border border-strawberry-200 rounded-2xl text-strawberry-800 text-xs flex items-start space-x-2.5">
-              <AlertCircle size={16} className="text-strawberry-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <strong className="block font-bold">Notice</strong>
-                <span>{errorMessage}</span>
-              </div>
-            </div>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      busy={isLoading}
+      size="lg"
+      tint="#fff0b0"
+      title={result ? 'Check your new cards' : 'Make cards with AI'}
+      description={
+        result
+          ? addingToExisting
+            ? `They’ll be added to “${targetDeck!.name}”. AI can make mistakes, so give them a quick read.`
+            : `They’ll go into a new deck called “${result.deck.name}”. AI can make mistakes, so give them a quick read.`
+          : 'Type a topic and get a first draft of flashcards. You choose which ones to keep.'
+      }
+      footer={footer}
+    >
+      {error && (
+        <div className="st-alert st-alert-error" role="alert">
+          <AlertCircle size={18} />
+          <span style={{ flex: 1 }}>{error}</span>
+          {needsAccount && onNeedSignIn && (
+            <button type="button" className="st-btn st-btn-secondary st-btn-sm" onClick={onNeedSignIn}>
+              Sign in or sign up
+            </button>
           )}
+        </div>
+      )}
 
-          {!generatedResult && (
-            <form onSubmit={handleGenerate} className="space-y-4">
-              
-              {/* Destination Selector: Add to Existing Deck vs Create New Deck */}
-              <div className="p-3.5 bg-white rounded-2xl border border-[#EFE8DE] space-y-2 shadow-2xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-cocoa-600 flex items-center space-x-1.5">
-                    <Layers size={13} className="text-cocoa-500" />
-                    <span>Destination</span>
+      {!result && (
+        <form onSubmit={generate} style={{ display: 'grid', gap: 18 }}>
+          <Field label="What should the cards be about?" htmlFor="ai-topic">
+            <input
+              id="ai-topic"
+              className="st-text"
+              type="text"
+              required
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g. The Krebs cycle"
+            />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 4 }}>
+              {EXAMPLES.map((ex) => (
+                <button key={ex} type="button" className="st-ghost" style={{ minHeight: 34, border: '2px solid var(--st-line)', borderRadius: 999 }} onClick={() => setTopic(ex)}>
+                  {ex}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="How many cards?">
+            <div className="st-seg" role="group" aria-label="How many cards">
+              {COUNTS.map((n) => (
+                <button key={n} type="button" aria-pressed={cardCount === n} onClick={() => setCardCount(n)}>{n}</button>
+              ))}
+            </div>
+          </Field>
+
+          {decks.length > 0 && (
+            <Field label="Where should they go?">
+              <div style={{ display: 'grid', gap: 8 }}>
+                <button type="button" className="st-option" aria-pressed={destination === 'new'} onClick={() => setDestination('new')}>
+                  <span>
+                    <span className="st-option-title">A new deck</span>
+                    <span className="st-option-sub">Named after the topic</span>
                   </span>
-
-                  {decks.length > 0 && (
-                    <div className="inline-flex p-0.5 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE] text-[10px] font-bold shadow-2xs">
-                      <button
-                        type="button"
-                        onClick={() => { sounds.playClick(); setDestinationMode('existing'); }}
-                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                          destinationMode === 'existing'
-                            ? 'bg-strawberry-500 text-white shadow-2xs'
-                            : 'text-cocoa-500 hover:text-cocoa-800'
-                        }`}
-                      >
-                        Add to Existing
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { sounds.playClick(); setDestinationMode('new'); }}
-                        className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
-                          destinationMode === 'new'
-                            ? 'bg-strawberry-500 text-white shadow-2xs'
-                            : 'text-cocoa-500 hover:text-cocoa-800'
-                        }`}
-                      >
-                        + New Deck
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {destinationMode === 'existing' && decks.length > 0 ? (
-                  <div className="space-y-1.5 pt-0.5">
-                    <select
-                      value={targetDeckId}
-                      onChange={(e) => setTargetDeckId(e.target.value)}
-                      className="w-full text-xs font-bold text-[#3E2D28] bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400"
-                    >
-                      {decks.map(d => (
-                        <option key={d.id} value={d.id}>
-                          {d.icon || '📁'} {d.name}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="text-[10px] text-cocoa-600 font-semibold px-1 flex items-center space-x-1">
-                      <span>✓ Cards will be added into</span>
-                      <strong className="font-bold text-[#3E2D28]">{selectedDeck?.name || 'this deck'}</strong>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-[10px] text-cocoa-500 font-normal px-1">
-                    AI will automatically title and create a brand new deck in your collection.
-                  </div>
+                </button>
+                <button type="button" className="st-option" aria-pressed={destination === 'existing'} onClick={() => setDestination('existing')}>
+                  <span>
+                    <span className="st-option-title">One of my decks</span>
+                    <span className="st-option-sub">{targetDeck ? targetDeck.name : 'Pick a deck'}</span>
+                  </span>
+                </button>
+                {destination === 'existing' && (
+                  <select className="st-text" value={targetDeckId} onChange={(e) => setTargetDeckId(e.target.value)} aria-label="Deck">
+                    {decks.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+                  </select>
                 )}
               </div>
+            </Field>
+          )}
 
-              {/* Presets */}
-              <div>
-                <label className="block font-bold text-cocoa-700 mb-1.5 text-[11px] flex items-center justify-between">
-                  <span>Quick Presets</span>
-                  <span className="text-[10px] text-cocoa-400 font-normal">Click to fill</span>
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {PRESET_TOPICS.map((p, idx) => (
-                    <button
-                      type="button"
-                      key={idx}
-                      onClick={() => setTopic(p.topic)}
-                      className="px-2.5 py-1 rounded-xl bg-white hover:bg-strawberry-50 hover:text-strawberry-700 hover:border-strawberry-200 text-cocoa-700 border border-[#EFE8DE] text-[11px] font-semibold transition-all cursor-pointer shadow-2xs"
-                    >
-                      {p.label}
-                    </button>
+          <details open={showMore} onToggle={(e) => setShowMore((e.target as HTMLDetailsElement).open)}>
+            <summary style={{ cursor: 'pointer', fontWeight: 800 }}>More options</summary>
+            <div style={{ display: 'grid', gap: 16, marginTop: 14 }}>
+              <Field label="Your notes (optional)" htmlFor="ai-notes" hint="Paste lecture notes or a chapter and the cards will stick to it.">
+                <textarea id="ai-notes" className="st-text" rows={4} value={notes} onChange={(e) => setNotes(e.target.value)} />
+              </Field>
+              <Field label="Kind of cards">
+                <div className="st-seg" role="group" aria-label="Kind of cards">
+                  {STYLES.map((s) => (
+                    <button key={s.id} type="button" aria-pressed={style === s.id} onClick={() => setStyle(s.id)}>{s.label}</button>
                   ))}
                 </div>
-              </div>
-
-              {/* Topic Input */}
-              <div className="space-y-1">
-                <label className="block font-bold text-cocoa-700 text-xs">
-                  Topic or Concept <span className="text-strawberry-500 font-bold">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  placeholder="e.g. Japanese JLPT N5 Verbs, or Cardiac Arrhythmias..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE8DE] text-xs text-[#3E2D28] font-bold focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs"
-                />
-              </div>
-
-              {/* Source Notes Paste Area */}
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="block font-bold text-cocoa-700 text-xs">
-                    Paste Lecture Notes or Text (Optional)
-                  </label>
-                  <span className="text-[10px] text-cocoa-400">Extract high-yield cards</span>
-                </div>
-                <textarea
-                  rows={4}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Paste your raw notes, study guides, or syllabus here. The AI will distill them into optimal flashcards with clozes and mnemonics..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE8DE] text-xs text-[#3E2D28] font-normal focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400 shadow-2xs resize-y"
-                />
-              </div>
-
-              {/* Generation Controls: Card count & Card Style */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-white p-3.5 rounded-2xl border border-[#EFE8DE] shadow-2xs">
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="font-bold text-cocoa-700 text-[11px]">
-                      Cards to Generate: <strong className="text-strawberry-600">{cardCount}</strong>
-                    </label>
-                  </div>
-                  <input
-                    type="range"
-                    min="3"
-                    max="15"
-                    step="1"
-                    value={cardCount}
-                    onChange={(e) => setCardCount(parseInt(e.target.value))}
-                    className="w-full accent-strawberry-500 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[10px] text-cocoa-400 mt-0.5 font-semibold">
-                    <span>3 Quick</span>
-                    <span>8 Standard</span>
-                    <span>15 Deep</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="font-bold text-cocoa-700 text-[11px] block mb-1.5">
-                    Flashcard Style
-                  </label>
-                  <div className="inline-flex p-0.5 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE] shadow-2xs w-full">
-                    <button
-                      type="button"
-                      onClick={() => setStyle('mixed')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                        style === 'mixed' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
-                      }`}
-                    >
-                      Mixed
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStyle('basic')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                        style === 'basic' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
-                      }`}
-                    >
-                      Q&A
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setStyle('cloze')}
-                      className={`flex-1 py-1 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                        style === 'cloze' ? 'bg-strawberry-500 text-white shadow-2xs' : 'text-cocoa-500 hover:text-cocoa-800'
-                      }`}
-                    >
-                      Cloze
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Custom API Key Collapsible */}
-              <div className="rounded-2xl border border-[#EFE8DE] bg-white overflow-hidden text-xs shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setShowKeyInput(!showKeyInput)}
-                  className="w-full px-3.5 py-2.5 flex items-center justify-between text-left text-cocoa-700 hover:text-[#3E2D28] transition-colors cursor-pointer"
-                >
-                  <span className="flex items-center space-x-1.5 font-bold text-[11px]">
-                    <Key size={13} className="text-strawberry-500" />
-                    <span>DeepSeek API Key {customApiKey ? '✓ (Custom key configured)' : '(Optional)'}</span>
-                  </span>
-                  <span className="text-[10px] text-cocoa-500 font-bold">
-                    {showKeyInput ? 'Hide' : 'Configure'}
-                  </span>
-                </button>
-                
-                {showKeyInput && (
-                  <div className="p-3 pt-1 space-y-2 border-t border-[#EFE8DE] bg-[#FAF7F2]">
-                    <p className="text-[11px] text-cocoa-600 leading-relaxed font-normal">
-                      By default, Ankitti uses your Cloudflare secret <code className="font-mono bg-white border border-[#EFE8DE] text-cocoa-800 px-1.5 py-0.5 rounded text-[10px]">DEEPSEEK_API_KEY</code>. You can also provide a personal DeepSeek API key:
-                    </p>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="password"
-                        value={customApiKey}
-                        onChange={(e) => handleSaveCustomKey(e.target.value)}
-                        placeholder="sk-..."
-                        className="flex-1 px-3 py-2 rounded-xl bg-white border border-[#EFE8DE] text-xs font-mono text-[#3E2D28] focus:outline-none focus:ring-2 focus:ring-strawberry-400/30 focus:border-strawberry-400"
-                      />
-                      {customApiKey && (
-                        <button
-                          type="button"
-                          onClick={() => handleSaveCustomKey('')}
-                          className="px-2.5 py-2 text-[10px] font-bold text-strawberry-700 bg-strawberry-50 hover:bg-strawberry-100 rounded-xl border border-strawberry-200 cursor-pointer"
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <div className="text-[10px] text-cocoa-400">
-                      Stored only in your local browser storage. Never committed to git.
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <div className="pt-2 pb-safe">
-                <button
-                  type="submit"
-                  disabled={isLoading || !topic.trim()}
-                  className="squishy-btn w-full py-3 rounded-2xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Generating flashcards with AI...</span>
-                    </div>
-                  ) : (
-                    <>
-                      <Sparkles size={15} />
-                      <span>Generate Cards</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Generated Deck Review Stage */}
-          {generatedResult && (
-            <div className="space-y-4 animate-fadeIn">
-              
-              {/* Deck Summary Card */}
-              <div className="p-3.5 bg-white rounded-2xl border border-[#EFE8DE] flex items-center justify-between shadow-2xs">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl p-2 bg-[#FAF7F2] rounded-xl border border-[#EFE8DE]">
-                    {destinationMode === 'existing' ? (selectedDeck?.icon || '📁') : (generatedResult.deck.icon || '🤖')}
-                  </span>
-                  <div>
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-strawberry-600">
-                      {destinationMode === 'existing' ? 'Destination Deck' : 'New Deck Title'}
-                    </div>
-                    <h3 className="font-extrabold text-[#3E2D28] text-sm">
-                      {destinationMode === 'existing' ? selectedDeck?.name : generatedResult.deck.name}
-                    </h3>
-                    <p className="text-[11px] text-cocoa-500 mt-0.5">
-                      {destinationMode === 'existing'
-                        ? 'Cards will be added directly into this deck.'
-                        : generatedResult.deck.description}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-xs font-bold text-cocoa-700 bg-[#FAF7F2] px-3 py-1 rounded-full border border-[#EFE8DE] shadow-2xs">
-                    {selectedCount} / {generatedResult.cards.length} Cards
-                  </span>
-                </div>
-              </div>
-
-              {/* Cards List Preview */}
-              <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                {generatedResult.cards.map((card, idx) => {
-                  const isSelected = selectedIndices[idx] !== false;
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => toggleSelect(idx)}
-                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-start space-x-3 ${
-                        isSelected 
-                          ? 'bg-white border-strawberry-200 shadow-2xs ring-1 ring-strawberry-400/20' 
-                          : 'bg-[#FAF7F2] border-[#EFE8DE] opacity-60'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => {}}
-                        className="rounded text-strawberry-600 focus:ring-strawberry-400 mt-1 accent-strawberry-500 w-4 h-4 cursor-pointer"
-                      />
-
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-strawberry-100/70 text-strawberry-700">
-                            {card.type === 'cloze' ? 'Cloze' : 'Q&A'}
-                          </span>
-                          <span className="text-[10px] text-cocoa-400 font-mono">#{idx + 1}</span>
-                        </div>
-
-                        <div className="font-bold text-[#3E2D28] text-xs">
-                          {card.front}
-                        </div>
-
-                        <div className="text-cocoa-600 text-[11px] leading-relaxed">
-                          {card.back}
-                        </div>
-
-                        {card.takeaway && (
-                          <div className="text-[10px] text-matcha-800 bg-matcha-50 px-2 py-0.5 rounded-md border border-matcha-200 inline-block font-semibold">
-                            💡 {card.takeaway}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2 pt-2 pb-safe border-t border-[#EFE8DE]">
-                <button
-                  type="button"
-                  onClick={() => setGeneratedResult(null)}
-                  className="px-4 py-2.5 rounded-xl bg-white hover:bg-cocoa-100 text-cocoa-700 font-semibold text-xs border border-[#EFE8DE] transition-colors cursor-pointer"
-                >
-                  ← Back to Prompt
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleImportToCollection}
-                  disabled={isLoading || selectedCount === 0}
-                  className="squishy-btn flex-1 py-2.5 rounded-xl bg-strawberry-500 hover:bg-strawberry-600 text-white font-bold text-xs shadow-squishy-pink transition-all flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50"
-                >
-                  <CheckCircle2 size={15} />
-                  <span>
-                    {destinationMode === 'existing'
-                      ? `Add ${selectedCount} Cards to "${selectedDeck?.name || 'Deck'}"`
-                      : `Create Deck & Add ${selectedCount} Cards`}
-                  </span>
-                </button>
-              </div>
+              </Field>
+              <Field
+                label="Your own DeepSeek API key (optional)"
+                htmlFor="ai-key"
+                hint="Only needed if AI decks aren’t switched on for this site. Kept in this browser only."
+              >
+                <input id="ai-key" className="st-text" type="password" value={apiKey} onChange={(e) => saveKey(e.target.value)} placeholder="sk-…" autoComplete="off" />
+              </Field>
             </div>
-          )}
+          </details>
+          <button type="submit" hidden />
+        </form>
+      )}
+
+      {result && (
+        <div style={{ display: 'grid', gap: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+            <strong>{selectedCount} of {result.cards.length} cards selected</strong>
+            <button
+              type="button"
+              className="st-link-btn"
+              onClick={() => {
+                const all = selectedCount < result.cards.length;
+                setSelected(Object.fromEntries(result.cards.map((_, i) => [i, all])));
+              }}
+            >
+              {selectedCount < result.cards.length ? 'Select all' : 'Select none'}
+            </button>
+          </div>
+          {result.cards.map((card, i) => {
+            const on = selected[i] !== false;
+            return (
+              <label key={i} className="st-option" style={{ alignItems: 'flex-start', opacity: on ? 1 : 0.6 }} aria-checked={on}>
+                <input
+                  type="checkbox"
+                  checked={on}
+                  onChange={() => setSelected((prev) => ({ ...prev, [i]: !on }))}
+                  style={{ width: 20, height: 20, marginTop: 2, accentColor: '#d6307c', flex: 'none' }}
+                />
+                <span style={{ minWidth: 0 }}>
+                  <span className="st-option-title" style={{ overflowWrap: 'anywhere' }}>{card.front}</span>
+                  <span className="st-option-sub" style={{ overflowWrap: 'anywhere' }}>{card.back}</span>
+                  {card.takeaway && <span className="st-option-sub" style={{ marginTop: 4 }}>Remember: {card.takeaway}</span>}
+                </span>
+              </label>
+            );
+          })}
         </div>
-      </div>
-    </div>
+      )}
+    </Dialog>
   );
 };
