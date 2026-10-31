@@ -5,7 +5,8 @@ import { renderToStaticMarkup, renderToString } from 'react-dom/server';
 import { LandingPage, FAQS } from './components/landing/LandingPage';
 import { GuidePage, GuidesIndex } from './components/guides/GuidePage';
 import { GUIDE_CONTENT } from './components/guides/content';
-import { GUIDES, SITE_URL, guideUrl } from './seo/site';
+import { PrivacyPage } from './components/legal/PrivacyPage';
+import { GUIDES, PRIVACY, SITE_URL, THEME_BOOT_SCRIPT, guideUrl } from './seo/site';
 import { INITIAL_DECKS } from './services/storage';
 
 const noop = () => {};
@@ -81,6 +82,7 @@ function documentFor(opts: {
 <meta name="theme-color" content="#f5f1ff" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#17112a" media="(prefers-color-scheme: dark)" />
 <meta name="color-scheme" content="light dark" />
+<script>${THEME_BOOT_SCRIPT}</script>
 <link rel="icon" href="/favicon.ico" sizes="48x48" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -175,6 +177,20 @@ export function staticPages(assetsHead: string): StaticPage[] {
     }),
   });
 
+  const privacyUrl = `${SITE_URL}${PRIVACY.path}`;
+  pages.push({
+    path: 'privacy/index.html',
+    html: documentFor({
+      url: privacyUrl,
+      title: PRIVACY.title,
+      description: PRIVACY.description,
+      ogType: 'website',
+      assetsHead,
+      body: renderToStaticMarkup(<PrivacyPage />),
+      ld: [breadcrumbLd([home, { name: 'Privacy', url: privacyUrl }])],
+    }),
+  });
+
   return pages;
 }
 
@@ -184,6 +200,7 @@ export function sitemapXml(): string {
     { loc: `${SITE_URL}/`, lastmod: latest, priority: '1.0' },
     { loc: `${SITE_URL}/guides/`, lastmod: latest, priority: '0.7' },
     ...GUIDES.map((g) => ({ loc: `${SITE_URL}${guideUrl(g.slug)}`, lastmod: g.updated, priority: '0.8' })),
+    { loc: `${SITE_URL}${PRIVACY.path}`, lastmod: PRIVACY.updated, priority: '0.3' },
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

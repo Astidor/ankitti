@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Check, Download, LogOut, Smartphone, Trash2, Volume2, VolumeX } from 'lucide-react';
+import { Check, Download, LogOut, Moon, Smartphone, Sun, Trash2, UserX, Volume2, VolumeX } from 'lucide-react';
+import { setThemePreference, useTheme } from '../../services/themePreference';
 import { UserAccount } from '../../types/anki';
 import { storage } from '../../services/storage';
 import { api } from '../../services/api';
@@ -48,6 +49,11 @@ export const AccountModal: React.FC<AccountModalProps> = ({
   const [soundEnabled, setSoundEnabled] = useState(currentAccount.soundEnabled ?? true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { theme, preference } = useTheme();
 
   // Start from the account as it is now each time the dialog opens.
   useEffect(() => {
@@ -57,6 +63,9 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     setExamDate(currentAccount.examDateSet ? currentAccount.examDate : '');
     setSoundEnabled(currentAccount.soundEnabled ?? true);
     setSaved(false);
+    setDeleteOpen(false);
+    setDeletePassword('');
+    setDeleteError('');
   }, [isOpen, currentAccount]);
 
   const isGuest = !currentAccount.email;
@@ -108,6 +117,20 @@ export const AccountModal: React.FC<AccountModalProps> = ({
     }
   };
 
+  const handleDeleteAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsDeleting(true);
+    setDeleteError('');
+    try {
+      await api.deleteAccount(deletePassword);
+      onResetData();
+      onClose();
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : 'Could not delete the account.');
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Dialog
       open={isOpen}
@@ -129,7 +152,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
         <KittyAvatar size={56} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <p className="st-display" style={{ margin: 0, fontSize: '1.25rem' }}>{currentAccount.name}</p>
-          <p className="st-muted" style={{ margin: 0, fontWeight: 600 }}>{currentAccount.email || 'Guest on this device'}</p>
+          <p className="st-muted" style={{ margin: 0, fontWeight: 600, overflowWrap: 'anywhere' }}>{currentAccount.email || 'Guest on this device'}</p>
         </div>
         {!isGuest && onLogout && (
           <button className="st-btn st-btn-secondary st-btn-sm" onClick={() => { onClose(); onLogout(); }}>
@@ -192,6 +215,20 @@ export const AccountModal: React.FC<AccountModalProps> = ({
           </span>
           <span className="st-option-title">{soundEnabled ? 'On' : 'Off'}</span>
         </button>
+        <div className="st-option" style={{ cursor: 'default' }}>
+          {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+          <span style={{ flex: 1 }}>
+            <span className="st-option-title">Appearance</span>
+            <span className="st-option-sub">{preference === 'system' ? 'Follows this device' : 'Saved on this device'}</span>
+          </span>
+        </div>
+        <div className="st-seg" role="group" aria-label="Appearance" style={{ marginTop: -8 }}>
+          {(['system', 'light', 'dark'] as const).map((p) => (
+            <button key={p} type="button" aria-pressed={preference === p} onClick={() => { sounds.playClick(); setThemePreference(p); }}>
+              {p === 'system' ? 'System' : p === 'light' ? 'Light' : 'Dark'}
+            </button>
+          ))}
+        </div>
         {onOpenInstall && (
           <button type="button" className="st-option" onClick={() => { onClose(); onOpenInstall(); }}>
             <Smartphone size={20} />
@@ -223,6 +260,42 @@ export const AccountModal: React.FC<AccountModalProps> = ({
             </span>
           </span>
         </button>
+        {!isGuest && !deleteOpen && (
+          <button type="button" className="st-option" onClick={() => setDeleteOpen(true)} style={{ color: 'var(--c-due)' }}>
+            <UserX size={20} />
+            <span>
+              <span className="st-option-title">Delete account</span>
+              <span className="st-option-sub">Erases your account and every deck, card and review saved to it</span>
+            </span>
+          </button>
+        )}
+        {!isGuest && deleteOpen && (
+          <form onSubmit={handleDeleteAccount} className="st-alert st-alert-error" style={{ display: 'grid', gap: 12 }}>
+            <span>
+              <strong>Delete your account for good?</strong> Your decks, cards, reviews and drafts are erased from
+              our servers straight away, and this can’t be undone. Download a backup first if you might want them.
+            </span>
+            <Field label="Type your password to confirm" htmlFor="acc-delete-pw">
+              <input
+                id="acc-delete-pw"
+                className="st-text"
+                type="password"
+                autoComplete="current-password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                required
+              />
+            </Field>
+            {deleteError && <span role="alert" style={{ fontWeight: 700 }}>{deleteError}</span>}
+            <span style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="st-btn st-btn-secondary st-btn-sm" onClick={() => setDeleteOpen(false)}>Keep my account</button>
+              <button type="submit" className="st-btn st-btn-primary st-btn-sm" disabled={isDeleting || !deletePassword}>
+                {isDeleting ? 'Deleting…' : 'Delete account'}
+              </button>
+            </span>
+          </form>
+        )}
+        <a href="/privacy/" className="st-muted" style={{ fontWeight: 600, fontSize: '0.875rem' }}>Privacy policy</a>
       </section>
     </Dialog>
   );

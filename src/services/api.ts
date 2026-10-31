@@ -100,6 +100,20 @@ class ApiService {
     this.setToken(null);
   }
 
+  /** Permanently erases the account and everything synced to it. */
+  public async deleteAccount(password: string): Promise<void> {
+    const res = await fetch(`${API_BASE}/auth/account`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ password }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Could not delete the account.');
+    }
+    this.setToken(null);
+  }
+
   public async getMe(): Promise<UserAccount | null> {
     if (!this.token) return null;
     try {

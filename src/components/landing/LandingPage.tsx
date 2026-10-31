@@ -648,7 +648,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="lp-foot-base">
             <span>
-              © {YEAR} Ankitti · Made by <a href="https://github.com/Astidor/ankitti" target="_blank" rel="noreferrer">Astidor</a>
+              © {YEAR} Ankitti · Made by <a href="https://github.com/Astidor/ankitti" target="_blank" rel="noreferrer">Astidor</a> · <a href="/privacy/">Privacy</a>
             </span>
             <a href="#top" className="lp-btn lp-btn-paper lp-btn-sm">Back to top</a>
           </div>

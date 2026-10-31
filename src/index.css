@@ -57,87 +57,95 @@
   --c-code-text: #f5f1ff;
 }
 
-@media (prefers-color-scheme: dark) {
-  /* "Pastel stickers at night": the page and panels go dark, the pastels stay pastel. */
-  :root {
-    --c-ground: #1f1b29;
-    --c-paper: #2a2438;
-    --c-raised: #332c45;
-    --c-ink: #f3eefc;
-    --c-ink-soft: #c1b6dc;
-    --c-line: #3d3552;
-    --c-grid: #29243a;
-    --c-drop: #0e0b15;
-    --c-placeholder: #8f85ad;
-    --c-hover: rgba(205, 191, 243, 0.14);
-    --c-scrim: rgba(8, 6, 14, 0.62);
-    --c-shadow: rgba(0, 0, 0, 0.45);
-    --c-mix: #1f1b29;
+/* Dark theme, "pastel stickers at night": the page and panels go dark, the pastels stay pastel.
+   The head script in index.html sets data-theme from the saved choice or the device setting. */
+:root[data-theme='dark'] {
+  --c-ground: #1f1b29;
+  --c-paper: #2a2438;
+  --c-raised: #332c45;
+  --c-ink: #f3eefc;
+  --c-ink-soft: #c1b6dc;
+  --c-line: #3d3552;
+  --c-grid: #29243a;
+  --c-drop: #0e0b15;
+  --c-placeholder: #8f85ad;
+  --c-hover: rgba(205, 191, 243, 0.14);
+  --c-scrim: rgba(8, 6, 14, 0.62);
+  --c-shadow: rgba(0, 0, 0, 0.45);
+  --c-mix: #1f1b29;
 
-    --c-pink: #d6307c;
-    --c-pink-hover: #e4478f;
-    --c-on-pink: #ffffff;
-    --c-band: #2f2650;
-    --c-on-band: #f3eefc;
+  --c-pink: #d6307c;
+  --c-pink-hover: #e4478f;
+  --c-on-pink: #ffffff;
+  --c-band: #2f2650;
+  --c-on-band: #f3eefc;
 
-    --c-pink-soft: #f2c6da;
-    --c-lilac: #cdbff3;
-    --c-mint: #bfe3cf;
-    --c-butter: #f0e0a0;
-    --c-peach: #f3cfb4;
-    --c-sky: #bdd7f3;
-    --c-oat: #e2d3c4;
-    --c-sea: #bfe2df;
-    --c-blush: #ff9cc6;
-    --c-pink-line: #5a3d5c;
-    --c-field-pink: #33233d;
-    --c-field-lilac: #352c55;
+  --c-pink-soft: #f2c6da;
+  --c-lilac: #cdbff3;
+  --c-mint: #bfe3cf;
+  --c-butter: #f0e0a0;
+  --c-peach: #f3cfb4;
+  --c-sky: #bdd7f3;
+  --c-oat: #e2d3c4;
+  --c-sea: #bfe2df;
+  --c-blush: #ff9cc6;
+  --c-pink-line: #5a3d5c;
+  --c-field-pink: #33233d;
+  --c-field-lilac: #352c55;
 
-    --c-due: #ff9cc6;
-    --c-ok: #9fe0bd;
-    --c-error-bg: #f2c6da;
-    --c-error-text: #85164a;
+  --c-due: #ff9cc6;
+  --c-ok: #9fe0bd;
+  --c-error-bg: #f2c6da;
+  --c-error-text: #85164a;
 
-    --c-heat-0: #2a2438;
-    --c-heat-1: #5c2f52;
-    --c-heat-2: #9a3d70;
-    --c-heat-3: #e0559a;
-    --c-heat-4: #ff9cc6;
+  --c-heat-0: #2a2438;
+  --c-heat-1: #5c2f52;
+  --c-heat-2: #9a3d70;
+  --c-heat-3: #e0559a;
+  --c-heat-4: #ff9cc6;
 
-    --c-code-bg: #15111d;
-    --c-code-text: #f3eefc;
-  }
-
-  /* Inside a pastel sticker, text, outlines and nested buttons use the light-mode colours. */
-  .pastel-scope,
-  .st-deck, .st-today, .st-guest, .st-choice, .st-rate, .st-tag, .st-pop-icon, .st-dialog-head,
-  .st-alert-ok, .st-alert-info, .st-alert-warn, .st-alert-error, .st-banner,
-  .st-card-a, .st-card-note, .st-when-new, .st-when-due, .st-when-later,
-  .st-nav-item[aria-current='page'], .st-option[aria-pressed='true'], .st-option[aria-checked='true'],
-  .st-icon-choice[aria-pressed='true'], .st-drop:hover, .st-drop[data-over='true'],
-  .lp-tile:not(.lp-tile-h), .lp-faq-card, .lp-block, .lp-seg-block, .lp-rate, .lp-study-a,
-  .lp-vs .lp-vs-us, .gp-try, .gp-index-card, .gp-prose thead th, .gp-prose code,
-  .cloze-badge, .cloze-active, .card-rich-content code, .card-rich-content mark {
-    --c-ink: #33245e;
-    --c-ink-soft: #5f5191;
-    --c-paper: #fffbf6;
-    --c-raised: #ffffff;
-    --c-line: #e2d9f5;
-    --c-drop: #33245e;
-    --c-placeholder: #8d80b8;
-    --c-hover: rgba(51, 36, 94, 0.08);
-    --c-due: #a41a58;
-    --c-ok: #276749;
-    --st-ink: var(--c-ink);
-    --st-ink-soft: var(--c-ink-soft);
-    --st-paper: var(--c-paper);
-    --st-line: var(--c-line);
-    --lp-ink: var(--c-ink);
-    --lp-ink-soft: var(--c-ink-soft);
-    --lp-paper: var(--c-paper);
-    color: var(--c-ink);
-  }
+  --c-code-bg: #15111d;
+  --c-code-text: #f3eefc;
 }
+
+/* Inside a pastel sticker, text, outlines and nested buttons use the light-mode colours. */
+[data-theme='dark'] .pastel-scope, [data-theme='dark'] .st-deck, [data-theme='dark'] .st-today,
+[data-theme='dark'] .st-guest, [data-theme='dark'] .st-choice, [data-theme='dark'] .st-rate,
+[data-theme='dark'] .st-tag, [data-theme='dark'] .st-pop-icon, [data-theme='dark'] .st-dialog-head,
+[data-theme='dark'] .st-alert-ok, [data-theme='dark'] .st-alert-info, [data-theme='dark'] .st-alert-warn,
+[data-theme='dark'] .st-alert-error, [data-theme='dark'] .st-banner, [data-theme='dark'] .st-card-a,
+[data-theme='dark'] .st-card-note, [data-theme='dark'] .st-when-new, [data-theme='dark'] .st-when-due,
+[data-theme='dark'] .st-when-later, [data-theme='dark'] .st-nav-item[aria-current='page'],
+[data-theme='dark'] .st-option[aria-pressed='true'], [data-theme='dark'] .st-option[aria-checked='true'],
+[data-theme='dark'] .st-icon-choice[aria-pressed='true'], [data-theme='dark'] .st-drop:hover,
+[data-theme='dark'] .st-drop[data-over='true'], [data-theme='dark'] .lp-tile:not(.lp-tile-h),
+[data-theme='dark'] .lp-faq-card, [data-theme='dark'] .lp-block, [data-theme='dark'] .lp-seg-block,
+[data-theme='dark'] .lp-rate, [data-theme='dark'] .lp-study-a, [data-theme='dark'] .lp-vs .lp-vs-us,
+[data-theme='dark'] .gp-try, [data-theme='dark'] .gp-index-card, [data-theme='dark'] .gp-prose thead th,
+[data-theme='dark'] .gp-prose code, [data-theme='dark'] .cloze-badge, [data-theme='dark'] .cloze-active,
+[data-theme='dark'] .card-rich-content code, [data-theme='dark'] .card-rich-content mark {
+  --c-ink: #33245e;
+  --c-ink-soft: #5f5191;
+  --c-paper: #fffbf6;
+  --c-raised: #ffffff;
+  --c-line: #e2d9f5;
+  --c-drop: #33245e;
+  --c-placeholder: #8d80b8;
+  --c-hover: rgba(51, 36, 94, 0.08);
+  --c-due: #a41a58;
+  --c-ok: #276749;
+  --st-ink: var(--c-ink);
+  --st-ink-soft: var(--c-ink-soft);
+  --st-paper: var(--c-paper);
+  --st-line: var(--c-line);
+  --lp-ink: var(--c-ink);
+  --lp-ink-soft: var(--c-ink-soft);
+  --lp-paper: var(--c-paper);
+  color: var(--c-ink);
+}
+
+/* Launched as an app: hide the prerendered website until React swaps in the decks. */
+.app-launch #root > .lp { display: none; }
 
 @layer base {
   * {

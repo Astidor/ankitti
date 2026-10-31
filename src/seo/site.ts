@@ -49,3 +49,18 @@ export const GUIDES: GuideMeta[] = [
 ];
 
 export const guideUrl = (slug: string) => `/${slug}/`;
+
+export const PRIVACY = {
+  path: '/privacy/',
+  title: 'Privacy Policy | Ankitti',
+  description:
+    'What Ankitti stores when you study as a guest or with an account, how AI deck generation uses DeepSeek, and how to download or delete your data.',
+  updated: '2026-10-31',
+};
+
+/**
+ * Runs in <head> before first paint: applies the saved light/dark choice (or the device setting)
+ * as <html data-theme>, and marks app launches so the prerendered website stays hidden.
+ * index.html carries a copy of this script; keep the two the same.
+ */
+export const THEME_BOOT_SCRIPT = `(function(){var d=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');function saved(){try{return localStorage.getItem('ankitti_theme')}catch(e){return null}}function apply(p){p=p||saved();var t=p==='light'||p==='dark'?p:m.matches?'dark':'light';d.dataset.theme=t;d.style.colorScheme=t;var ms=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<ms.length;i++)ms[i].content=t==='dark'?'#17112a':'#f5f1ff';dispatchEvent(new Event('ankitti-theme'))}window.__ankittiApplyTheme=apply;apply();m.addEventListener('change',function(){apply()});if(new URLSearchParams(location.search).get('view')==='app'||matchMedia('(display-mode: standalone)').matches)d.classList.add('app-launch')})();`;

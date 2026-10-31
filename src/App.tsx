@@ -8,6 +8,8 @@ import {
   Plus,
   Volume2,
   VolumeX,
+  Moon,
+  Sun,
   FileEdit,
   WifiOff,
   CheckCircle2,
@@ -36,6 +38,7 @@ import { KittyBow, KittyAvatar } from './components/common/KittyIllustrations';
 import { CreateButton, CreateSheet } from './components/studio/Menus';
 import './components/studio/studio.css';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
+import { setThemePreference, useTheme } from './services/themePreference';
 
 export function App() {
   const [account, setAccount] = useState<UserAccount>(storage.getActiveAccount());
@@ -44,14 +47,24 @@ export function App() {
   const [reviewLogs, setReviewLogs] = useState<ReviewLog[]>(storage.getReviewLogs());
   const [soundEnabled, setSoundEnabled] = useState<boolean>(account.soundEnabled ?? true);
 
+  // Opened as an app (the Android app and installed PWA launch with ?view=app): skip the
+  // website and go straight to the decks, asking signed-out people to sign up or log in.
+  const [launchedAsApp] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      new URLSearchParams(window.location.search).get('view') === 'app' ||
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (navigator as any).standalone === true
+    );
+  });
+
   // View state: 'landing' or 'app' (Default to landing page for web visitors)
   const [viewMode, setViewMode] = useState<'landing' | 'app'>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('view') === 'app') return 'app';
       if (params.get('view') === 'landing') return 'landing';
     }
-    return 'landing';
+    return launchedAsApp ? 'app' : 'landing';
   });
 
   // App Studio state
@@ -84,8 +97,8 @@ export function App() {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
 
   // Auth & AI Modals
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('login');
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => launchedAsApp && !account.email);
+  const [authModalMode, setAuthModalMode] = useState<'login' | 'signup'>('signup');
   const [isAiDeckModalOpen, setIsAiDeckModalOpen] = useState<boolean>(false);
   const [aiDeckTargetDeck, setAiDeckTargetDeck] = useState<Deck | null>(null);
 
@@ -95,6 +108,23 @@ export function App() {
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [isInstallModalOpen, setIsInstallModalOpen] = useState<boolean>(false);
   const [isStandalone, setIsStandalone] = useState<boolean>(false);
+
+  const { theme } = useTheme();
+  const themeButton = (size: number) => (
+    <button
+      className="st-icon-btn"
+      onClick={() => { sounds.playClick(); setThemePreference(theme === 'dark' ? 'light' : 'dark'); }}
+      aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {theme === 'dark' ? <Sun size={size} /> : <Moon size={size} />}
+    </button>
+  );
+
+  // The decks have replaced the prerendered website, so app launches can show #root again.
+  useEffect(() => {
+    document.documentElement.classList.remove('app-launch');
+  }, []);
 
   // Monitor connectivity & PWA install status
   useEffect(() => {
@@ -256,7 +286,12 @@ export function App() {
     setAccount(guestAccount);
     setDecks(storage.getDecks());
     setCards(storage.getCards());
-    setViewMode('landing');
+    if (launchedAsApp) {
+      setAuthModalMode('login');
+      setIsAuthModalOpen(true);
+    } else {
+      setViewMode('landing');
+    }
     sounds.playClick();
   };
 
@@ -705,6 +740,7 @@ export function App() {
             >
               {soundEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
             </button>
+            {themeButton(18)}
             <button
               className="st-icon-btn"
               onClick={() => { sounds.playClick(); setViewMode('landing'); }}
@@ -732,6 +768,7 @@ export function App() {
             >
               <Timer size={20} />
             </button>
+            {themeButton(20)}
             <button className="st-icon-btn" onClick={() => setIsAccountModalOpen(true)} aria-label="Account and settings">
               <KittyAvatar size={30} />
             </button>

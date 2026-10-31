@@ -579,6 +579,21 @@ Remember: return ONLY the JSON object, with no markdown code blocks and no comme
         return jsonResponse({ success: true, message: 'Logged out successfully' });
       }
 
+      // --- 3b. DELETE ACCOUNT (asks for the password again) ---
+      if (url.pathname === '/api/auth/account' && request.method === 'DELETE') {
+        const body: any = await request.json().catch(() => ({}));
+        const row = await env.DB.prepare('SELECT password_hash, salt FROM users WHERE id = ?').bind(user.id).first();
+        if (!row || !body.password || !(await verifyPassword(String(body.password), row.password_hash, row.salt))) {
+          return jsonResponse({ error: 'That password is not right.' }, 403);
+        }
+        await env.DB.batch(
+          ['review_logs', 'drafts', 'cards', 'decks', 'sessions'].map((table) =>
+            env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(user.id)
+          ).concat(env.DB.prepare('DELETE FROM users WHERE id = ?').bind(user.id))
+        );
+        return jsonResponse({ success: true });
+      }
+
       // --- 4. CURRENT USER / PROFILE ---
       if (url.pathname === '/api/auth/me' && request.method === 'GET') {
         return jsonResponse({ user });

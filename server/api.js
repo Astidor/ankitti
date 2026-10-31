@@ -211,6 +211,24 @@ router.post('/auth/logout', authMiddleware, (req, res) => {
   }
 });
 
+// Delete Account (asks for the password again)
+router.delete('/auth/account', rateLimit(5, 60000), authMiddleware, (req, res) => {
+  try {
+    const row = db.prepare('SELECT password_hash, salt FROM users WHERE id = ?').get(req.user.id);
+    const { password } = req.body || {};
+    if (!row || !password || !verifyPassword(String(password), row.password_hash, row.salt)) {
+      return res.status(403).json({ error: 'That password is not right.' });
+    }
+    for (const table of ['review_logs', 'drafts', 'cards', 'decks', 'sessions']) {
+      db.prepare(`DELETE FROM ${table} WHERE user_id = ?`).run(req.user.id);
+    }
+    db.prepare('DELETE FROM users WHERE id = ?').run(req.user.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not delete the account' });
+  }
+});
+
 // Get Current User Profile
 router.get('/auth/me', authMiddleware, (req, res) => {
   res.json({ user: req.user });

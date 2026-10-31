@@ -3,7 +3,7 @@
   "name": "Ankitti: cute spaced repetition flashcards",
   "short_name": "Ankitti",
   "description": "Free flashcards with Anki-style spaced repetition. Opens your .apkg decks, works offline.",
-  "start_url": "/",
+  "start_url": "/?view=app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

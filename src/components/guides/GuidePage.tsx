@@ -19,7 +19,7 @@ const FOOT_LETTERS = [
 const formatDate = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
-const Shell: React.FC<{
+export const Shell: React.FC<{
   crumbs: { href?: string; label: string }[];
   h1: string;
   lead: string;
@@ -109,7 +109,7 @@ const Shell: React.FC<{
         </div>
         <div className="lp-foot-base">
           <span>
-            © {new Date().getFullYear()} Ankitti · Made by <a href="https://github.com/Astidor/ankitti" rel="noreferrer">Astidor</a>
+            © {new Date().getFullYear()} Ankitti · Made by <a href="https://github.com/Astidor/ankitti" rel="noreferrer">Astidor</a> · <a href="/privacy/">Privacy</a>
           </span>
           <a href="#top" className="lp-btn lp-btn-paper lp-btn-sm">Back to top</a>
         </div>

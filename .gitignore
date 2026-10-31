@@ -32,3 +32,6 @@ dist-ssr
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Android app (kept local, not on GitHub)
+/android/
