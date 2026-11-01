@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Check, Download, LogOut, Moon, Smartphone, Sun, Trash2, UserX, Volume2, VolumeX } from 'lucide-react';
 import { setThemePreference, useTheme } from '../../services/themePreference';
+import { saveFile } from '../../services/nativeApp';
 import { UserAccount } from '../../types/anki';
 import { storage } from '../../services/storage';
 import { api } from '../../services/api';
@@ -98,12 +99,7 @@ export const AccountModal: React.FC<AccountModalProps> = ({
 
   const handleExportBackup = () => {
     const data = storage.exportAllAsJSON();
-    const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `ankitti-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    saveFile(`ankitti-backup-${new Date().toISOString().split('T')[0]}.json`, 'application/json', data);
     sounds.playRating(4);
   };
 

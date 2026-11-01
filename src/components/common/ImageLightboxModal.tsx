@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { X, ZoomIn, ZoomOut, Download, Sparkles } from 'lucide-react';
 import { KittyBow } from './KittyIllustrations';
+import { saveFile } from '../../services/nativeApp';
 
 interface ImageLightboxModalProps {
   isOpen: boolean;
@@ -42,12 +43,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const link = document.createElement('a');
-    link.href = src;
-    link.download = `ankitti-card-attachment-${Date.now()}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    saveFile(`ankitti-card-attachment-${Date.now()}.png`, 'image/png', src, { isUrl: true });
   };
 
   return (

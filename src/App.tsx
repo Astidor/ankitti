@@ -39,6 +39,7 @@ import { CreateButton, CreateSheet } from './components/studio/Menus';
 import './components/studio/studio.css';
 import { PwaInstallModal } from './components/common/PwaInstallModal';
 import { setThemePreference, useTheme } from './services/themePreference';
+import { isAndroidApp, saveFile } from './services/nativeApp';
 
 export function App() {
   const [account, setAccount] = useState<UserAccount>(storage.getActiveAccount());
@@ -52,6 +53,7 @@ export function App() {
   const [launchedAsApp] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
     return (
+      isAndroidApp() ||
       new URLSearchParams(window.location.search).get('view') === 'app' ||
       window.matchMedia('(display-mode: standalone)').matches ||
       (navigator as any).standalone === true
@@ -125,6 +127,21 @@ export function App() {
   useEffect(() => {
     document.documentElement.classList.remove('app-launch');
   }, []);
+
+  // The Android app calls this on Back: close what's on top, else step back to My decks.
+  // Returning false lets the app go back a page or close.
+  useEffect(() => {
+    (window as any).__ankittiBack = () => {
+      if (document.querySelector('[role=dialog]')) {
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        return true;
+      }
+      if (viewMode === 'landing') { setViewMode('app'); return true; }
+      if (activeStudyDeck) { setActiveStudyDeck(null); return true; }
+      if (currentTab !== 'decks') { setCurrentTab('decks'); return true; }
+      return false;
+    };
+  }, [viewMode, activeStudyDeck, currentTab]);
 
   // Monitor connectivity & PWA install status
   useEffect(() => {
@@ -397,13 +414,7 @@ export function App() {
       version: 'ankitti-1.0',
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${deck.name.toLowerCase().replace(/\s+/g, '-')}-ankitti.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    saveFile(`${deck.name.toLowerCase().replace(/\s+/g, '-')}-ankitti.json`, 'application/json', JSON.stringify(exportData, null, 2));
     sounds.playRating(4);
   };
 
@@ -930,7 +941,7 @@ export function App() {
           setIsAuthModalOpen(true);
         }}
         onLogout={handleLogout}
-        onOpenInstall={() => setIsInstallModalOpen(true)}
+        onOpenInstall={isAndroidApp() ? undefined : () => setIsInstallModalOpen(true)}
       />
 
       <AuthModal
