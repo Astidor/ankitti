@@ -46,6 +46,8 @@ for (const page of pages) {
 }
 
 await fs.writeFile(path.join(dist, 'sitemap.xml'), mod.sitemapXml());
+await fs.mkdir(path.join(dist, 'blog'), { recursive: true });
+await fs.writeFile(path.join(dist, 'blog', 'rss.xml'), mod.blogRss());
 await fs.rm(ssrDir, { recursive: true, force: true });
 
 console.log(`prerender: index.html + ${pages.length} static pages + sitemap.xml`);
