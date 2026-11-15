@@ -16,7 +16,7 @@ const FOOT_LETTERS = [
   { ch: 'i', h: 94, bg: 'var(--c-pink-soft)' },
 ];
 
-const formatDate = (iso: string) =>
+export const formatDate = (iso: string) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
 export const Shell: React.FC<{
@@ -38,6 +38,7 @@ export const Shell: React.FC<{
           <a href="/#how">How it works</a>
           <a href="/#features">Features</a>
           <a href="/guides/">Guides</a>
+          <a href="/blog/">Blog</a>
         </div>
         <div className="lp-nav-actions">
           <a className="lp-btn lp-btn-pink lp-btn-sm" href="/">Start free</a>
@@ -96,6 +97,7 @@ export const Shell: React.FC<{
               <li><a href="/#how">How it works</a></li>
               <li><a href="/#features">Features</a></li>
               <li><a href="/#faq">FAQ</a></li>
+              <li><a href="/blog/">Blog</a></li>
             </ul>
           </div>
           <div style={{ gridColumn: 'span 2' }}>
@@ -118,7 +120,7 @@ export const Shell: React.FC<{
   </div>
 );
 
-const TryCard: React.FC = () => (
+export const TryCard: React.FC = () => (
   <div className="gp-try lp-eared">
     <Ears fill="var(--c-pink-soft)" />
     <p className="gp-try-h lp-display">Try it in your browser</p>

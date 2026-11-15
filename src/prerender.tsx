@@ -7,6 +7,8 @@ import { GuidePage, GuidesIndex } from './components/guides/GuidePage';
 import { GUIDE_CONTENT } from './components/guides/content';
 import { PrivacyPage } from './components/legal/PrivacyPage';
 import { GUIDES, PRIVACY, SITE_URL, THEME_BOOT_SCRIPT, guideUrl } from './seo/site';
+import { getPosts, postUrl } from './blog/posts';
+import { BlogIndex, BlogPostPage } from './components/blog/BlogPages';
 import { INITIAL_DECKS } from './services/storage';
 
 const noop = () => {};
@@ -68,6 +70,7 @@ function documentFor(opts: {
   assetsHead: string;
   ld: unknown[];
   body: string;
+  extraHead?: string;
 }): string {
   const { url, title, description } = opts;
   return `<!doctype html>
@@ -104,6 +107,7 @@ function documentFor(opts: {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
 ${opts.assetsHead}
+${opts.extraHead ?? ''}
 ${opts.ld.map(jsonLd).join('\n')}
 </head>
 <body style="margin:0">
@@ -177,6 +181,76 @@ export function staticPages(assetsHead: string): StaticPage[] {
     }),
   });
 
+  // Blog: one page per post, newest first on /blog/.
+  const posts = getPosts();
+  const blogHub = { name: 'Blog', url: `${SITE_URL}/blog/` };
+  const rssLink = `<link rel="alternate" type="application/rss+xml" title="Ankitti blog" href="${SITE_URL}/blog/rss.xml" />`;
+  posts.forEach((post) => {
+    const url = `${SITE_URL}${postUrl(post.slug)}`;
+    const recent = posts.filter((p) => p.slug !== post.slug).slice(0, 5);
+    pages.push({
+      path: `blog/${post.slug}/index.html`,
+      html: documentFor({
+        url,
+        title: `${post.title} | Ankitti`,
+        description: post.description,
+        ogType: 'article',
+        assetsHead,
+        extraHead: rssLink,
+        body: renderToStaticMarkup(<BlogPostPage post={post} recent={recent} />),
+        ld: [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: post.description,
+            image: OG_IMAGE,
+            datePublished: post.date,
+            dateModified: post.date,
+            keywords: post.keywords.length ? post.keywords.join(', ') : undefined,
+            wordCount: post.words,
+            mainEntityOfPage: url,
+            author: { '@type': 'Organization', name: 'Ankitti', url: `${SITE_URL}/` },
+            publisher: {
+              '@type': 'Organization',
+              name: 'Ankitti',
+              logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-512.png` },
+            },
+          },
+          breadcrumbLd([home, blogHub, { name: post.title, url }]),
+        ],
+      }),
+    });
+  });
+  pages.push({
+    path: 'blog/index.html',
+    html: documentFor({
+      url: blogHub.url,
+      title: 'Blog: Flashcards, Spaced Repetition and Study Tips | Ankitti',
+      description:
+        'Practical posts on studying with flashcards: spaced repetition, Anki decks, language learning, exam prep and study habits.',
+      ogType: 'website',
+      assetsHead,
+      extraHead: rssLink,
+      body: renderToStaticMarkup(<BlogIndex posts={posts} />),
+      ld: [
+        breadcrumbLd([home, blogHub]),
+        {
+          '@context': 'https://schema.org',
+          '@type': 'Blog',
+          name: 'The Ankitti blog',
+          url: blogHub.url,
+          blogPost: posts.slice(0, 30).map((p) => ({
+            '@type': 'BlogPosting',
+            headline: p.title,
+            datePublished: p.date,
+            url: `${SITE_URL}${postUrl(p.slug)}`,
+          })),
+        },
+      ],
+    }),
+  });
+
   const privacyUrl = `${SITE_URL}${PRIVACY.path}`;
   pages.push({
     path: 'privacy/index.html',
@@ -201,10 +275,50 @@ export function sitemapXml(): string {
     { loc: `${SITE_URL}/guides/`, lastmod: latest, priority: '0.7' },
     ...GUIDES.map((g) => ({ loc: `${SITE_URL}${guideUrl(g.slug)}`, lastmod: g.updated, priority: '0.8' })),
     { loc: `${SITE_URL}${PRIVACY.path}`, lastmod: PRIVACY.updated, priority: '0.3' },
+    ...blogSitemapEntries(),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url>\n    <loc>${u.loc}</loc>\n    <lastmod>${u.lastmod}</lastmod>\n    <priority>${u.priority}</priority>\n  </url>`).join('\n')}
 </urlset>
 `;
+}
+
+function blogSitemapEntries() {
+  const posts = getPosts();
+  const hub = { loc: `${SITE_URL}/blog/`, lastmod: posts[0]?.date ?? new Date().toISOString().slice(0, 10), priority: '0.6' };
+  return [hub, ...posts.map((p) => ({ loc: `${SITE_URL}${postUrl(p.slug)}`, lastmod: p.date, priority: '0.6' }))];
+}
+
+/** RSS 2.0 feed of the latest posts, written to /blog/rss.xml. */
+export function blogRss(): string {
+  const xml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const items = getPosts()
+    .slice(0, 20)
+    .map((p) => {
+      const url = `${SITE_URL}${postUrl(p.slug)}`;
+      return [
+        '  <item>',
+        `    <title>${xml(p.title)}</title>`,
+        `    <link>${url}</link>`,
+        `    <guid isPermaLink="true">${url}</guid>`,
+        `    <pubDate>${new Date(`${p.date}T09:00:00Z`).toUTCString()}</pubDate>`,
+        `    <description>${xml(p.description)}</description>`,
+        '  </item>',
+      ].join('\n');
+    })
+    .join('\n');
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<rss version="2.0">',
+    '<channel>',
+    '  <title>The Ankitti blog</title>',
+    `  <link>${SITE_URL}/blog/</link>`,
+    '  <description>Practical posts on studying with flashcards and spaced repetition.</description>',
+    '  <language>en</language>',
+    items,
+    '</channel>',
+    '</rss>',
+    '',
+  ].join('\n');
 }

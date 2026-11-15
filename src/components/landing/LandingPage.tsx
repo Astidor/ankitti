@@ -642,6 +642,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {GUIDES.map((g) => (
                   <li key={g.slug}><a href={guideUrl(g.slug)}>{g.linkText}</a></li>
                 ))}
+                <li><a href="/blog/">Blog</a></li>
               </ul>
             </div>
           </div>
