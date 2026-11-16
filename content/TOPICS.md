@@ -11,7 +11,7 @@ Format: `- [ ] Working title — search phrases`
 ## Spaced repetition basics
 
 - [x] How many flashcards should you study a day? → /blog/how-many-flashcards-a-day/ (2026-11-15)
-- [ ] Why your Anki reviews pile up, and how to get back on track — anki backlog, too many reviews, catch up on flashcards
+- [x] Why your Anki reviews pile up, and how to get back on track → /blog/why-anki-reviews-pile-up-and-how-to-get-back-on-track/ (2026-11-16)
 - [ ] Spaced repetition vs rereading notes: which works better? — spaced repetition vs rereading, active recall vs rereading
 - [ ] What "ease" means in spaced repetition, explained simply — anki ease factor explained, ease hell
 - [ ] Should you press Hard or Again? A guide to the four answer buttons — anki again vs hard, anki good vs easy
