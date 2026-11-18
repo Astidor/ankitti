@@ -13,7 +13,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] How many flashcards should you study a day? → /blog/how-many-flashcards-a-day/ (2026-11-15)
 - [x] Why your Anki reviews pile up, and how to get back on track → /blog/why-anki-reviews-pile-up-and-how-to-get-back-on-track/ (2026-11-16)
 - [x] Spaced repetition vs rereading notes: which works better? → /blog/spaced-repetition-vs-rereading-notes/ (2026-11-17)
-- [ ] What "ease" means in spaced repetition, explained simply — anki ease factor explained, ease hell
+- [x] What "ease" means in spaced repetition, explained simply → /blog/what-ease-means-in-spaced-repetition-explained-simply/ (2026-11-18)
 - [ ] Should you press Hard or Again? A guide to the four answer buttons — anki again vs hard, anki good vs easy
 - [ ] How long does it take for spaced repetition to work? — spaced repetition results, how long to remember with flashcards
 - [ ] Learning steps explained: the first ten minutes of a new card — anki learning steps, relearning steps
