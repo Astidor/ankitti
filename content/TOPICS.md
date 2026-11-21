@@ -16,7 +16,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] What "ease" means in spaced repetition, explained simply → /blog/what-ease-means-in-spaced-repetition-explained-simply/ (2026-11-18)
 - [x] Should you press Hard or Again? A guide to the four answer buttons → /blog/should-you-press-hard-or-again-four-answer-buttons/ (2026-11-19)
 - [x] How long does it take for spaced repetition to work? → /blog/how-long-does-it-take-for-spaced-repetition-to-work/ (2026-11-20)
-- [ ] Learning steps explained: the first ten minutes of a new card — anki learning steps, relearning steps
+- [x] Learning steps explained: the first ten minutes of a new card → /blog/learning-steps-explained-first-ten-minutes-of-a-new-card/ (2026-11-21)
 - [ ] What to do when you keep forgetting the same card — leech flashcards, anki leeches, keep forgetting cards
 - [ ] Is cramming ever a good idea? — cramming vs spaced repetition, study the night before exam
 - [ ] How to take a break from flashcards without losing progress — anki vacation, skip a day of reviews
