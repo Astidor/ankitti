@@ -17,7 +17,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] Should you press Hard or Again? A guide to the four answer buttons → /blog/should-you-press-hard-or-again-four-answer-buttons/ (2026-11-19)
 - [x] How long does it take for spaced repetition to work? → /blog/how-long-does-it-take-for-spaced-repetition-to-work/ (2026-11-20)
 - [x] Learning steps explained: the first ten minutes of a new card → /blog/learning-steps-explained-first-ten-minutes-of-a-new-card/ (2026-11-21)
-- [ ] What to do when you keep forgetting the same card — leech flashcards, anki leeches, keep forgetting cards
+- [x] What to do when you keep forgetting the same card → /blog/what-to-do-when-you-keep-forgetting-the-same-card/ (2026-11-22)
 - [ ] Is cramming ever a good idea? — cramming vs spaced repetition, study the night before exam
 - [ ] How to take a break from flashcards without losing progress — anki vacation, skip a day of reviews
 - [ ] The forgetting curve in plain words — ebbinghaus forgetting curve explained, how fast we forget
