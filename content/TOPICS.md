@@ -19,7 +19,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] Learning steps explained: the first ten minutes of a new card → /blog/learning-steps-explained-first-ten-minutes-of-a-new-card/ (2026-11-21)
 - [x] What to do when you keep forgetting the same card → /blog/what-to-do-when-you-keep-forgetting-the-same-card/ (2026-11-22)
 - [x] Is cramming ever a good idea? → /blog/is-cramming-ever-a-good-idea/ (2026-11-23)
-- [ ] How to take a break from flashcards without losing progress — anki vacation, skip a day of reviews
+- [x] How to take a break from flashcards without losing progress → /blog/how-to-take-a-break-from-flashcards-without-losing-progress/ (2026-11-24)
 - [ ] The forgetting curve in plain words — ebbinghaus forgetting curve explained, how fast we forget
 - [ ] Active recall: what it is and how to do it with flashcards — active recall technique, retrieval practice
 - [ ] Interleaving: should you mix subjects in one study session? — interleaving study technique, mix flashcard decks
