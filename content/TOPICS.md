@@ -20,7 +20,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] What to do when you keep forgetting the same card → /blog/what-to-do-when-you-keep-forgetting-the-same-card/ (2026-11-22)
 - [x] Is cramming ever a good idea? → /blog/is-cramming-ever-a-good-idea/ (2026-11-23)
 - [x] How to take a break from flashcards without losing progress → /blog/how-to-take-a-break-from-flashcards-without-losing-progress/ (2026-11-24)
-- [ ] The forgetting curve in plain words — ebbinghaus forgetting curve explained, how fast we forget
+- [x] The forgetting curve in plain words → /blog/the-forgetting-curve-in-plain-words/ (2026-11-25)
 - [ ] Active recall: what it is and how to do it with flashcards — active recall technique, retrieval practice
 - [ ] Interleaving: should you mix subjects in one study session? — interleaving study technique, mix flashcard decks
 
