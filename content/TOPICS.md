@@ -21,7 +21,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] Is cramming ever a good idea? → /blog/is-cramming-ever-a-good-idea/ (2026-11-23)
 - [x] How to take a break from flashcards without losing progress → /blog/how-to-take-a-break-from-flashcards-without-losing-progress/ (2026-11-24)
 - [x] The forgetting curve in plain words → /blog/the-forgetting-curve-in-plain-words/ (2026-11-25)
-- [ ] Active recall: what it is and how to do it with flashcards — active recall technique, retrieval practice
+- [x] Active recall: what it is and how to do it with flashcards → /blog/active-recall-what-it-is-and-how-to-do-it-with-flashcards/ (2026-11-26)
 - [ ] Interleaving: should you mix subjects in one study session? — interleaving study technique, mix flashcard decks
 
 ## Writing better flashcards
