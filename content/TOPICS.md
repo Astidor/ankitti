@@ -22,7 +22,7 @@ Format: `- [ ] Working title — search phrases`
 - [x] How to take a break from flashcards without losing progress → /blog/how-to-take-a-break-from-flashcards-without-losing-progress/ (2026-11-24)
 - [x] The forgetting curve in plain words → /blog/the-forgetting-curve-in-plain-words/ (2026-11-25)
 - [x] Active recall: what it is and how to do it with flashcards → /blog/active-recall-what-it-is-and-how-to-do-it-with-flashcards/ (2026-11-26)
-- [ ] Interleaving: should you mix subjects in one study session? — interleaving study technique, mix flashcard decks
+- [x] Interleaving: should you mix subjects in one study session? → /blog/interleaving-should-you-mix-subjects-in-one-study-session/ (2026-11-27)
 
 ## Writing better flashcards
 
