@@ -26,7 +26,7 @@ Format: `- [ ] Working title — search phrases`
 
 ## Writing better flashcards
 
-- [ ] How to write good flashcards: 10 rules that save hours — how to make good flashcards, flashcard tips
+- [x] How to write good flashcards: 10 rules that save hours → /blog/how-to-write-good-flashcards-10-rules-that-save-hours/ (2026-11-28)
 - [ ] One fact per card: why atomic flashcards work — atomic flashcards, minimum information principle
 - [ ] Cloze deletion cards: when to use them and when not to — cloze deletion anki, fill in the blank flashcards
 - [ ] How to make flashcards from lecture notes — make flashcards from notes, lecture to flashcards
